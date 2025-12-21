@@ -1,0 +1,4526 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8">
+    <title>Tidsregistrering – Arbeidsliste</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        :root{
+            --bg: #f3f4f6;
+            --text: #111827;
+            --muted: #4b5563;
+            --card: #ffffff;
+            --border: #d1d5db;
+            --border-soft: #e5e7eb;
+            --hover: #f3f4f6;
+            --btn-bg: #f9fafb;
+            --shadow: 0 1px 3px rgba(15,23,42,0.08);
+
+            --dot-blue: #2563eb;
+            --dot-orange: #f97316;
+            --dot-green: #16a34a;
+
+            --danger: #dc2626;
+            --danger-border: #b91c1c;
+
+            --excel: #217346;
+            --excel-border: #14552f;
+
+            --modal-backdrop: rgba(15,23,42,0.3);
+
+            --chart-hand: #111827;
+
+            --timebar-base: #e5e7eb;
+
+            --comment-pink: #ec4899;
+
+            --select-bg: #ffffff;
+            --select-text: #111827;
+
+            --btn-copy-bg: #6b7280; 
+        }
+
+        body.theme-dark{
+            --bg: #0b1220;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --card: #0f172a;
+            --border: #334155;
+            --border-soft: #1f2937;
+            --hover: rgba(148,163,184,0.10);
+            --btn-bg: rgba(148,163,184,0.12);
+            --shadow: 0 1px 3px rgba(0,0,0,0.35);
+
+            --modal-backdrop: rgba(0,0,0,0.32);
+
+            --chart-hand: #e5e7eb;
+
+            --timebar-base: #1f2937;
+
+            --select-bg: #f9fafb;
+            --select-text: #111827;
+
+            --btn-copy-bg: #4b5563;
+        }
+
+        body.theme-black{
+            --bg: #000000;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --card: #000000;
+            --border: #333333;
+            --border-soft: #1f2937;
+            --hover: #111111;
+            --btn-bg: #111111;
+            --shadow: none;
+
+            --modal-backdrop: rgba(0,0,0,0.45);
+
+            --chart-hand: #e5e7eb;
+
+            --timebar-base: #1f2937;
+
+            --select-bg: #000000;
+            --select-text: #e5e7eb;
+        }
+        
+        body.theme-black .card, 
+        body.theme-black .modal {
+            border: 1px solid #333;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 1.5rem;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .header-left h1 {
+            margin: 0 0 0.25rem;
+            font-size: 1.5rem;
+        }
+        .time-now {
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--muted);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            transition: border-color 0.3s, background-color 0.3s, box-shadow 0.3s;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            gap: 0.5rem;
+        }
+        .card-header-left{
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+        .card-header-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        @keyframes pulse-blue-card {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+
+        @keyframes pulse-orange-card {
+            0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(249, 115, 22, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+        }
+
+        .card-active-mode {
+            position: relative;
+            border: 2px solid var(--dot-blue) !important;
+            border-radius: 0.75rem;
+            background: var(--card);
+            animation: pulse-blue-card 2s infinite;
+        }
+
+        .card-active-mode-resumed {
+            position: relative;
+            border: 2px solid var(--dot-orange) !important;
+            border-radius: 0.75rem;
+            background: var(--card);
+            animation: pulse-orange-card 2s infinite;
+        }
+
+        .task-input-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .task-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .task-input-row input {
+            flex: 1;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            font-size: 0.95rem;
+            background: transparent;
+            color: var(--text);
+        }
+
+        .task-input-row button {
+            padding: 0.5rem 0.9rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 0.95rem;
+            cursor: pointer;
+            background: var(--dot-green);
+            color: #ffffff;
+            font-weight: 500;
+        }
+        .task-input-row button:disabled {
+            background: #9ca3af;
+            cursor: default;
+        }
+
+        #taskSuggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.25rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 8px rgba(15,23,42,0.15);
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 30;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.35rem 0.6rem;
+            cursor: pointer;
+        }
+        .suggestion-item:hover { background: var(--hover); }
+        .suggestion-item.selected { background: rgba(37,99,235,0.12); }
+        .suggestion-label {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .suggestion-delete {
+            margin-left: 0.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+        .suggestion-delete:hover { color: #ef4444; }
+
+        .helper-text {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        .helper-text.hidden {
+            display: none;
+        }
+        body.theme-dark .helper-text { color: var(--muted); }
+
+        .current-task {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .current-task-label {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .current-task-title { font-weight: 600; }
+        
+        .current-task-time { 
+            font-family: monospace; 
+            color: var(--text); 
+            font-size: 1.1rem;
+        }
+
+        .time-digit-neutral { color: var(--text); font-weight: normal; }
+        .time-digit-h-active { color: #ff6b6b; font-weight: 600; }
+        .time-digit-m-active { color: #feca57; font-weight: 600; }
+        .time-digit-s-active { color: #54a0ff; font-weight: 600; }
+
+        .text-rounded-green, .text-rounded-green span {
+            color: var(--dot-green) !important;
+            font-weight: 600;
+        }
+
+        .current-task-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            margin-top: 0.35rem;
+        }
+
+        .rainbow-text {
+            background: linear-gradient(
+                90deg,
+                #ef4444, #f97316, #facc15, #22c55e,
+                #14b8a6, #3b82f6, #a855f7, #ef4444
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: rainbow 8s linear infinite;
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        @keyframes flash-text {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+        
+        .text-flash-anim {
+            animation: flash-text 0.3s ease-in-out 2;
+        }
+
+        .btn-secondary {
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            background: var(--btn-bg);
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--text);
+            transition: background-color 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+        .btn-secondary:disabled {
+            cursor: default;
+            opacity: 0.5;
+        }
+        .btn-secondary.active {
+            background-color: var(--dot-blue);
+            color: #ffffff;
+            border-color: var(--dot-blue);
+        }
+
+        .btn-hover-blue:not(:disabled):hover {
+            background-color: var(--dot-blue) !important;
+            color: #ffffff !important;
+            border-color: var(--dot-blue) !important;
+        }
+
+        .btn-hover-green:not(:disabled):hover {
+            background-color: var(--dot-green) !important;
+            color: #ffffff !important;
+            border-color: var(--dot-green) !important;
+        }
+
+        #copyOneNoteButton:not(:disabled):hover {
+            background-color: var(--comment-pink) !important;
+            color: #ffffff !important;
+            border-color: var(--comment-pink) !important;
+        }
+
+        #endButton:not(:disabled):hover {
+            background-color: var(--danger) !important;
+            color: #ffffff !important;
+            border-color: var(--danger-border) !important;
+        }
+
+        @keyframes pulse-green-wave {
+            0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+        }
+
+        .btn-rounding-active {
+            background-color: var(--dot-green) !important;
+            color: #ffffff !important;
+            border-color: var(--dot-green) !important;
+            animation: pulse-green-wave 2s infinite;
+        }
+
+        @keyframes pulse-blue-wave {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+
+        .btn-profile-active {
+            background-color: var(--dot-blue) !important;
+            color: #ffffff !important;
+            border-color: var(--dot-blue) !important;
+            animation: pulse-blue-wave 2s infinite;
+        }
+
+        .text-rounded {
+            color: var(--dot-green) !important;
+            font-weight: 600;
+        }
+
+        .time-add-display {
+            font-size: 1.5rem;
+            font-family: monospace;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+            padding: 0.5rem;
+            flex: 1;
+        }
+
+        .btn-stepper {
+            background-color: var(--dot-green);
+            color: #ffffff;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            user-select: none;
+            min-width: 100px;
+        }
+        .btn-stepper:active {
+            transform: scale(0.96);
+        }
+        .btn-stepper.btn-orange-flash {
+            background-color: var(--dot-orange) !important;
+        }
+
+        #clearButton:not(:disabled):hover {
+            background: var(--danger);
+            color: #ffffff;
+            border-color: var(--danger-border);
+        }
+        #exportButton:not(:disabled):hover {
+            background: var(--excel);
+            color: #ffffff;
+            border-color: var(--excel-border);
+        }
+        #clearArchivesButton:not(:disabled):hover {
+            background: var(--danger);
+            color: #ffffff;
+            border-color: var(--danger-border);
+        }
+
+        #themeToggleButton:hover{
+            background: rgba(37,99,235,0.12);
+            border-color: rgba(37,99,235,0.35);
+        }
+        
+        #profileButton {
+            margin-top: 0.25rem;
+        }
+        #profileButton:hover {
+            opacity: 0.9;
+        }
+
+        .task-list-wrapper {
+            position: relative;
+            --dynamic-gap: 60%; 
+        }
+
+        .task-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .task-list.expanded {
+            max-height: none;
+        }
+
+        /* SCROLLBAR STYLING */
+        .task-list::-webkit-scrollbar {
+            width: 12px;
+        }
+        .task-list::-webkit-scrollbar-track {
+            background: var(--card);
+        }
+        .task-list::-webkit-scrollbar-thumb {
+            background-color: #000000;
+            border-radius: 6px;
+            border: 3px solid var(--card);
+        }
+        body.theme-dark .task-list::-webkit-scrollbar-thumb,
+        body.theme-black .task-list::-webkit-scrollbar-thumb {
+            background-color: #ffffff;
+        }
+
+        .task-list.compact-mode .task-list-item {
+            display: flex;
+            align-items: center;
+            position: relative; 
+        }
+        
+        .task-list.compact-mode .task-left {
+            width: calc(var(--dynamic-gap) - 10px);
+            min-width: 0;
+            flex: none;
+            padding-right: 10px;
+        }
+
+        /* Logic to hide comment field when divider is dragged over */
+        .task-list.compact-mode .task-comment-row {
+            width: calc(var(--dynamic-gap) - 10px);
+            max-width: calc(var(--dynamic-gap) - 10px);
+            overflow: hidden;
+        }
+        
+        .task-list.compact-mode .task-comment-box {
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-list.compact-mode .task-time {
+            position: absolute;
+            left: var(--dynamic-gap);
+            top: 0;
+            bottom: 0;
+            right: 0;
+            margin: 0;
+            z-index: 10;
+            background: var(--card);
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        #resizeHandle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: var(--dynamic-gap); 
+            width: 24px;
+            transform: translateX(-50%);
+            cursor: col-resize;
+            z-index: 100;
+            display: none;
+            align-items: stretch;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        
+        .task-list-wrapper.compact-active #resizeHandle {
+            display: flex;
+        }
+
+        #resizeHandle::after {
+            content: '';
+            width: 2px;
+            background-color: var(--dot-green);
+            transition: none; 
+        }
+        
+        body.theme-dark #resizeHandle::after {
+            background-color: var(--dot-green);
+        }
+
+        #resizeHandle:hover::after, 
+        #resizeHandle.resizing::after {
+            background-color: var(--dot-blue) !important;
+            width: 3px;
+        }
+
+        .handle-release-anim::after {
+            animation: blinkGreenBlue 0.6s ease-in-out;
+        }
+
+        @keyframes blinkGreenBlue {
+            0% { background-color: var(--dot-blue); width: 3px; }
+            20% { background-color: var(--dot-green); width: 2px; }
+            40% { background-color: var(--dot-blue); width: 3px; }
+            60% { background-color: var(--dot-green); width: 2px; }
+            80% { background-color: var(--dot-blue); width: 3px; }
+            100% { background-color: var(--dot-green); width: 2px; }
+        }
+        
+        body.theme-dark .task-list.compact-mode .task-time {
+            background: var(--card);
+        }
+
+        .task-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.25rem;
+            border-bottom: 1px solid var(--border-soft);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        .task-list-item:last-child { border-bottom: none; }
+        .task-list-item:hover { background: var(--hover); }
+
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            min-width: 0;
+        }
+        
+        .task-info-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .task-name-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .task-name {
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 520px;
+        }
+        
+        .task-project-number {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 0px;
+            line-height: 1.1;
+        }
+        
+        body.theme-dark .task-project-number {
+            color: #64748b;
+        }
+
+        .btn-comment-copy {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            height: 18px; 
+            width: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.25rem;
+            padding: 0;
+            vertical-align: middle;
+        }
+        
+        .btn-comment-copy::after {
+            content: '';
+            width: 8px; 
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--comment-pink);
+            display: block;
+            transition: transform 0.2s;
+        }
+        
+        .btn-comment-copy:hover::after {
+            transform: scale(1.3);
+        }
+        
+        .task-time {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #374151;
+            white-space: nowrap;
+            margin-left: 0.75rem;
+        }
+        body.theme-dark .task-time { color: #cbd5e1; }
+
+        .task-selected { background: rgba(37,99,235,0.12); }
+        .task-active { font-weight: 600; }
+
+        #youtubeButton:not(:disabled):hover {
+            color: var(--dot-green);
+        }
+
+        .empty-text {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        body.theme-dark .empty-text { color: var(--muted); }
+
+        .archive-group { margin-top: 0.5rem; }
+        .archive-group summary {
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        .archive-group ul {
+            margin-top: 0.25rem;
+            margin-left: 1rem;
+            max-height: none;
+        }
+
+        .month-group {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .month-summary {
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+        
+        .week-group {
+            margin-top: 0.5rem;
+            margin-left: 0.5rem;
+            border-left: 3px solid;
+            padding-left: 0.75rem;
+        }
+
+        .week-group:nth-of-type(odd) {
+            border-left-color: var(--dot-green);
+        }
+        .week-group:nth-of-type(odd) > .week-summary {
+            color: var(--dot-green);
+        }
+
+        .week-group:nth-of-type(even) {
+            border-left-color: var(--dot-blue);
+        }
+        .week-group:nth-of-type(even) > .week-summary {
+            color: var(--dot-blue);
+        }
+
+        .week-summary {
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .week-export-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: var(--comment-pink);
+            border-radius: 50%;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .week-export-dot:hover {
+            transform: scale(1.3);
+        }
+
+        .week-content {
+            margin-left: 0.5rem;
+        }
+
+        .week-content .archive-summary .archive-label {
+            color: var(--dot-green);
+            font-weight: 600;
+        }
+
+        .archive-group .task-list .task-name,
+        .archive-group .task-list .task-time {
+            color: var(--comment-pink);
+        }
+
+        .archive-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            list-style: none;
+        }
+        .archive-summary .archive-label {
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .archive-summary .archive-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        .archive-action-btn {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            background: var(--btn-bg);
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: var(--text);
+        }
+        .archive-action-btn:hover {
+            background: rgba(37,99,235,0.12);
+            border-color: rgba(37,99,235,0.35);
+        }
+        .archive-action-btn:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .task-comment-row{
+            border-bottom: 1px solid var(--border-soft);
+            padding: 0.4rem 0.25rem 0.55rem;
+            margin: -0.2rem 0 0.2rem;
+        }
+        .task-comment-box{
+            border: 1px solid var(--border);
+            background: rgba(148,163,184,0.08);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.65rem;
+            font-size: 0.9rem;
+            color: #374151;
+            white-space: pre-wrap;
+        }
+        body.theme-dark .task-comment-box{
+            color: #cbd5e1;
+            background: rgba(148,163,184,0.10);
+        }
+
+        .compact-control {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: 1rem;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+        .compact-control input[type=range] {
+            width: 120px;
+            cursor: pointer;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--modal-backdrop);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .overlay.show { display: flex; }
+        .modal {
+            position: relative;
+            background: var(--card);
+            border-radius: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(15,23,42,0.35);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        body.theme-dark .modal { border-color: rgba(255,255,255,0.06); box-shadow: 0 20px 40px rgba(0,0,0,0.45); }
+
+        .modal h2 {
+            margin: 0 0 0.75rem;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+        .modal p {
+            margin: 0 0 0.75rem;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+        body.theme-dark .modal p { color: #cbd5e1; }
+        
+        .settings-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .settings-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .settings-section h3 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .modal-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .modal-row label { font-size: 0.9rem; }
+
+        .modal-select, .modal-input, .modal-textarea {
+            padding: 0.4rem 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            background: transparent;
+            color: var(--text);
+        }
+        select.modal-select{
+            background: var(--select-bg);
+            color: var(--select-text);
+            border-color: var(--border);
+        }
+        body.theme-dark select.modal-select{
+            background: var(--select-bg);
+            color: var(--select-text);
+            border-color: #94a3b8;
+        }
+        select.modal-select option{
+            background: var(--select-bg);
+            color: var(--select-text);
+        }
+
+        .modal-input{ width: 100%; }
+        .modal-textarea{
+            width: 100%;
+            min-height: 120px;
+            resize: vertical;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .modal-button-primary {
+            padding: 0.45rem 0.9rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: var(--dot-blue);
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 0.4rem;
+            right: 0.6rem;
+            border: none;
+            background: transparent;
+            font-size: 1.25rem;
+            line-height: 1;
+            cursor: pointer;
+            color: var(--muted);
+        }
+        .modal-close:hover { color: var(--text); }
+
+        #taskChart {
+            width: 100%;
+            max-width: 900px;
+            height: 110px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .chart-legend {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+            font-size: 0.8rem;
+            color: #374151;
+        }
+        body.theme-dark .chart-legend { color: #cbd5e1; }
+
+        .chart-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .chart-legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            height: 110px;
+            margin: 0 auto;
+        }
+
+        .chart-gif-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .chart-gif-overlay img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            opacity: 0.9;
+        }
+
+        .inline-note {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        /* TIMELINE STYLES */
+        .timeline-wrap{
+            width: 100%;
+            max-width: 900px;
+            margin: 0.25rem auto 0;
+            position: relative;
+        }
+        .timeline-bar{
+            position: relative;
+            height: 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(37,99,235,0.20);
+            overflow: hidden;
+            user-select: none;
+            cursor: default;
+        }
+        body.theme-dark .timeline-bar{
+            background: rgba(37,99,235,0.25);
+        }
+
+        .timeline-seg{
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-radius: 999px; /* Can be 0 if contiguous, but small radius looks ok */
+        }
+        .timeline-seg.blue{ background: var(--dot-blue); opacity: 0.75; }
+        .timeline-seg.orange{ background: var(--dot-orange); opacity: 0.85; }
+        .timeline-seg.green{ background: var(--dot-green); opacity: 0.90; }
+
+        .timeline-seg.clickable{
+            cursor: pointer;
+        }
+        .timeline-seg.clickable:hover{
+            filter: brightness(1.05);
+        }
+
+        .timeline-ticks{
+            position: relative;
+            height: 28px;
+            margin-top: 0.5rem;
+            user-select: none;
+        }
+        .timeline-tick{
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 10px;
+            background: var(--border);
+        }
+        body.theme-dark .timeline-tick{
+            background: #94a3b8;
+            opacity: 0.7;
+        }
+        .timeline-label{
+            position: absolute;
+            top: 12px;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: var(--muted);
+            white-space: nowrap;
+            font-family: monospace;
+        }
+
+        .timeline-curtain{
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 220ms ease, opacity 180ms ease;
+            margin-top: 0.65rem;
+            border-top: 1px solid var(--border-soft);
+            padding-top: 0;
+        }
+        .timeline-curtain.open{
+            max-height: 140px;
+            opacity: 1;
+            padding-top: 0.75rem;
+        }
+        .timeline-curtain-header{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .timeline-curtain-title{
+            font-weight: 600;
+            color: var(--text);
+        }
+        .timeline-curtain-row{
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .timeline-curtain-row label{
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+        .timeline-curtain-close{
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            background: var(--btn-bg);
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: var(--text);
+        }
+        .timeline-curtain-close:hover{
+            background: rgba(37,99,235,0.12);
+            border-color: rgba(37,99,235,0.35);
+        }
+
+        .timeline-now-layer{
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 14px;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .timeline-now-dot{
+            position: absolute;
+            top: 0x;
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            transform: translateX(-50%);
+            background: conic-gradient(
+                #ef4444, #f97316, #facc15, #22c55e,
+                #14b8a6, #3b82f6, #a855f7, #ef4444
+            );
+            box-shadow:
+                0 0 0 2px rgba(255,255,255,0.85),
+                0 6px 14px rgba(15,23,42,0.18);
+            animation: spinRainbow 2.2s linear infinite;
+            will-change: left;
+        }
+
+        body.theme-dark .timeline-now-dot{
+            box-shadow:
+                0 0 0 2px rgba(15,23,42,0.75),
+                0 6px 14px rgba(0,0,0,0.45);
+        }
+
+        @keyframes spinRainbow{
+            0%   { transform: translateX(-50%) rotate(0deg); }
+            100% { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        /* Switch Toggle Styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 22px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--dot-green);
+        }
+        input:checked + .slider:before {
+            transform: translateX(18px);
+        }
+        body.theme-dark .slider {
+            background-color: #4b5563;
+        }
+        body.theme-dark input:checked + .slider {
+            background-color: var(--dot-green);
+        }
+
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "recharts": "https://esm.sh/recharts@^3.6.0"
+  }
+}
+</script>
+</head>
+<body>
+
+<header class="header-bar">
+    <div class="header-left">
+        <h1>Tidsregistrering – Arbeidsliste</h1>
+        <div class="time-now" id="timeNow"></div>
+    </div>
+    <div class="header-right">
+        <button id="themeToggleButton" class="btn-secondary" type="button" title="Bytt mellom lys, mørk og svart modus">Darkmode</button>
+        <button id="profileButton" class="btn-secondary" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Brukerprofil</button>
+        <div style="margin-top:0.25rem;">Utviklet av Mathias Weiseth Gran, BIM Tekniker</div>
+    </div>
+</header>
+
+<section class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <span><strong>Tidslinje</strong></span>
+        </div>
+    </div>
+
+    <div class="timeline-wrap">
+        <!-- Main Bar - Content generated by JS -->
+        <div id="dayTimelineBar" class="timeline-bar" title="Viser arbeidsfordeling."></div>
+
+        <!-- Rainbow dot layer -->
+        <div class="timeline-now-layer">
+            <div id="timelineNowDot" class="timeline-now-dot" aria-hidden="true"></div>
+        </div>
+
+        <div id="dayTimelineTicks" class="timeline-ticks"></div>
+
+        <div id="dayTimelineCurtain" class="timeline-curtain">
+            <div class="timeline-curtain-header">
+                <div id="dayTimelineCurtainTitle" class="timeline-curtain-title">Juster tid</div>
+                <button id="dayTimelineCurtainClose" type="button" class="timeline-curtain-close">Lukk</button>
+            </div>
+
+            <div class="timeline-curtain-row">
+                <label for="dayTimelineFrom">Fra:</label>
+                <select id="dayTimelineFrom" class="modal-select"></select>
+
+                <label for="dayTimelineTo">Til:</label>
+                <select id="dayTimelineTo" class="modal-select"></select>
+
+                <span class="helper-text" id="dayTimelineCurtainHint"></span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="card">
+    <div class="card-header">
+        <span><strong>Fordeling av prosjekter (tid)</strong></span>
+    </div>
+
+    <div class="chart-wrapper">
+        <div id="taskChartGifOverlay" class="chart-gif-overlay">
+            <img src="din-animasjon.gif" alt="Start et prosjekt for å se fordelingen" />
+        </div>
+        <canvas id="taskChart" width="900" height="110"></canvas>
+    </div>
+
+    <div id="chartLegend" class="chart-legend"></div>
+</section>
+
+<section class="card">
+    <div><strong>Prosjekt</strong></div>
+    <div class="task-input-row">
+        <div class="task-input-wrapper">
+            <input type="text" id="taskInput" placeholder="Skriv inn prosjektnavn …" />
+            <div id="taskSuggestions"></div>
+        </div>
+        <button id="startButton" title="Start tidsur for valgt prosjekt">Start arbeid</button>
+    </div>
+    <div class="helper-text" id="selectionInfo">
+        Skriv inn et prosjekt og trykk Enter eller «Start arbeid».
+    </div>
+</section>
+
+<section class="card" id="currentTaskCard">
+    <div class="current-task">
+        <div>
+            <div>
+                <span id="currentTaskLabel" class="current-task-label">Nåværende prosjekt</span>
+            </div>
+            <div id="currentTaskName" class="current-task-title">Ingen aktivt prosjekt</div>
+            <div class="current-task-actions">
+                <button id="transferTimeButton" class="btn-secondary" disabled title="Flytt tid mellom prosjekter">Overfør tid</button>
+                <button id="adjustStartButton" class="btn-secondary" disabled title="Legg til tid på aktivt prosjekt">Tilfør tid</button>
+            </div>
+            <div class="inline-note" id="currentTaskHint"></div>
+        </div>
+        <div style="text-align:right;">
+            <div id="currentTaskTime" class="current-task-time">00:00:00</div>
+            <button id="endButton" class="btn-secondary" disabled title="Stopp tid og avslutt dagen">Avslutt arbeid</button>
+        </div>
+    </div>
+</section>
+
+<section class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <span><strong>Arbeidsliste (dagens)</strong></span>
+            <button id="copyOneNoteButton" class="btn-secondary" type="button" disabled title="Kopier sammendrag til utklippstavle">Kopier for Onenote</button>
+            <button id="toggleAllCommentsButton" class="btn-secondary" type="button" disabled title="Vis/skjul alle kommentarer">Vis kommentarer</button>
+            <button id="toggleListHeightButton" class="btn-secondary" type="button" disabled title="Endre høyde på oppgaveliste">Utvid liste</button>
+            <button id="toggleRoundingButton" class="btn-secondary" type="button" title="Runder tid til nærmeste 30min/1t">Avrund tid</button>
+        </div>
+        <button id="clearButton" class="btn-secondary" disabled title="Tøm listen og arkiver til historikk">Tøm og arkiver</button>
+    </div>
+    <p class="helper-text" id="taskListHelper">
+        Klikk på et prosjekt i listen for å velge det. Knappen over feltet blir da «Gjenoppta arbeid».
+        Dobbeltklikk på den rosa sirkelen for å legge til eller vise kommentar.
+    </p>
+    <div class="task-list-wrapper">
+        <div id="resizeHandle" title="Dra for å justere kolonnebredde"></div>
+        <ul id="taskList" class="task-list"></ul>
+    </div>
+    <div id="emptyListText" class="empty-text">Ingen prosjekter registrert ennå.</div>
+</section>
+
+<section class="card">
+    <div class="card-header">
+        <span><strong>Historikk</strong></span>
+        <div class="card-header-buttons">
+            <button id="exportButton" class="btn-secondary" title="Last ned all historikk som CSV">Eksporter til Excel</button>
+            <button id="clearArchivesButton" class="btn-secondary" title="Slett all historikk permanent">Slett historikk</button>
+        </div>
+    </div>
+    <p class="helper-text" id="archiveHelper">
+        Når du tømmer listen, blir prosjektene flyttet hit, gruppert på dag og måned.
+        Du kan gjenoppta et arkivert prosjekt kun dersom det er samme dato.
+    </p>
+    <div id="archiveList"></div>
+</section>
+
+<!-- Settings Modal -->
+<div id="settingsOverlay" class="overlay">
+    <div class="modal">
+        <button class="modal-close" id="settingsCloseButton">&times;</button>
+        <h2>Profil og Innstillinger</h2>
+        
+        <div class="settings-section">
+            <h3>Profiler</h3>
+            <p>Bytt mellom ulike profiler for å holde data separert (f.eks. Jobb, Privat, Prosjekt X).</p>
+            
+            <div class="modal-row">
+                <label for="profileSelect" style="min-width: 80px;">Aktiv profil:</label>
+                <select id="profileSelect" class="modal-select" style="flex:1; margin-right: 0.5rem;"></select>
+                <button id="deleteProfileButton" type="button" class="btn-secondary" style="color: var(--danger);">Slett valgt</button>
+            </div>
+            
+            <div class="modal-row" style="margin-top:0.5rem; border-top: 1px solid var(--border-soft); padding-top: 1rem;">
+                <label for="newProfileName" style="min-width: 80px;">Ny profil:</label>
+                <input type="text" id="newProfileName" class="modal-input" placeholder="Navn på ny profil..." style="flex:1;">
+                <button id="createProfileButton" class="btn-secondary">Opprett</button>
+            </div>
+            
+            <p class="helper-text" id="profileHelperText"></p>
+        </div>
+
+        <div class="settings-section">
+            <h3>Sikkerhetskopiering (Data)</h3>
+            <p>Sikkerhetskopiering av oppsett og data kan lagres manuelt eller du kan få en popup melding med valg av plassering hver gang du avslutter dagens arbeid. Hvis nettleseren ikke støtter denne funksjonen så benyttes standard plassering for nedlastinger</p>
+            <div class="modal-row">
+                <button id="downloadBackupButton" class="btn-secondary">Last ned profil (.json)</button>
+                <button id="uploadBackupButton" class="btn-secondary">Gjenopprett profil</button>
+                <input type="file" id="backupFileInput" accept=".json" style="display: none;" />
+            </div>
+            
+            <div class="modal-row" style="margin-top: 1rem;">
+                <label class="switch">
+                    <input type="checkbox" id="autoSaveToggle">
+                    <span class="slider"></span>
+                </label>
+                <label for="autoSaveToggle" style="cursor:pointer; font-size: 0.9rem;">Lagre profil automatisk ved «Avslutt arbeid»</label>
+            </div>
+
+            <p class="helper-text">Tips: Skru på automatisk lagring av profil for å hindre tap av data.</p>
+        </div>
+
+        <div class="settings-section" style="border-bottom: 1px solid var(--border-soft); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+            <h3>Testdata</h3>
+            <p>Generer en komplett profil med 6 måneders historikk for testing.</p>
+            <button id="generateTestDataButton" class="btn-secondary">Generer Testdata (6 mnd)</button>
+        </div>
+
+        <div style="margin-top: 1rem; border-top: 1px solid var(--border-soft); padding-top: 1rem; text-align: center;">
+            <button id="youtubeButton" class="btn-secondary" style="width: 100%;">Se instruksjonsvideo</button>
+        </div>
+
+        <div class="modal-footer">
+            <button id="settingsDoneButton" class="modal-button-primary">Ferdig</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteProfileOverlay" class="overlay">
+    <div class="modal">
+        <h2>Slett profil</h2>
+        <p>Er du sikker på at du vil slette profilen <strong id="deleteProfileNameDisplay"></strong>?</p>
+        <p style="color: var(--danger);">Dette vil slette alle data tilhørende denne profilen permanent.</p>
+        
+        <div class="modal-footer" style="justify-content: space-between;">
+            <button id="deleteProfileCancelBtn" class="btn-secondary">Avbryt</button>
+            <div style="display:flex; gap:0.5rem;">
+                <button id="deleteProfileSaveDeleteBtn" class="btn-secondary">Lagre profil & Slett</button>
+                <button id="deleteProfileConfirmBtn" class="modal-button-primary" style="background: var(--danger);">Slett profil</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="projectOverlay" class="overlay">
+    <div class="modal">
+        <button class="modal-close" id="projectCloseButton">&times;</button>
+        <h2>Prosjektnummer</h2>
+        <p>Legg inn prosjektnummer for prosjektet:</p>
+        <p><strong id="projectTaskName"></strong></p>
+
+        <div class="modal-row" style="width:100%;">
+            <input id="projectNumberInput" class="modal-input" type="text" placeholder="Prosjektnummer …" />
+        </div>
+
+        <div class="modal-footer">
+            <button id="projectCancelButton" class="btn-secondary" type="button">Avbryt</button>
+            <button id="projectConfirmButton" class="modal-button-primary" type="button">Start arbeid</button>
+        </div>
+        <div class="helper-text">Enter = start. Prosjektnummer lagres per prosjektnavn til du sletter det fra historikk (X i forslaglisten).</div>
+    </div>
+</div>
+
+<div id="overdueOverlay" class="overlay">
+    <div class="modal">
+        <h2>Aktivt prosjekt har stått for lenge</h2>
+        <p>
+            Prosjektet <strong id="overdueTaskName"></strong> har vært aktivt i mer enn 10 timer.
+        </p>
+        <p>Når ble dette prosjektet fullført?</p>
+        <div class="modal-row">
+            <label for="overdueHour">Tidspunkt:</label>
+            <select id="overdueHour" class="modal-select"></select>
+            <span>:</span>
+            <select id="overdueMinute" class="modal-select"></select>
+        </div>
+        <p class="helper-text">Valgt tidspunkt brukes til å beregne total tid for prosjektet.</p>
+        <div class="modal-footer">
+            <button id="overdueConfirmButton" class="modal-button-primary">
+                Fullfør prosjekt til angitt tid og tøm og arkiver listen
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="clearArchivesOverlay" class="overlay">
+    <div class="modal">
+        <button class="modal-close" id="clearArchivesCloseButton">&times;</button>
+        <h2>Slette historikk</h2>
+        <p>Du er i ferd med å slette all «Historikk».</p>
+        <p>Velg om du vil kun slette, eller først eksportere til Excel og deretter slette.</p>
+        <div class="modal-footer">
+            <button id="clearArchivesCancelButton" class="btn-secondary">Avbryt</button>
+            <button id="clearArchivesDeleteButton" class="btn-secondary">Slett all historikk</button>
+            <button id="clearArchivesExportDeleteButton" class="modal-button-primary">Eksporter til Excel og slett</button>
+        </div>
+    </div>
+</div>
+
+<div id="clearTodayOverlay" class="overlay">
+    <div class="modal">
+        <h2>Tøm dagens arbeidsliste</h2>
+        <p>Dette vil tømme dagens arbeidsliste, og det vil ikke lenger være mulig å gjenoppta prosjekter.</p>
+        <p>Er du sikker på at du vil fortsette?</p>
+        <div class="modal-footer">
+            <button id="clearTodayCancelButton" class="btn-secondary">Avbryt</button>
+            <button id="clearTodayConfirmButton" class="modal-button-primary">Tøm og arkiver</button>
+        </div>
+    </div>
+</div>
+
+<div id="commentOverlay" class="overlay">
+    <div class="modal">
+        <button class="modal-close" id="commentCloseButton">&times;</button>
+        <h2>Kommentar</h2>
+        <p><strong id="commentTaskName"></strong></p>
+        <textarea id="commentTextarea" class="modal-textarea" placeholder="Skriv kommentar … (Enter = lagre)"></textarea>
+        <div class="modal-footer">
+            <button id="commentCancelButton" class="btn-secondary">Avbryt</button>
+            <button id="commentSaveButton" class="modal-button-primary">Lagre</button>
+        </div>
+        <div class="helper-text">Tips: Enter lagrer. Shift+Enter gir linjeskift.</div>
+    </div>
+</div>
+
+<div id="transferOverlay" class="overlay">
+    <div class="modal">
+        <button class="modal-close" id="transferCloseButton">&times;</button>
+        <h2>Overfør tid</h2>
+        <p>
+            Velg «Fra prosjekt» og «Til prosjekt». Det er ikke mulig å overføre mer tid enn det som er registrert på «Fra».
+        </p>
+
+        <div class="modal-row">
+            <label for="transferSource">Fra prosjekt:</label>
+            <select id="transferSource" class="modal-select"></select>
+        </div>
+
+        <div class="modal-row">
+            <label for="transferTarget">Til prosjekt:</label>
+            <select id="transferTarget" class="modal-select"></select>
+        </div>
+
+        <div class="modal-row">
+            <label>Varighet:</label>
+            <select id="transferHours" class="modal-select"></select>
+            <span>t</span>
+            <select id="transferMinutes" class="modal-select"></select>
+            <span>min</span>
+        </div>
+
+        <div class="helper-text" id="transferMaxHint"></div>
+
+        <div class="modal-footer">
+            <button id="transferCancelButton" class="btn-secondary">Avbryt</button>
+            <button id="transferConfirmButton" class="modal-button-primary">Overfør</button>
+        </div>
+    </div>
+</div>
+
+<div id="adjustStartOverlay" class="overlay">
+    <div class="modal">
+        <button class="modal-close" id="adjustStartCloseButton">&times;</button>
+        <h2 id="adjustStartTitle">Tilfør tid</h2>
+        <p id="adjustStartDesc">
+            Juster tid på det aktive prosjektet.
+        </p>
+
+        <!-- Mode 1: Set Time (Visible for 1st task only) -->
+        <div id="adjustStartModeTime" style="display:none;">
+            <p>Sett starttidspunkt:</p>
+            <div class="modal-row">
+                <select id="adjustStartHour" class="modal-select"></select>
+                <span>:</span>
+                <select id="adjustStartMinute" class="modal-select"></select>
+            </div>
+        </div>
+
+        <!-- Mode 2: Add Duration (Visible for subsequent tasks) -->
+        <div id="adjustStartModeAdd">
+            <div class="modal-row" style="justify-content: space-around; gap: 1rem;">
+                <div id="adjustAddTimeDisplay" class="time-add-display">0t 0min</div>
+                <button id="adjustTimeStepperBtn" type="button" class="btn-stepper" title="Enkeltrykk: +15 min | Dobbeltrykk: -15 min">
+                    +15 min
+                </button>
+            </div>
+            <div class="helper-text" style="text-align:center; margin-top:0.5rem;">
+                Enkeltrykk = +15 min<br>Dobbeltrykk = -15 min
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="adjustStartCancelButton" class="btn-secondary">Avbryt</button>
+            <button id="adjustStartConfirmButton" class="modal-button-primary">Lagre resultat</button>
+        </div>
+    </div>
+</div>
+
+<div id="restoreDayOverlay" class="overlay">
+    <div class="modal">
+        <h2>Gjenoppta arkivert dag</h2>
+        <p id="restoreDayText"></p>
+        <p>Dette vil flytte hele dagens liste tilbake til «Arbeidsliste (dagens)».</p>
+        <div class="modal-footer">
+            <button id="restoreDayCancelButton" class="btn-secondary">Avbryt</button>
+            <button id="restoreDayConfirmButton" class="modal-button-primary">Gjenoppta dagen</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY_PREFIX = "taskTimeTracker_data_";
+    const THEME_KEY = "taskTimeTracker_theme_v1";
+    const TIMELINE_KEY_PREFIX = "taskTimeTracker_timeline_";
+    const PROFILES_KEY = "taskTimeTracker_profiles_list";
+    const AUTO_SAVE_KEY = "taskTimeTracker_autoSave_v1";
+
+    const youtubeLink = "https://www.youtube.com/watch?v=D-5qL-rtKp4";
+
+    let profiles = ["Standard"];
+    let currentProfile = "Standard";
+    let autoSaveOnEndDay = false;
+
+    let data = {
+        tasks: [],
+        archives: [],
+        taskNames: [],
+        projectNumbers: {}
+    };
+
+    let selectedTaskId = null;
+    let overduePopupShown = false;
+
+    let suggestionIndex = -1;
+    let filteredSuggestions = [];
+
+    let commentEditingTaskId = null;
+    let pendingRestoreArchiveId = null;
+
+    let showAllComments = false;
+    let expandedCommentTaskId = null;
+
+    let pendingNewTaskName = null;
+    let timelineMode = localStorage.getItem('taskTimeTracker_timeline_mode') || 'setup';
+
+    const timeNowEl = document.getElementById("timeNow");
+    const taskInputEl = document.getElementById("taskInput");
+    const taskSuggestionsEl = document.getElementById("taskSuggestions");
+    const startButtonEl = document.getElementById("startButton");
+    const endButtonEl = document.getElementById("endButton");
+    const clearButtonEl = document.getElementById("clearButton");
+    const exportButtonEl = document.getElementById("exportButton");
+    const clearArchivesButtonEl = document.getElementById("clearArchivesButton");
+    const currentTaskLabelEl = document.getElementById("currentTaskLabel");
+    const currentTaskNameEl = document.getElementById("currentTaskName");
+    const currentTaskTimeEl = document.getElementById("currentTaskTime");
+    const currentTaskHintEl = document.getElementById("currentTaskHint");
+
+    const transferTimeButtonEl = document.getElementById("transferTimeButton");
+    const adjustStartButtonEl = document.getElementById("adjustStartButton");
+
+    const taskListEl = document.getElementById("taskList");
+    const selectionInfoEl = document.getElementById("selectionInfo");
+    const taskListHelperEl = document.getElementById("taskListHelper");
+    const archiveHelperEl = document.getElementById("archiveHelper");
+    const emptyListTextEl = document.getElementById("emptyListText");
+    const archiveListEl = document.getElementById("archiveList");
+
+    const toggleAllCommentsButtonEl = document.getElementById("toggleAllCommentsButton");
+    const toggleListHeightButtonEl = document.getElementById("toggleListHeightButton");
+    const toggleRoundingButtonEl = document.getElementById("toggleRoundingButton");
+    
+    const copyOneNoteButtonEl = document.getElementById("copyOneNoteButton");
+
+    const resizeHandleEl = document.getElementById("resizeHandle");
+    const taskListWrapperEl = document.querySelector(".task-list-wrapper");
+
+    const projectOverlayEl = document.getElementById("projectOverlay");
+    const projectCloseButtonEl = document.getElementById("projectCloseButton");
+    const projectCancelButtonEl = document.getElementById("projectCancelButton");
+    const projectConfirmButtonEl = document.getElementById("projectConfirmButton");
+    const projectTaskNameEl = document.getElementById("projectTaskName");
+    const projectNumberInputEl = document.getElementById("projectNumberInput");
+
+    const overdueOverlayEl = document.getElementById("overdueOverlay");
+    const overdueTaskNameEl = document.getElementById("overdueTaskName");
+    const overdueHourEl = document.getElementById("overdueHour");
+    const overdueMinuteEl = document.getElementById("overdueMinute");
+    const overdueConfirmButtonEl = document.getElementById("overdueConfirmButton");
+
+    const clearArchivesOverlayEl = document.getElementById("clearArchivesOverlay");
+    const clearArchivesDeleteButtonEl = document.getElementById("clearArchivesDeleteButton");
+    const clearArchivesExportDeleteButtonEl = document.getElementById("clearArchivesExportDeleteButton");
+    const clearArchivesCloseButtonEl = document.getElementById("clearArchivesCloseButton");
+    const clearArchivesCancelButtonEl = document.getElementById("clearArchivesCancelButton");
+
+    const clearTodayOverlayEl = document.getElementById("clearTodayOverlay");
+    const clearTodayCancelButtonEl = document.getElementById("clearTodayCancelButton");
+    const clearTodayConfirmButtonEl = document.getElementById("clearTodayConfirmButton");
+
+    const commentOverlayEl = document.getElementById("commentOverlay");
+    const commentCloseButtonEl = document.getElementById("commentCloseButton");
+    const commentCancelButtonEl = document.getElementById("commentCancelButton");
+    const commentSaveButtonEl = document.getElementById("commentSaveButton");
+    const commentTextareaEl = document.getElementById("commentTextarea");
+    const commentTaskNameEl = document.getElementById("commentTaskName");
+
+    const transferOverlayEl = document.getElementById("transferOverlay");
+    const transferCloseButtonEl = document.getElementById("transferCloseButton");
+    const transferCancelButtonEl = document.getElementById("transferCancelButton");
+    const transferConfirmButtonEl = document.getElementById("transferConfirmButton");
+    const transferSourceEl = document.getElementById("transferSource");
+    const transferTargetEl = document.getElementById("transferTarget");
+    const transferHoursEl = document.getElementById("transferHours");
+    const transferMinutesEl = document.getElementById("transferMinutes");
+    const transferMaxHintEl = document.getElementById("transferMaxHint");
+
+    const adjustStartOverlayEl = document.getElementById("adjustStartOverlay");
+    const adjustStartCloseButtonEl = document.getElementById("adjustStartCloseButton");
+    const adjustStartCancelButtonEl = document.getElementById("adjustStartCancelButton");
+    const adjustStartConfirmButtonEl = document.getElementById("adjustStartConfirmButton");
+    const adjustStartTitleEl = document.getElementById("adjustStartTitle");
+    const adjustStartDescEl = document.getElementById("adjustStartDesc");
+    const adjustStartModeTimeEl = document.getElementById("adjustStartModeTime");
+    const adjustStartModeAddEl = document.getElementById("adjustStartModeAdd");
+    const adjustStartHourEl = document.getElementById("adjustStartHour");
+    const adjustStartMinuteEl = document.getElementById("adjustStartMinute");
+    const adjustAddTimeDisplayEl = document.getElementById("adjustAddTimeDisplay");
+    const adjustTimeStepperBtnEl = document.getElementById("adjustTimeStepperBtn");
+
+    const restoreDayOverlayEl = document.getElementById("restoreDayOverlay");
+    const restoreDayTextEl = document.getElementById("restoreDayText");
+    const restoreDayCancelButtonEl = document.getElementById("restoreDayCancelButton");
+    const restoreDayConfirmButtonEl = document.getElementById("restoreDayConfirmButton");
+
+    const themeToggleButtonEl = document.getElementById("themeToggleButton");
+
+    const profileButtonEl = document.getElementById("profileButton");
+    const settingsOverlayEl = document.getElementById("settingsOverlay");
+    const settingsCloseButtonEl = document.getElementById("settingsCloseButton");
+    const settingsDoneButtonEl = document.getElementById("settingsDoneButton");
+    const profileSelectEl = document.getElementById("profileSelect");
+    const createProfileButtonEl = document.getElementById("createProfileButton");
+    const deleteProfileButtonEl = document.getElementById("deleteProfileButton");
+    const profileHelperTextEl = document.getElementById("profileHelperText");
+    const downloadBackupButtonEl = document.getElementById("downloadBackupButton");
+    const uploadBackupButtonEl = document.getElementById("uploadBackupButton");
+    const backupFileInputEl = document.getElementById("backupFileInput");
+    const autoSaveToggleEl = document.getElementById("autoSaveToggle");
+    const newProfileNameEl = document.getElementById("newProfileName");
+    const generateTestDataButtonEl = document.getElementById("generateTestDataButton");
+
+    const deleteProfileOverlayEl = document.getElementById("deleteProfileOverlay");
+    const deleteProfileNameDisplayEl = document.getElementById("deleteProfileNameDisplay");
+    const deleteProfileCancelBtnEl = document.getElementById("deleteProfileCancelBtn");
+    const deleteProfileSaveDeleteBtnEl = document.getElementById("deleteProfileSaveDeleteBtn");
+    const deleteProfileConfirmBtnEl = document.getElementById("deleteProfileConfirmBtn");
+
+    const chartCanvas = document.getElementById("taskChart");
+    const chartCtx = chartCanvas ? chartCanvas.getContext("2d") : null;
+    const chartLegendEl = document.getElementById("chartLegend");
+    const chartGifOverlayEl = document.getElementById("taskChartGifOverlay");
+
+    const dayTimelineBarEl = document.getElementById("dayTimelineBar");
+    const dayTimelineTicksEl = document.getElementById("dayTimelineTicks");
+
+    const timelineNowDotEl = document.getElementById("timelineNowDot");
+
+    const dayTimelineCurtainEl = document.getElementById("dayTimelineCurtain");
+    const dayTimelineCurtainTitleEl = document.getElementById("dayTimelineCurtainTitle");
+    const dayTimelineCurtainCloseEl = document.getElementById("dayTimelineCurtainClose");
+    const dayTimelineFromEl = document.getElementById("dayTimelineFrom");
+    const dayTimelineToEl = document.getElementById("dayTimelineTo");
+    const dayTimelineCurtainHintEl = document.getElementById("dayTimelineCurtainHint");
+
+    let dayTimelineSettings = {
+        dayStartMin: 7 * 60,
+        dayEndMin: 17 * 60,
+        coreStartMin: 9 * 60,
+        coreEndMin: 15 * 60,
+        lunchStartMin: 11 * 60 + 30,
+        lunchEndMin: 12 * 60
+    };
+
+    let dayTimelineEditing = null; 
+    let dayTimelineBlockChange = false;
+    let isTaskListExpanded = false;
+    let isRoundingEnabled = false;
+
+    function loadTheme() {
+        const t = localStorage.getItem(THEME_KEY);
+        document.body.classList.remove("theme-dark", "theme-black");
+
+        if (t === "black") {
+            document.body.classList.add("theme-dark"); 
+            document.body.classList.add("theme-black"); 
+        } else if (t === "dark") {
+            document.body.classList.add("theme-dark");
+        }
+    }
+
+    function saveTheme(mode) {
+        localStorage.setItem(THEME_KEY, mode);
+    }
+
+    function saveTimelineMode(mode) {
+        timelineMode = mode;
+        localStorage.setItem('taskTimeTracker_timeline_mode', mode);
+    }
+
+    function normalizeTaskName(name) {
+        return (name || "").trim().replace(/\s+/g, " ").toLowerCase();
+    }
+
+    function loadProfiles() {
+        const raw = localStorage.getItem(PROFILES_KEY);
+        if (raw) {
+            try {
+                const p = JSON.parse(raw);
+                if (Array.isArray(p) && p.length > 0) profiles = p;
+            } catch (e) {}
+        }
+        if (!profiles.includes("Standard")) profiles.unshift("Standard");
+        
+        const lastActive = localStorage.getItem("taskTimeTracker_active_profile");
+        if (lastActive && profiles.includes(lastActive)) {
+            currentProfile = lastActive;
+        } else {
+            currentProfile = profiles[0];
+        }
+    }
+
+    function saveProfiles() {
+        localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+        localStorage.setItem("taskTimeTracker_active_profile", currentProfile);
+    }
+
+    function getStorageKey() { return STORAGE_KEY_PREFIX + currentProfile; }
+    function getTimelineKey() { return TIMELINE_KEY_PREFIX + currentProfile; }
+
+    function updateProfileButton() {
+        if (!profileButtonEl) return;
+        profileButtonEl.style.backgroundColor = "";
+        profileButtonEl.style.color = "";
+        profileButtonEl.style.borderColor = "";
+
+        if (currentProfile === "Standard") {
+            profileButtonEl.textContent = "Brukerprofil";
+            profileButtonEl.classList.remove("btn-profile-active");
+        } else {
+            profileButtonEl.textContent = currentProfile;
+            profileButtonEl.classList.add("btn-profile-active");
+        }
+    }
+
+    function loadFromStorage() {
+        const key = getStorageKey();
+        const raw = localStorage.getItem(key);
+        
+        data = { tasks: [], archives: [], taskNames: [], projectNumbers: {} };
+
+        if (raw) {
+            try {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === "object") {
+                    data.tasks = Array.isArray(parsed.tasks) ? parsed.tasks : [];
+                    data.archives = Array.isArray(parsed.archives) ? parsed.archives : [];
+                    data.taskNames = Array.isArray(parsed.taskNames) ? parsed.taskNames : [];
+                    data.projectNumbers = (parsed.projectNumbers && typeof parsed.projectNumbers === "object") ? parsed.projectNumbers : {};
+
+                    data.tasks.forEach(t => {
+                        if (!t) return;
+                        if (typeof t.comment !== "string") t.comment = "";
+                        if (typeof t.startAdjusted !== "boolean") t.startAdjusted = false;
+                        if (typeof t.projectNumber !== "string") t.projectNumber = "";
+                    });
+                    data.archives.forEach(a => {
+                        if (!a || !Array.isArray(a.tasks)) return;
+                        a.tasks.forEach(t => {
+                            if (!t) return;
+                            if (typeof t.comment !== "string") t.comment = "";
+                            if (typeof t.projectNumber !== "string") t.projectNumber = "";
+                        });
+                    });
+
+                    if (!parsed.projectNumbers || typeof parsed.projectNumbers !== "object") {
+                        data.projectNumbers = {};
+                        const ingest = (name, pn) => {
+                            const key = normalizeTaskName(name);
+                            const val = (pn || "").trim();
+                            if (key && val) data.projectNumbers[key] = val;
+                        };
+                        data.tasks.forEach(t => ingest(t.name, t.projectNumber));
+                        data.archives.forEach(a => (a.tasks || []).forEach(t => ingest(t.name, t.projectNumber)));
+                    }
+
+                    if (!parsed.taskNames) {
+                        const nameSet = new Set();
+                        data.tasks.forEach(t => { if (t && t.name) nameSet.add(t.name); });
+                        data.archives.forEach(a => {
+                            if (a && Array.isArray(a.tasks)) a.tasks.forEach(t => { if (t && t.name) nameSet.add(t.name); });
+                        });
+                        data.taskNames = Array.from(nameSet);
+                    }
+                }
+            } catch (e) {}
+        }
+    }
+
+    function saveToStorage() {
+        const key = getStorageKey();
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    function loadAutoSaveSetting() {
+        const val = localStorage.getItem(AUTO_SAVE_KEY);
+        autoSaveOnEndDay = (val === "true");
+        if (autoSaveToggleEl) autoSaveToggleEl.checked = autoSaveOnEndDay;
+    }
+
+    function clampInt(v, min, max) {
+        v = parseInt(v, 10);
+        if (isNaN(v)) v = min;
+        return Math.max(min, Math.min(max, v));
+    }
+
+    function loadDayTimelineSettings() {
+        const key = getTimelineKey();
+        const raw = localStorage.getItem(key);
+        
+        dayTimelineSettings = {
+            dayStartMin: 7 * 60, dayEndMin: 17 * 60,
+            coreStartMin: 9 * 60, coreEndMin: 15 * 60,
+            lunchStartMin: 11 * 60 + 30, lunchEndMin: 12 * 60
+        };
+
+        if (!raw) return;
+        try {
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== "object") return;
+
+            dayTimelineSettings.dayStartMin = clampInt(parsed.dayStartMin, 0, 1439);
+            dayTimelineSettings.dayEndMin = clampInt(parsed.dayEndMin, 1, 1440);
+            dayTimelineSettings.coreStartMin = clampInt(parsed.coreStartMin, 0, 1439);
+            dayTimelineSettings.coreEndMin = clampInt(parsed.coreEndMin, 1, 1440);
+            dayTimelineSettings.lunchStartMin = clampInt(parsed.lunchStartMin, 0, 1439);
+            dayTimelineSettings.lunchEndMin = clampInt(parsed.lunchEndMin, 1, 1440);
+
+            validateDayTimelineSettings();
+        } catch (e) {}
+    }
+
+    function saveDayTimelineSettings() {
+        const key = getTimelineKey();
+        localStorage.setItem(key, JSON.stringify(dayTimelineSettings));
+    }
+
+    function validateDayTimelineSettings() {
+        if (dayTimelineSettings.dayEndMin <= dayTimelineSettings.dayStartMin) {
+            dayTimelineSettings.dayEndMin = Math.min(1440, dayTimelineSettings.dayStartMin + 60);
+        }
+        dayTimelineSettings.coreStartMin = Math.max(dayTimelineSettings.dayStartMin, Math.min(dayTimelineSettings.coreStartMin, dayTimelineSettings.dayEndMin - 1));
+        dayTimelineSettings.coreEndMin = Math.max(dayTimelineSettings.dayStartMin + 1, Math.min(dayTimelineSettings.coreEndMin, dayTimelineSettings.dayEndMin));
+        if (dayTimelineSettings.coreEndMin <= dayTimelineSettings.coreStartMin) {
+            dayTimelineSettings.coreEndMin = Math.min(dayTimelineSettings.dayEndMin, dayTimelineSettings.coreStartMin + 60);
+        }
+        dayTimelineSettings.lunchStartMin = Math.max(dayTimelineSettings.dayStartMin, Math.min(dayTimelineSettings.lunchStartMin, dayTimelineSettings.dayEndMin - 1));
+        dayTimelineSettings.lunchEndMin = Math.max(dayTimelineSettings.dayStartMin + 1, Math.min(dayTimelineSettings.lunchEndMin, dayTimelineSettings.dayEndMin));
+        if (dayTimelineSettings.lunchEndMin <= dayTimelineSettings.lunchStartMin) {
+            dayTimelineSettings.lunchEndMin = Math.min(dayTimelineSettings.dayEndMin, dayTimelineSettings.lunchStartMin + 30);
+        }
+        if (dayTimelineSettings.lunchStartMin < dayTimelineSettings.coreStartMin) dayTimelineSettings.coreStartMin = dayTimelineSettings.lunchStartMin;
+        if (dayTimelineSettings.lunchEndMin > dayTimelineSettings.coreEndMin) dayTimelineSettings.coreEndMin = dayTimelineSettings.lunchEndMin;
+        dayTimelineSettings.coreStartMin = Math.max(dayTimelineSettings.dayStartMin, Math.min(dayTimelineSettings.coreStartMin, dayTimelineSettings.dayEndMin - 1));
+        dayTimelineSettings.coreEndMin = Math.max(dayTimelineSettings.dayStartMin + 1, Math.min(dayTimelineSettings.coreEndMin, dayTimelineSettings.dayEndMin));
+    }
+
+    function minutesToLabel(mins) {
+        mins = Math.max(0, Math.min(1440, mins));
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        const hh = String(h).padStart(2, "0");
+        const mm = String(m).padStart(2, "0");
+        return `${hh}.${mm}`;
+    }
+
+    function minutesToLabelColon(mins) {
+        mins = Math.max(0, Math.min(1440, mins));
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        const hh = String(h).padStart(2, "0");
+        const mm = String(m).padStart(2, "0");
+        return `${hh}:${mm}`;
+    }
+
+    function updateTimelineNowDot() {
+        if (!timelineNowDotEl || !dayTimelineBarEl) return;
+        const ds = dayTimelineSettings.dayStartMin;
+        const de = dayTimelineSettings.dayEndMin;
+        const total = Math.max(1, de - ds);
+        const now = new Date();
+        const nowMin = now.getHours() * 60 + now.getMinutes() + (now.getSeconds() / 60);
+        let pct = ((nowMin - ds) / total) * 100;
+        pct = Math.max(0, Math.min(100, pct));
+        timelineNowDotEl.style.left = `${pct}%`;
+        const hh = String(now.getHours()).padStart(2, "0");
+        const mm = String(now.getMinutes()).padStart(2, "0");
+        const ss = String(now.getSeconds()).padStart(2, "0");
+        timelineNowDotEl.title = `${hh}:${mm}:${ss}`;
+    }
+
+    function createTimelineSegment(leftPct, widthPct, color, opacity, mode, id) {
+        const div = document.createElement("div");
+        div.className = "timeline-seg";
+        if (mode === 'setup') {
+            div.classList.add("clickable");
+            div.classList.add(color); // 'blue', 'orange', 'green' classes
+            if (id === 'day') div.title = "Juster arbeidsdag";
+            else if (id === 'core') div.title = "Juster kjernetid";
+            else if (id === 'lunch') div.title = "Juster lunsj";
+            
+            div.addEventListener("dblclick", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openDayTimelineCurtain(id);
+            });
+        } else {
+            div.style.backgroundColor = color;
+            div.style.opacity = opacity;
+        }
+        div.style.left = `${leftPct}%`;
+        div.style.width = `${widthPct}%`;
+        return div;
+    }
+
+    function getTaskColor(task, index, allTasks) {
+        if (allTasks.length === 1 && task.isActive) {
+             return "#2563eb"; 
+        } else if (allTasks.every(t => !t.isActive)) {
+            const n = allTasks.length;
+            const hue = (index / n) * 360;
+            return `hsl(${hue}, 65%, 55%)`;
+        } else {
+            // Mixed
+            if (task.isActive) return "#2563eb"; 
+            
+            const nonActiveTasks = allTasks.filter(t => !t.isActive);
+            const nonActiveCount = nonActiveTasks.length || 1;
+            // Find index among inactive tasks
+            const inactiveIdx = nonActiveTasks.findIndex(t => t.id === task.id);
+            
+            const frac = inactiveIdx / Math.max(nonActiveCount - 1, 1);
+            const lightness = 30 + frac * 50;
+            return `hsl(0, 0%, ${lightness}%)`;
+        }
+    }
+
+    function renderDayTimeline() {
+        if (!dayTimelineBarEl || !dayTimelineTicksEl) return;
+        validateDayTimelineSettings();
+        
+        dayTimelineBarEl.innerHTML = "";
+        dayTimelineTicksEl.innerHTML = "";
+
+        const ds = dayTimelineSettings.dayStartMin;
+        const de = dayTimelineSettings.dayEndMin;
+        const total = Math.max(1, de - ds);
+
+        // Render based on automated timelineMode
+        if (timelineMode === 'setup') {
+            dayTimelineBarEl.title = "Dobbeltklikk på en farge for å justere tid.";
+            dayTimelineBarEl.style.cursor = "default";
+            
+            const cs = dayTimelineSettings.coreStartMin;
+            const ce = dayTimelineSettings.coreEndMin;
+            const ls = dayTimelineSettings.lunchStartMin;
+            const le = dayTimelineSettings.lunchEndMin;
+
+            // Blue
+            dayTimelineBarEl.appendChild(createTimelineSegment(0, 100, 'blue', null, 'setup', 'day'));
+
+            // Core
+            const coreLeft = ((Math.max(ds, cs) - ds) / total) * 100;
+            const coreRight = ((Math.min(de, ce) - ds) / total) * 100;
+            const coreWidth = Math.max(0, coreRight - coreLeft);
+            dayTimelineBarEl.appendChild(createTimelineSegment(coreLeft, coreWidth, 'orange', null, 'setup', 'core'));
+
+            // Lunch
+            const lunchLeft = ((Math.max(ds, ls) - ds) / total) * 100;
+            const lunchRight = ((Math.min(de, le) - ds) / total) * 100;
+            const lunchWidth = Math.max(0, lunchRight - lunchLeft);
+            dayTimelineBarEl.appendChild(createTimelineSegment(lunchLeft, lunchWidth, 'green', null, 'setup', 'lunch'));
+
+        } else {
+            // WORK MODE
+            dayTimelineBarEl.title = "Viser arbeidsfordeling.";
+            dayTimelineBarEl.style.cursor = "default";
+            
+            data.tasks.forEach((task, idx) => {
+                const d = new Date(task.firstStartAt || task.createdAt);
+                const startMins = d.getHours() * 60 + d.getMinutes();
+                const elapsedMs = task.isActive ? getTaskElapsedMs(task) : (task.totalMs || 0);
+                const durMins = elapsedMs / 60000;
+                
+                // Only render if within day range (roughly)
+                // We clamp visual range
+                const taskEndMins = startMins + durMins;
+                
+                const visibleStart = Math.max(ds, startMins);
+                const visibleEnd = Math.min(de, taskEndMins);
+                
+                if (visibleEnd > visibleStart) {
+                    const leftPct = ((visibleStart - ds) / total) * 100;
+                    const widthPct = ((visibleEnd - visibleStart) / total) * 100;
+                    const color = getTaskColor(task, idx, data.tasks);
+                    
+                    const seg = createTimelineSegment(leftPct, widthPct, color, 0.9, 'work', null);
+                    seg.title = `${task.name} (${formatDuration(elapsedMs, false)})`;
+                    dayTimelineBarEl.appendChild(seg);
+                }
+            });
+        }
+
+        // Ticks Logic
+        const labelMinsSet = new Set([ds, de]);
+        if (timelineMode === 'setup') {
+            labelMinsSet.add(dayTimelineSettings.coreStartMin);
+            labelMinsSet.add(dayTimelineSettings.coreEndMin);
+            labelMinsSet.add(dayTimelineSettings.lunchStartMin);
+            labelMinsSet.add(dayTimelineSettings.lunchEndMin);
+        }
+
+        const startHour = Math.ceil(ds / 60);
+        const endHour = Math.floor(de / 60);
+
+        for (let h = startHour; h <= endHour; h++) {
+            const m = h * 60;
+            if (m < ds || m > de) continue;
+            const x = ((m - ds) / total) * 100;
+            const tick = document.createElement("div");
+            tick.className = "timeline-tick";
+            tick.style.left = `${x}%`;
+            dayTimelineTicksEl.appendChild(tick);
+
+            if (labelMinsSet.has(m) || timelineMode === 'work') {
+                // In work mode show hourly labels, in setup show specific boundaries
+                if (timelineMode === 'setup' && !labelMinsSet.has(m)) continue; 
+                
+                const lab = document.createElement("div");
+                lab.className = "timeline-label";
+                lab.style.left = `${x}%`;
+                lab.textContent = minutesToLabel(m);
+                dayTimelineTicksEl.appendChild(lab);
+            }
+        }
+        
+        // Add specific non-hour labels for setup
+        if (timelineMode === 'setup') {
+            [dayTimelineSettings.lunchStartMin, dayTimelineSettings.lunchEndMin, dayTimelineSettings.coreStartMin, dayTimelineSettings.coreEndMin, ds, de].forEach(m => {
+                if ((m % 60) !== 0 && m >= ds && m <= de) {
+                    const x = ((m - ds) / total) * 100;
+                    const tick = document.createElement("div");
+                    tick.className = "timeline-tick";
+                    tick.style.left = `${x}%`;
+                    tick.style.height = "14px";
+                    dayTimelineTicksEl.appendChild(tick);
+                    
+                    const lab = document.createElement("div");
+                    lab.className = "timeline-label";
+                    lab.style.left = `${x}%`;
+                    lab.textContent = minutesToLabel(m);
+                    dayTimelineTicksEl.appendChild(lab);
+                }
+            });
+            // Ensure boundaries have labels
+             function ensureEdgeLabel(m) {
+                if (m < ds || m > de) return;
+                const x = ((m - ds) / total) * 100;
+                // Simple check if label exists at this position
+                const existing = Array.from(dayTimelineTicksEl.querySelectorAll(".timeline-label"))
+                    .some(el => Math.abs(parseFloat(el.style.left) - x) < 0.001);
+                if (existing) return;
+
+                const lab = document.createElement("div");
+                lab.className = "timeline-label";
+                lab.style.left = `${x}%`;
+                lab.textContent = minutesToLabel(m);
+                dayTimelineTicksEl.appendChild(lab);
+            }
+            ensureEdgeLabel(ds);
+            ensureEdgeLabel(de);
+        }
+
+        updateTimelineNowDot();
+    }
+
+    function buildTimelineTimeOptions(selectEl) {
+        if (!selectEl) return;
+        if (selectEl.options.length > 0) return;
+        for (let m = 0; m <= 1440; m += 5) {
+            const opt = document.createElement("option");
+            opt.value = String(m);
+            opt.textContent = minutesToLabelColon(m);
+            selectEl.appendChild(opt);
+        }
+    }
+
+    function openDayTimelineCurtain(mode) {
+        dayTimelineEditing = mode;
+        buildTimelineTimeOptions(dayTimelineFromEl);
+        buildTimelineTimeOptions(dayTimelineToEl);
+        dayTimelineBlockChange = true;
+
+        if (mode === "lunch") {
+            dayTimelineCurtainTitleEl.textContent = "Juster lunsj";
+            dayTimelineFromEl.value = String(dayTimelineSettings.lunchStartMin);
+            dayTimelineToEl.value = String(dayTimelineSettings.lunchEndMin);
+            dayTimelineCurtainHintEl.textContent = `Nå: ${minutesToLabel(dayTimelineSettings.lunchStartMin)}–${minutesToLabel(dayTimelineSettings.lunchEndMin)}`;
+        } else if (mode === "core") {
+            dayTimelineCurtainTitleEl.textContent = "Juster kjernetid";
+            dayTimelineFromEl.value = String(dayTimelineSettings.coreStartMin);
+            dayTimelineToEl.value = String(dayTimelineSettings.coreEndMin);
+            dayTimelineCurtainHintEl.textContent = `Nå: ${minutesToLabel(dayTimelineSettings.coreStartMin)}–${minutesToLabel(dayTimelineSettings.coreEndMin)}`;
+        } else {
+            dayTimelineCurtainTitleEl.textContent = "Juster arbeidsdag";
+            dayTimelineFromEl.value = String(dayTimelineSettings.dayStartMin);
+            dayTimelineToEl.value = String(dayTimelineSettings.dayEndMin);
+            dayTimelineCurtainHintEl.textContent = `Nå: ${minutesToLabel(dayTimelineSettings.dayStartMin)}–${minutesToLabel(dayTimelineSettings.dayEndMin)}`;
+        }
+        dayTimelineBlockChange = false;
+        dayTimelineCurtainEl.classList.add("open");
+    }
+
+    function closeDayTimelineCurtain() {
+        dayTimelineCurtainEl.classList.remove("open");
+        dayTimelineEditing = null;
+    }
+
+    function applyDayTimelineCurtainChange() {
+        if (dayTimelineBlockChange) return;
+        if (!dayTimelineEditing) return;
+
+        const fromMin = clampInt(dayTimelineFromEl.value, 0, 1440);
+        const toMin = clampInt(dayTimelineToEl.value, 0, 1440);
+
+        if (dayTimelineEditing === "lunch") {
+            dayTimelineSettings.lunchStartMin = fromMin;
+            dayTimelineSettings.lunchEndMin = toMin;
+        } else if (dayTimelineEditing === "core") {
+            dayTimelineSettings.coreStartMin = fromMin;
+            dayTimelineSettings.coreEndMin = toMin;
+        } else {
+            dayTimelineSettings.dayStartMin = fromMin;
+            dayTimelineSettings.dayEndMin = toMin;
+        }
+
+        validateDayTimelineSettings();
+        saveDayTimelineSettings();
+        renderDayTimeline();
+
+        if (dayTimelineEditing === "lunch") {
+            dayTimelineCurtainHintEl.textContent = `Nå: ${minutesToLabel(dayTimelineSettings.lunchStartMin)}–${minutesToLabel(dayTimelineSettings.lunchEndMin)}`;
+        } else if (dayTimelineEditing === "core") {
+            dayTimelineCurtainHintEl.textContent = `Nå: ${minutesToLabel(dayTimelineSettings.coreStartMin)}–${minutesToLabel(dayTimelineSettings.coreEndMin)}`;
+        } else {
+            dayTimelineCurtainHintEl.textContent = `Nå: ${minutesToLabel(dayTimelineSettings.dayStartMin)}–${minutesToLabel(dayTimelineSettings.dayEndMin)}`;
+        }
+        updateTimelineNowDot();
+    }
+
+    function formatDuration(ms, showSeconds = true) {
+        ms = Math.max(0, ms || 0);
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const pad = (n) => n.toString().padStart(2, "0");
+        if (showSeconds) {
+            const seconds = totalSeconds % 60;
+            return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        } else {
+            return `${pad(hours)}:${pad(minutes)}`;
+        }
+    }
+
+    function formatColoredDuration(ms) {
+        ms = Math.max(0, ms || 0);
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        const pad = (n) => n.toString().padStart(2, "0");
+        const hClass = hours > 0 ? 'time-digit-h-active' : 'time-digit-neutral';
+        const mClass = minutes > 0 ? 'time-digit-m-active' : 'time-digit-neutral';
+        const sClass = seconds > 0 ? 'time-digit-s-active' : 'time-digit-neutral';
+        return `<span class="${hClass}">${pad(hours)}</span>:<span class="${mClass}">${pad(minutes)}</span>:<span class="${sClass}">${pad(seconds)}</span>`;
+    }
+
+    function formatHoursMinutes(ms) {
+        if (ms == null) return "";
+        ms = Math.max(0, ms || 0);
+        const totalMinutes = Math.floor(ms / 60000);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        const h = hours.toString().padStart(2, "0");
+        const m = minutes.toString().padStart(2, "0");
+        return `${h}:${m}`;
+    }
+
+    function getRoundedTooltipText(ms) {
+        const r = getRoundedMs(ms);
+        const h = Math.floor(r / 3600000);
+        const m = Math.floor((r % 3600000) / 60000);
+        return `Avrundet tid: ${h}t ${m}min`;
+    }
+
+    function formatTimeOfDay(ts) {
+        if (!ts) return "";
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return "";
+        const h = d.getHours().toString().padStart(2, "0");
+        const m = d.getMinutes().toString().padStart(2, "0");
+        return `${h}:${m}`;
+    }
+
+    function sameLocalDate(tsA, tsB) {
+        if (!tsA || !tsB) return false;
+        const a = new Date(tsA);
+        const b = new Date(tsB);
+        return (a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate());
+    }
+
+    function getRoundedMs(ms) {
+        if (ms <= 0) return 0;
+        const totalMinutes = ms / 60000;
+        const wholeHours = Math.floor(totalMinutes / 60);
+        const remainderMinutes = totalMinutes % 60;
+        if (remainderMinutes >= 45) return (wholeHours + 1) * 60 * 60000;
+        if (remainderMinutes > 15 && remainderMinutes < 30) return (wholeHours * 60 + 30) * 60000;
+        return ms;
+    }
+
+    function getTaskElapsedMs(task) {
+        if (!task) return 0;
+        const base = Math.max(0, task.totalMs || 0);
+        if (!task.isActive || !task.lastStartMs) return base;
+        const diff = Date.now() - task.lastStartMs;
+        const running = Math.max(0, diff);
+        return base + running;
+    }
+
+    function getActiveTaskIndex() { return data.tasks.findIndex(t => t.isActive); }
+    function getActiveTask() { const idx = getActiveTaskIndex(); return idx >= 0 ? data.tasks[idx] : null; }
+
+    function normalizeActivePosition() {
+        const idx = getActiveTaskIndex();
+        if (idx > 0) {
+            const task = data.tasks[idx];
+            data.tasks.splice(idx, 1);
+            data.tasks.unshift(task);
+        }
+    }
+
+    function finalizeActiveTask() {
+        const idx = getActiveTaskIndex();
+        if (idx === -1) return;
+        const task = data.tasks[idx];
+        task.totalMs = getTaskElapsedMs(task);
+        task.isActive = false;
+        task.lastEndAt = Date.now();
+        task.lastStartMs = null;
+    }
+
+    function finalizeActiveTaskAt(hour, minute) {
+        const idx = getActiveTaskIndex();
+        if (idx === -1) return;
+        const task = data.tasks[idx];
+        const baseMs = Math.max(0, task.totalMs || 0);
+        const startMs = task.lastStartMs;
+        if (!startMs) { finalizeActiveTask(); return; }
+
+        const startDate = new Date(startMs);
+        const endDate = new Date(startDate);
+        endDate.setHours(hour, minute, 0, 0);
+        if (endDate.getTime() < startMs) endDate.setDate(endDate.getDate() + 1);
+        const deltaRaw = endDate.getTime() - startMs;
+        const delta = Math.max(0, deltaRaw);
+        task.totalMs = baseMs + delta;
+        task.isActive = false;
+        task.lastEndAt = endDate.getTime();
+        task.lastStartMs = null;
+    }
+
+    function addTaskNameToHistory(name) {
+        if (!name) return;
+        if (!Array.isArray(data.taskNames)) data.taskNames = [];
+        const trimmed = name.trim();
+        if (!trimmed) return;
+        const existingIndex = data.taskNames.indexOf(trimmed);
+        if (existingIndex !== -1) data.taskNames.splice(existingIndex, 1);
+        data.taskNames.unshift(trimmed);
+    }
+
+    function removeTaskNameFromHistory(name) {
+        if (!Array.isArray(data.taskNames)) return;
+        const idx = data.taskNames.indexOf(name);
+        if (idx !== -1) {
+            data.taskNames.splice(idx, 1);
+            const key = normalizeTaskName(name);
+            if (key && data.projectNumbers && Object.prototype.hasOwnProperty.call(data.projectNumbers, key)) {
+                delete data.projectNumbers[key];
+            }
+            saveToStorage();
+        }
+    }
+
+    function clearSuggestions() {
+        suggestionIndex = -1;
+        filteredSuggestions = [];
+        if (taskSuggestionsEl) {
+            taskSuggestionsEl.innerHTML = "";
+            taskSuggestionsEl.style.display = "none";
+        }
+    }
+
+    function renderSuggestions() {
+        if (!taskSuggestionsEl) return;
+        const focused = document.activeElement === taskInputEl;
+        if (!focused || !Array.isArray(data.taskNames) || data.taskNames.length === 0) {
+            clearSuggestions();
+            return;
+        }
+        const query = taskInputEl.value.trim().toLowerCase();
+        filteredSuggestions = data.taskNames.filter(name => {
+            if (!query) return true;
+            return name.toLowerCase().includes(query);
+        });
+        if (filteredSuggestions.length === 0) {
+            clearSuggestions();
+            return;
+        }
+        if (suggestionIndex >= filteredSuggestions.length) suggestionIndex = -1;
+
+        taskSuggestionsEl.innerHTML = "";
+        filteredSuggestions.forEach((name, idx) => {
+            const item = document.createElement("div");
+            item.className = "suggestion-item";
+            if (idx === suggestionIndex) item.classList.add("selected");
+            const labelSpan = document.createElement("span");
+            labelSpan.className = "suggestion-label";
+            labelSpan.textContent = name;
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "suggestion-delete";
+            deleteBtn.textContent = "X";
+            deleteBtn.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                removeTaskNameFromHistory(name);
+                renderSuggestions();
+                taskInputEl.focus();
+            });
+            item.appendChild(labelSpan);
+            item.appendChild(deleteBtn);
+            item.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                selectedTaskId = null;
+                startOrResumeByName(name);
+            });
+            taskSuggestionsEl.appendChild(item);
+        });
+        taskSuggestionsEl.style.display = "block";
+    }
+
+    function getStoredProjectNumberForName(name) {
+        const key = normalizeTaskName(name);
+        if (!key) return "";
+        if (!data.projectNumbers || typeof data.projectNumbers !== "object") data.projectNumbers = {};
+        const val = data.projectNumbers[key];
+        return (typeof val === "string") ? val : "";
+    }
+
+    function setStoredProjectNumberForName(name, projectNumber) {
+        const key = normalizeTaskName(name);
+        if (!key) return;
+        if (!data.projectNumbers || typeof data.projectNumbers !== "object") data.projectNumbers = {};
+        const val = (projectNumber || "").trim();
+        if (val) data.projectNumbers[key] = val;
+        else delete data.projectNumbers[key];
+    }
+
+    function findTaskByName(name) {
+        const key = normalizeTaskName(name);
+        if (!key) return null;
+        return data.tasks.find(t => normalizeTaskName(t.name) === key) || null;
+    }
+
+    function startOrResumeByName(name) {
+        const trimmed = (name || "").trim();
+        if (!trimmed) return;
+        const existing = findTaskByName(trimmed);
+        
+        // Reset to Setup mode when starting/resuming a task
+        saveTimelineMode('setup');
+
+        if (existing) {
+            if (existing.isActive) {
+                selectedTaskId = null;
+                taskInputEl.value = "";
+                clearSuggestions();
+                overduePopupShown = false;
+                saveToStorage();
+                updateUI();
+                disableCompactMode(); 
+                return;
+            }
+            resumeTask(existing.id);
+            return;
+        }
+        const storedPN = getStoredProjectNumberForName(trimmed).trim();
+        taskInputEl.value = "";
+        clearSuggestions();
+        if (storedPN) {
+            startNewTask(trimmed, storedPN);
+            return;
+        }
+        showProjectPopup(trimmed);
+    }
+
+    function startNewTask(name, projectNumber) {
+        if (!name) return;
+        // Reset to Setup mode when starting a new task
+        saveTimelineMode('setup');
+        
+        finalizeActiveTask();
+        const now = Date.now();
+        const pn = (typeof projectNumber === "string") ? projectNumber.trim() : "";
+        const newTask = {
+            id: now, name: name, totalMs: 0, isActive: true, lastStartMs: now, resumed: false,
+            createdAt: now, firstStartAt: now, lastEndAt: null, resumeCount: 0,
+            comment: "", startAdjusted: false, projectNumber: pn
+        };
+        if (pn) setStoredProjectNumberForName(name, pn);
+        data.tasks.unshift(newTask);
+        selectedTaskId = null;
+        expandedCommentTaskId = null;
+        addTaskNameToHistory(name);
+        taskInputEl.value = "";
+        clearSuggestions();
+        overduePopupShown = false;
+        saveToStorage();
+        disableCompactMode(); 
+        updateUI();
+    }
+
+    function resumeTask(taskId) {
+        if (!taskId) return;
+        
+        // Reset to Setup mode when resuming a task
+        saveTimelineMode('setup');
+
+        const idx = data.tasks.findIndex(t => t.id === taskId);
+        if (idx === -1) return;
+        const activeIdx = getActiveTaskIndex();
+        if (activeIdx !== -1 && data.tasks[activeIdx].id !== taskId) finalizeActiveTask();
+        
+        const task = data.tasks[idx];
+        if (idx > 0) {
+            data.tasks.splice(idx, 1);
+            data.tasks.unshift(task);
+        }
+        task.isActive = true;
+        task.lastStartMs = Date.now();
+        task.resumed = true;
+        task.resumeCount = (task.resumeCount || 0) + 1;
+        if (typeof task.comment !== "string") task.comment = "";
+        if (typeof task.startAdjusted !== "boolean") task.startAdjusted = false;
+        if (typeof task.projectNumber !== "string") task.projectNumber = "";
+        
+        const pn = (task.projectNumber || "").trim();
+        if (pn) setStoredProjectNumberForName(task.name, pn);
+        addTaskNameToHistory(task.name);
+        selectedTaskId = null;
+        expandedCommentTaskId = null;
+        taskInputEl.value = "";
+        clearSuggestions();
+        overduePopupShown = false;
+        saveToStorage();
+        disableCompactMode(); 
+        updateUI();
+    }
+
+    function clearAndArchiveTasks(archiveBaseTs = null) {
+        if (data.tasks.length === 0) return;
+        const now = new Date();
+        const archiveTimestamp = (archiveBaseTs && !isNaN(archiveBaseTs)) ? archiveBaseTs : now.getTime();
+        const archiveDateObj = new Date(archiveTimestamp);
+        
+        const snapshotTasks = data.tasks.map(t => {
+            const totalMs = getTaskElapsedMs(t);
+            let lastEndAt = t.lastEndAt;
+            if (!lastEndAt) lastEndAt = archiveTimestamp;
+            const createdAt = t.createdAt || t.firstStartAt || archiveTimestamp;
+            const firstStartAt = t.firstStartAt || t.createdAt || archiveTimestamp;
+            const resumeCount = t.resumeCount || 0;
+            const comment = typeof t.comment === "string" ? t.comment : "";
+            const projectNumber = typeof t.projectNumber === "string" ? t.projectNumber : "";
+            if (projectNumber.trim()) setStoredProjectNumberForName(t.name, projectNumber);
+            return {
+                id: t.id, name: t.name, totalMs, resumed: !!t.resumed,
+                createdAt, firstStartAt, lastEndAt, resumeCount, projectNumber, comment
+            };
+        });
+
+        const label = archiveDateObj.toLocaleDateString("nb-NO", {
+            weekday: "long", year: "numeric", month: "short", day: "numeric"
+        });
+        const archiveEntry = {
+            id: now.getTime(), label, createdAt: archiveDateObj.toISOString(), tasks: snapshotTasks
+        };
+        data.archives.unshift(archiveEntry);
+        data.tasks = [];
+        selectedTaskId = null;
+        expandedCommentTaskId = null;
+        showAllComments = false;
+        overduePopupShown = false;
+
+        // Reset timeline to default view
+        saveTimelineMode('setup');
+
+        saveToStorage();
+        disableCompactMode(); 
+        updateUI();
+    }
+
+    function showProjectPopup(taskName) {
+        pendingNewTaskName = (taskName || "").trim();
+        if (!pendingNewTaskName) return;
+        projectTaskNameEl.textContent = pendingNewTaskName;
+        projectNumberInputEl.value = getStoredProjectNumberForName(pendingNewTaskName) || "";
+        projectOverlayEl.classList.add("show");
+        setTimeout(() => projectNumberInputEl.focus(), 0);
+    }
+    function hideProjectPopup() {
+        projectOverlayEl.classList.remove("show");
+        pendingNewTaskName = null;
+        projectNumberInputEl.value = "";
+    }
+    function confirmProjectPopup() {
+        if (!pendingNewTaskName) return;
+        const projectNo = (projectNumberInputEl.value || "").trim();
+        startNewTask(pendingNewTaskName, projectNo);
+        hideProjectPopup();
+    }
+
+    function showCommentPopup(task) {
+        if (!task) return;
+        commentEditingTaskId = task.id;
+        commentTaskNameEl.textContent = task.name || "";
+        commentTextareaEl.value = typeof task.comment === "string" ? task.comment : "";
+        commentOverlayEl.classList.add("show");
+        setTimeout(() => commentTextareaEl.focus(), 0);
+    }
+    function hideCommentPopup() {
+        commentOverlayEl.classList.remove("show");
+        commentEditingTaskId = null;
+        commentTextareaEl.oninput = null;
+    }
+    function saveComment() {
+        if (!commentEditingTaskId) return;
+        const task = data.tasks.find(t => t.id === commentEditingTaskId);
+        if (!task) return;
+        task.comment = commentTextareaEl.value || "";
+        saveToStorage();
+        updateUI();
+        hideCommentPopup();
+    }
+
+    function toggleCommentDropdown(taskId) {
+        if (!taskId) return;
+        if (expandedCommentTaskId === taskId) expandedCommentTaskId = null;
+        else expandedCommentTaskId = taskId;
+    }
+    function hasAnyCommentsInTasks() {
+        return Array.isArray(data.tasks) && data.tasks.some(t => (t && typeof t.comment === "string" && t.comment.trim().length > 0));
+    }
+
+    function initTransferSelects() {
+        if (transferHoursEl.options.length === 0) {
+            for (let h = 0; h <= 12; h++) {
+                const opt = document.createElement("option");
+                opt.value = h;
+                opt.textContent = String(h).padStart(2, "0");
+                transferHoursEl.appendChild(opt);
+            }
+        }
+        if (transferMinutesEl.options.length === 0) {
+            for (let m = 0; m < 60; m += 1) {
+                const opt = document.createElement("option");
+                opt.value = m;
+                opt.textContent = String(m).padStart(2, "0");
+                transferMinutesEl.appendChild(opt);
+            }
+        }
+    }
+    function getTransferAmountMs() {
+        const h = parseInt(transferHoursEl.value, 10) || 0;
+        const m = parseInt(transferMinutesEl.value, 10) || 0;
+        return (h * 60 + m) * 60 * 1000;
+    }
+    function getTaskAvailableMs(task) {
+        if (!task) return 0;
+        return getTaskElapsedMs(task);
+    }
+    function refreshTransferHint() {
+        const sourceId = Number(transferSourceEl.value);
+        const source = data.tasks.find(t => t.id === sourceId);
+        const maxMs = getTaskAvailableMs(source);
+        const showSec = source ? source.isActive : false;
+        transferMaxHintEl.textContent = source
+            ? `Maks tilgjengelig å overføre fra valgt prosjekt: ${formatDuration(maxMs, showSec)}`
+            : "";
+    }
+    function showTransferPopup() {
+        if (data.tasks.length < 2) return;
+        const hasAnyTime = data.tasks.some(t => getTaskElapsedMs(t) > 0);
+        if (!hasAnyTime) return;
+        initTransferSelects();
+        transferSourceEl.innerHTML = "";
+        transferTargetEl.innerHTML = "";
+        const sources = data.tasks.filter(t => getTaskElapsedMs(t) > 0);
+        let defaultSourceId = null;
+        if (selectedTaskId) {
+            const sel = data.tasks.find(t => t.id === selectedTaskId);
+            if (sel && getTaskElapsedMs(sel) > 0) defaultSourceId = sel.id;
+        }
+        if (!defaultSourceId) {
+            const active = getActiveTask();
+            if (active && getTaskElapsedMs(active) > 0) defaultSourceId = active.id;
+        }
+        if (!defaultSourceId && sources.length > 0) defaultSourceId = sources[0].id;
+        sources.forEach(t => {
+            const opt = document.createElement("option");
+            opt.value = String(t.id);
+            opt.textContent = t.isActive ? (t.name + " (aktiv)") : t.name;
+            transferSourceEl.appendChild(opt);
+        });
+        transferSourceEl.value = String(defaultSourceId || (sources[0] ? sources[0].id : ""));
+        function fillTargets() {
+            const sourceId = Number(transferSourceEl.value);
+            transferTargetEl.innerHTML = "";
+            data.tasks.filter(t => t.id !== sourceId).forEach(t => {
+                const opt = document.createElement("option");
+                opt.value = String(t.id);
+                opt.textContent = t.isActive ? (t.name + " (aktiv)") : t.name;
+                transferTargetEl.appendChild(opt);
+            });
+        }
+        fillTargets();
+        transferHoursEl.value = "00";
+        transferMinutesEl.value = "05";
+        refreshTransferHint();
+        transferSourceEl.onchange = () => { fillTargets(); refreshTransferHint(); };
+        transferHoursEl.onchange = refreshTransferHint;
+        transferMinutesEl.onchange = refreshTransferHint;
+        transferOverlayEl.classList.add("show");
+    }
+    function hideTransferPopup() { transferOverlayEl.classList.remove("show"); }
+    function reduceTimeFromTask(task, amountMs) {
+        if (!task || amountMs <= 0) return false;
+        if (task.isActive && task.lastStartMs) {
+            const now = Date.now();
+            const base = Math.max(0, task.totalMs || 0);
+            const running = Math.max(0, now - task.lastStartMs);
+            const available = base + running;
+            const amt = Math.min(amountMs, available);
+            if (amt <= base) {
+                task.totalMs = base - amt;
+            } else {
+                const reduceFromRunning = amt - base;
+                task.totalMs = 0;
+                const newLastStart = task.lastStartMs + reduceFromRunning;
+                task.lastStartMs = Math.min(now, Math.max(task.lastStartMs, newLastStart));
+            }
+            return true;
+        } else {
+            const base = Math.max(0, task.totalMs || 0);
+            const amt = Math.min(amountMs, base);
+            task.totalMs = base - amt;
+            return true;
+        }
+    }
+    function transferTimeConfirm() {
+        const sourceId = Number(transferSourceEl.value);
+        const targetId = Number(transferTargetEl.value);
+        if (!sourceId || !targetId || sourceId === targetId) return;
+        const source = data.tasks.find(t => t.id === sourceId);
+        const target = data.tasks.find(t => t.id === targetId);
+        if (!source || !target) return;
+        const amountMsRaw = getTransferAmountMs();
+        if (amountMsRaw <= 0) { hideTransferPopup(); return; }
+        const available = getTaskAvailableMs(source);
+        const amountMs = Math.min(amountMsRaw, available);
+        if (amountMs <= 0) { hideTransferPopup(); return; }
+        target.totalMs = Math.max(0, target.totalMs || 0) + amountMs;
+        reduceTimeFromTask(source, amountMs);
+        saveToStorage();
+        updateUI();
+        hideTransferPopup();
+    }
+
+    let addedMinutesBuffer = 0;
+    
+    function initAdjustStartSelects() {
+        if (adjustStartHourEl.options.length === 0) {
+            for (let h = 0; h < 24; h++) {
+                const opt = document.createElement("option");
+                opt.value = h;
+                opt.textContent = String(h).padStart(2, "0");
+                adjustStartHourEl.appendChild(opt);
+            }
+        }
+        if (adjustStartMinuteEl.options.length === 0) {
+            for (let m = 0; m < 60; m++) {
+                const opt = document.createElement("option");
+                opt.value = m;
+                opt.textContent = String(m).padStart(2, "0");
+                adjustStartMinuteEl.appendChild(opt);
+            }
+        }
+    }
+
+    function canAdjustStartForActive() {
+        const active = getActiveTask();
+        return !!active;
+    }
+    function updateAddTimeDisplay() {
+        const h = Math.floor(addedMinutesBuffer / 60);
+        const m = addedMinutesBuffer % 60;
+        adjustAddTimeDisplayEl.textContent = `${h}t ${m}min`;
+    }
+    function showAdjustStartPopup() {
+        const active = getActiveTask();
+        if (!active) return;
+        
+        // Check if this is the ONLY task
+        if (data.tasks.length === 1) {
+            // MODE 1: Set Start Time
+            initAdjustStartSelects();
+            
+            // Pre-fill with current start time
+            const d = new Date(active.firstStartAt || active.createdAt);
+            adjustStartHourEl.value = d.getHours();
+            adjustStartMinuteEl.value = d.getMinutes();
+            
+            adjustStartTitleEl.textContent = "Sett starttid";
+            adjustStartDescEl.textContent = "Endre starttidspunkt for dagens første oppgave.";
+            
+            adjustStartModeTimeEl.style.display = "block";
+            adjustStartModeAddEl.style.display = "none";
+        } else {
+            // MODE 2: Add Duration
+            addedMinutesBuffer = 0;
+            updateAddTimeDisplay();
+            
+            adjustStartTitleEl.textContent = "Tilfør tid";
+            adjustStartDescEl.textContent = "Juster tid på det aktive prosjektet.";
+            
+            adjustStartModeTimeEl.style.display = "none";
+            adjustStartModeAddEl.style.display = "block";
+        }
+        
+        adjustStartOverlayEl.classList.add("show");
+    }
+    function hideAdjustStartPopup() { adjustStartOverlayEl.classList.remove("show"); }
+    function adjustStartConfirm() {
+        const active = getActiveTask();
+        if (!active) return;
+        
+        if (data.tasks.length === 1) {
+            // MODE 1: Set Start Time Logic
+            const h = parseInt(adjustStartHourEl.value, 10);
+            const m = parseInt(adjustStartMinuteEl.value, 10);
+            
+            const newStart = new Date(active.firstStartAt || active.createdAt);
+            newStart.setHours(h, m, 0, 0);
+            
+            const newTs = newStart.getTime();
+            
+            // Update task properties
+            active.firstStartAt = newTs;
+            active.createdAt = newTs; 
+            
+            // If active, we must update lastStartMs to shift the timeline anchor
+            if (active.isActive) {
+                active.lastStartMs = newTs;
+            }
+            // Reset totalMs for the first task usually implies a clean slate calculation from start
+            // active.totalMs = 0; 
+            
+        } else {
+            // MODE 2: Add Duration Logic
+            if (addedMinutesBuffer === 0) { hideAdjustStartPopup(); return; }
+            const msToAdd = addedMinutesBuffer * 60 * 1000;
+            if (active.isActive && active.lastStartMs) {
+                active.lastStartMs -= msToAdd;
+            } else {
+                active.totalMs = (active.totalMs || 0) + msToAdd;
+            }
+            if (!active.isActive && active.totalMs < 0) active.totalMs = 0;
+        }
+        
+        saveToStorage();
+        updateUI();
+        hideAdjustStartPopup();
+    }
+    let stepperClickCount = 0;
+    let stepperTimer = null;
+    if (adjustTimeStepperBtnEl) {
+        adjustTimeStepperBtnEl.addEventListener("click", (e) => {
+            e.preventDefault();
+            stepperClickCount++;
+            if (stepperClickCount === 1) {
+                stepperTimer = setTimeout(() => {
+                    addedMinutesBuffer += 15;
+                    updateAddTimeDisplay();
+                    stepperClickCount = 0;
+                }, 250); 
+            } else if (stepperClickCount === 2) {
+                clearTimeout(stepperTimer);
+                addedMinutesBuffer -= 15;
+                if (addedMinutesBuffer < 0) addedMinutesBuffer = 0; 
+                updateAddTimeDisplay();
+                stepperClickCount = 0;
+                adjustTimeStepperBtnEl.classList.add('btn-orange-flash');
+                setTimeout(() => { adjustTimeStepperBtnEl.classList.remove('btn-orange-flash'); }, 1000);
+            }
+        });
+    }
+
+    function isArchiveSameDateAsToday(archive) {
+        if (!archive) return false;
+        const today = Date.now();
+        const ts = archive.createdAt ? new Date(archive.createdAt).getTime() : (archive.id || 0);
+        return sameLocalDate(ts, today);
+    }
+    function showRestoreDayPopup(archiveId) {
+        const archive = data.archives.find(a => a.id === archiveId);
+        if (!archive) return;
+        if (!isArchiveSameDateAsToday(archive)) return;
+        pendingRestoreArchiveId = archiveId;
+        restoreDayTextEl.textContent = `Du er i ferd med å gjenoppta: ${archive.label || "valgt dag"}.`;
+        restoreDayOverlayEl.classList.add("show");
+    }
+    function hideRestoreDayPopup() {
+        restoreDayOverlayEl.classList.remove("show");
+        pendingRestoreArchiveId = null;
+    }
+    function restoreDayConfirm() {
+        if (!pendingRestoreArchiveId) return;
+        if (data.tasks.length > 0) { hideRestoreDayPopup(); return; }
+        const idx = data.archives.findIndex(a => a.id === pendingRestoreArchiveId);
+        if (idx === -1) return;
+        const archive = data.archives[idx];
+        if (!isArchiveSameDateAsToday(archive)) { hideRestoreDayPopup(); return; }
+        const restoredTasks = (archive.tasks || []).map(t => {
+            const id = t.id || Date.now();
+            const pn = (typeof t.projectNumber === "string") ? t.projectNumber.trim() : "";
+            if (pn) setStoredProjectNumberForName(t.name, pn);
+            return {
+                id, name: t.name || "", totalMs: Math.max(0, t.totalMs || 0), isActive: false,
+                lastStartMs: null, resumed: !!t.resumed, createdAt: t.createdAt || t.firstStartAt || Date.now(),
+                firstStartAt: t.firstStartAt || t.createdAt || Date.now(), lastEndAt: t.lastEndAt || null,
+                resumeCount: t.resumeCount || 0, projectNumber: pn,
+                comment: typeof t.comment === "string" ? t.comment : "", startAdjusted: false
+            };
+        });
+        data.tasks = restoredTasks;
+        selectedTaskId = null;
+        expandedCommentTaskId = null;
+        showAllComments = false;
+        data.archives.splice(idx, 1);
+        saveToStorage();
+        disableCompactMode(); 
+        updateUI();
+        hideRestoreDayPopup();
+    }
+
+    function updateCurrentTimeDisplay() {
+        const now = new Date();
+        const options = {
+            weekday: "long", year: "numeric", month: "long", day: "numeric",
+            hour: "2-digit", minute: "2-digit", second: "2-digit"
+        };
+        let text = now.toLocaleString("nb-NO", options) || "";
+        if (text.length > 0) text = text.charAt(0).toUpperCase() + text.slice(1);
+        timeNowEl.textContent = text;
+    }
+
+    function getISOWeek(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function updateArchivesUI() {
+        const hasExisting = archiveListEl.querySelectorAll("details").length > 0;
+        const openDayIds = new Set();
+        const openWeekKeys = new Set();
+        const openMonthKeys = new Set();
+        if (hasExisting) {
+            archiveListEl.querySelectorAll("details.archive-group[open]").forEach(el => openDayIds.add(Number(el.dataset.id)));
+            archiveListEl.querySelectorAll("details.week-group[open]").forEach(el => openWeekKeys.add(el.dataset.key));
+            archiveListEl.querySelectorAll("details.month-group[open]").forEach(el => openMonthKeys.add(el.dataset.key));
+        }
+        archiveListEl.innerHTML = "";
+        
+        if (!data.archives || data.archives.length === 0) {
+            const txt = document.createElement("div");
+            txt.className = "empty-text";
+            txt.textContent = "Ingen arkiverte prosjekter ennå.";
+            archiveListEl.appendChild(txt);
+            if (archiveHelperEl) archiveHelperEl.classList.remove('hidden');
+            return;
+        } else {
+            if (archiveHelperEl) archiveHelperEl.classList.add('hidden');
+        }
+
+        const sortedArchives = [...data.archives].sort((a, b) => {
+            const ta = a.createdAt ? new Date(a.createdAt).getTime() : (a.id || 0);
+            const tb = b.createdAt ? new Date(b.createdAt).getTime() : (b.id || 0);
+            return tb - ta;
+        });
+
+        const uniqueWeeks = new Set();
+        sortedArchives.forEach(arch => {
+            const d = arch.createdAt ? new Date(arch.createdAt) : new Date(arch.id);
+            const w = getISOWeek(d);
+            const y = d.getFullYear();
+            uniqueWeeks.add(`${y}-${w}`);
+        });
+
+        const showMonthHeader = uniqueWeeks.size >= 4;
+        const groupedData = new Map();
+        sortedArchives.forEach(arch => {
+            const d = arch.createdAt ? new Date(arch.createdAt) : new Date(arch.id);
+            const year = d.getFullYear();
+            const month = d.getMonth(); 
+            const week = getISOWeek(d);
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            const weekKey = `${year}-${String(week).padStart(2, '0')}`;
+            if (!groupedData.has(monthKey)) groupedData.set(monthKey, new Map());
+            const monthMap = groupedData.get(monthKey);
+            if (!monthMap.has(weekKey)) monthMap.set(weekKey, []);
+            monthMap.get(weekKey).push(arch);
+        });
+
+        groupedData.forEach((monthMap, monthKey) => {
+            let monthContainer = archiveListEl;
+            if (showMonthHeader) {
+                const [y, m] = monthKey.split('-').map(Number);
+                const dateObj = new Date(y, m, 1);
+                const monthName = dateObj.toLocaleString('nb-NO', { month: 'long', year: 'numeric' });
+                const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                const monthDetails = document.createElement('details');
+                monthDetails.className = 'month-group';
+                monthDetails.dataset.key = monthKey;
+                if (hasExisting && openMonthKeys.has(monthKey)) monthDetails.open = true;
+                
+                // Calculate month total
+                let totalMonthMs = 0;
+                monthMap.forEach((archives) => {
+                    archives.forEach(a => {
+                        (a.tasks || []).forEach(t => totalMonthMs += (t.totalMs || 0));
+                    });
+                });
+                
+                monthDetails.addEventListener("toggle", (e) => {
+                    if (!monthDetails.open) {
+                        const childDetails = monthDetails.querySelectorAll("details");
+                        childDetails.forEach(cd => cd.removeAttribute("open"));
+                    }
+                });
+                const monthSummary = document.createElement('summary');
+                monthSummary.className = 'month-summary';
+                monthSummary.textContent = capitalizedMonth;
+                monthSummary.title = getRoundedTooltipText(totalMonthMs); // Tooltip for month
+                monthDetails.appendChild(monthSummary);
+                archiveListEl.appendChild(monthDetails);
+                monthContainer = monthDetails; 
+            }
+            monthMap.forEach((archivesInWeek, weekKey) => {
+                const [y, w] = weekKey.split('-').map(Number);
+                const weekDetails = document.createElement('details');
+                weekDetails.className = 'week-group';
+                weekDetails.dataset.key = weekKey;
+                if (hasExisting && openWeekKeys.has(weekKey)) weekDetails.open = true;
+                const weekSummary = document.createElement('summary');
+                weekSummary.className = 'week-summary';
+                
+                // Calculate week total
+                let totalWeekMs = 0;
+                archivesInWeek.forEach(a => {
+                    (a.tasks || []).forEach(t => totalWeekMs += (t.totalMs || 0));
+                });
+                weekSummary.title = getRoundedTooltipText(totalWeekMs); // Tooltip for week
+
+                const exportDot = document.createElement('span');
+                exportDot.className = 'week-export-dot';
+                exportDot.title = `Eksporter Uke ${w} til Excel`;
+                exportDot.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    exportArchivesToCsv(archivesInWeek);
+                });
+                const weekText = document.createTextNode(`Uke ${w}`);
+                weekSummary.appendChild(exportDot);
+                weekSummary.appendChild(weekText);
+
+                // COLLAPSE ALL DAYS IF WEEK IS CLOSED
+                weekDetails.addEventListener("toggle", (e) => {
+                    if (!weekDetails.open) {
+                        const innerDetails = weekDetails.querySelectorAll("details.archive-group");
+                        innerDetails.forEach(d => d.removeAttribute("open"));
+                    }
+                });
+
+                const weekContent = document.createElement('div');
+                weekContent.className = 'week-content';
+                archivesInWeek.forEach(archive => {
+                    const isOpen = openDayIds.has(archive.id);
+                    const dayDetails = createArchiveElement(archive, isOpen);
+                    weekContent.appendChild(dayDetails);
+                });
+                weekDetails.appendChild(weekSummary);
+                weekDetails.appendChild(weekContent);
+                monthContainer.appendChild(weekDetails);
+            });
+        });
+    }
+
+    function createArchiveElement(archive, isOpen) {
+        const details = document.createElement("details");
+        details.className = "archive-group";
+        details.dataset.id = archive.id;
+        if (isOpen) details.open = true;
+        const summary = document.createElement("summary");
+        summary.className = "archive-summary";
+        
+        let totalDayMs = 0;
+        (archive.tasks || []).forEach(t => totalDayMs += (t.totalMs || 0));
+        summary.title = getRoundedTooltipText(totalDayMs); // Tooltip for day
+
+        const labelSpan = document.createElement("span");
+        labelSpan.className = "archive-label";
+        labelSpan.textContent = archive.label;
+        const actions = document.createElement("span");
+        actions.className = "archive-actions";
+        const restoreBtn = document.createElement("button");
+        restoreBtn.className = "archive-action-btn";
+        restoreBtn.type = "button";
+        restoreBtn.textContent = "Gjenoppta dagen";
+        restoreBtn.title = "Flytt arkiverte oppgaver tilbake til dagens arbeidsliste";
+        restoreBtn.disabled = !isArchiveSameDateAsToday(archive);
+        restoreBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (data.tasks.length > 0) return;
+            showRestoreDayPopup(archive.id);
+        });
+        actions.appendChild(restoreBtn);
+        summary.appendChild(labelSpan);
+        summary.appendChild(actions);
+        details.appendChild(summary);
+        const ul = document.createElement("ul");
+        ul.className = "task-list";
+        (archive.tasks || []).forEach(task => {
+            const li = document.createElement("li");
+            li.className = "task-list-item";
+            const left = document.createElement("span");
+            left.className = "task-left";
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "task-name";
+            nameSpan.textContent = task.name || "";
+            left.appendChild(nameSpan);
+            const timeSpan = document.createElement("span");
+            timeSpan.className = "task-time";
+            timeSpan.textContent = formatDuration(task.totalMs, false);
+            li.appendChild(left);
+            li.appendChild(timeSpan);
+            ul.appendChild(li);
+        });
+        details.appendChild(ul);
+        return details;
+    }
+
+    function drawTaskChart() {
+        if (!chartCtx || !chartCanvas) return;
+        const displayWidth = chartCanvas.clientWidth;
+        const displayHeight = chartCanvas.clientHeight;
+        if (chartCanvas.width !== displayWidth || chartCanvas.height !== displayHeight) {
+            chartCanvas.width = displayWidth;
+            chartCanvas.height = displayHeight;
+        }
+        const w = chartCanvas.width;
+        const h = chartCanvas.height;
+        const ctx = chartCtx;
+        const tasks = data.tasks;
+        ctx.clearRect(0, 0, w, h);
+        if (chartLegendEl) chartLegendEl.innerHTML = "";
+        const cx = w / 2;
+        const cy = h / 2;
+        const radius = Math.min(w, h) * 0.35;
+        const hasActive = tasks.some(t => t.isActive);
+        function addLegendItem(task, color, ms) {
+            if (!chartLegendEl) return;
+            const item = document.createElement("div");
+            item.className = "chart-legend-item";
+            const c = document.createElement("span");
+            c.className = "chart-legend-color";
+            c.style.background = color;
+            const txt = document.createElement("span");
+            const showSec = !!task.isActive;
+            txt.textContent = `${task.name || ""} – ${formatDuration(ms, showSec)}`;
+            item.appendChild(c);
+            item.appendChild(txt);
+            chartLegendEl.appendChild(item);
+        }
+        if (!tasks || tasks.length === 0) {
+            if (chartGifOverlayEl) chartGifOverlayEl.style.display = "none";
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--timebar-base").trim() || "#e5e7eb";
+            ctx.fill();
+            ctx.restore();
+            return;
+        } else {
+            if (chartGifOverlayEl) chartGifOverlayEl.style.display = "none";
+        }
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--timebar-base").trim() || "#e5e7eb";
+        ctx.fill();
+        ctx.restore();
+        const durations = tasks.map(getTaskElapsedMs);
+        const totalMs = durations.reduce((a, b) => a + b, 0);
+        const sum = totalMs > 0 ? totalMs : durations.length;
+        let startAngle = -Math.PI / 2;
+        let legendData = [];
+        tasks.forEach((task, idx) => {
+            const d = totalMs > 0 ? durations[idx] : 1;
+            const angleSpan = (d / sum) * Math.PI * 2;
+            const endAngle = startAngle + angleSpan;
+            const color = getTaskColor(task, idx, data.tasks);
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, radius, startAngle, endAngle);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.restore();
+            legendData.push({ task, color, ms: durations[idx] });
+            startAngle = endAngle;
+        });
+        if (!hasActive) {
+            legendData.sort((a, b) => b.ms - a.ms);
+            legendData.forEach(item => {
+                addLegendItem(item.task, item.color, item.ms);
+            });
+        }
+    }
+
+    function updateUI() {
+        normalizeActivePosition();
+        const activeTask = getActiveTask();
+        const currentTaskCardEl = document.getElementById("currentTaskCard");
+        if (currentTaskCardEl) {
+            currentTaskCardEl.classList.remove("card-active-mode", "card-active-mode-resumed");
+            if (activeTask) {
+                if (activeTask.resumed) {
+                    currentTaskCardEl.classList.add("card-active-mode-resumed");
+                } else {
+                    currentTaskCardEl.classList.add("card-active-mode");
+                }
+            }
+        }
+        const taskCount = data.tasks.length;
+        if (taskCount > 1) endButtonEl.textContent = "Avslutt dagens arbeid";
+        else endButtonEl.textContent = "Avslutt dagens arbeid";
+        let totalDayMs = 0;
+        data.tasks.forEach(t => {
+            if (t.isActive) totalDayMs += getTaskElapsedMs(t);
+            else totalDayMs += (t.totalMs || 0);
+        });
+        currentTaskTimeEl.classList.remove("text-rounded-green");
+        let displayTotalMs = totalDayMs;
+        if (isRoundingEnabled) {
+            displayTotalMs = getRoundedMs(totalDayMs);
+            currentTaskTimeEl.classList.add("text-rounded-green");
+            currentTaskTimeEl.innerHTML = formatDuration(displayTotalMs, false);
+        } else {
+            if (totalDayMs > 0) {
+                currentTaskTimeEl.innerHTML = formatColoredDuration(displayTotalMs);
+            } else {
+                currentTaskTimeEl.innerHTML = `<span class="time-digit-neutral">00</span>:<span class="time-digit-neutral">00</span>:<span class="time-digit-neutral">00</span>`;
+            }
+        }
+        if (activeTask) {
+            currentTaskLabelEl.textContent = "Nåværende prosjekt";
+            currentTaskLabelEl.className = "current-task-label";
+            currentTaskNameEl.textContent = activeTask.name;
+            currentTaskNameEl.className = "current-task-title rainbow-text";
+            endButtonEl.disabled = false;
+            const canTransfer = data.tasks.length >= 2 && data.tasks.some(t => getTaskElapsedMs(t) > 0);
+            transferTimeButtonEl.disabled = !canTransfer;
+            const canAdjust = canAdjustStartForActive();
+            adjustStartButtonEl.disabled = !canAdjust;
+            adjustStartButtonEl.classList.remove("btn-hover-blue", "btn-hover-green");
+            if (taskCount > 1) {
+                adjustStartButtonEl.textContent = "Tilfør tid";
+                adjustStartButtonEl.classList.add("btn-hover-green");
+            } else {
+                adjustStartButtonEl.textContent = "Legg til starttid";
+                adjustStartButtonEl.classList.add("btn-hover-blue");
+            }
+            currentTaskHintEl.textContent = canAdjust
+                ? "Tips: Bruk «Legg til starttid» dersom du startet tidligere enn registrert."
+                : "";
+        } else {
+            currentTaskLabelEl.textContent = "Nåværende prosjekt";
+            currentTaskLabelEl.className = "current-task-label";
+            currentTaskNameEl.textContent = "Ingen aktivt prosjekt";
+            currentTaskNameEl.className = "current-task-title";
+            endButtonEl.disabled = true;
+            const canTransfer = data.tasks.length >= 2 && data.tasks.some(t => getTaskElapsedMs(t) > 0);
+            transferTimeButtonEl.disabled = !canTransfer;
+            adjustStartButtonEl.disabled = true;
+            adjustStartButtonEl.classList.remove("btn-hover-blue", "btn-hover-green");
+            adjustStartButtonEl.textContent = "Legg til starttid"; 
+            currentTaskHintEl.textContent = "";
+        }
+        const anyComments = hasAnyCommentsInTasks();
+        toggleAllCommentsButtonEl.disabled = !anyComments;
+        toggleAllCommentsButtonEl.textContent = showAllComments ? "Skjul kommentarer" : "Vis kommentarer";
+        const hasTasks = data.tasks.length > 0;
+        toggleListHeightButtonEl.disabled = !hasTasks;
+        if (copyOneNoteButtonEl) copyOneNoteButtonEl.disabled = !hasTasks;
+        if (selectionInfoEl) {
+            if (hasTasks) selectionInfoEl.classList.add('hidden');
+            else selectionInfoEl.classList.remove('hidden');
+        }
+        if (taskListHelperEl) {
+            if (hasTasks) taskListHelperEl.classList.add('hidden');
+            else taskListHelperEl.classList.remove('hidden');
+        }
+        taskListEl.innerHTML = "";
+        if (data.tasks.length === 0) {
+            emptyListTextEl.style.display = "block";
+        } else {
+            emptyListTextEl.style.display = "none";
+            data.tasks.forEach(task => {
+                const li = document.createElement("li");
+                li.className = "task-list-item";
+                li.dataset.id = task.id;
+                if (task.isActive) li.classList.add("task-active");
+                if (task.id === selectedTaskId) li.classList.add("task-selected");
+                const left = document.createElement("span");
+                left.className = "task-left";
+                const hasComment = typeof task.comment === "string" && task.comment.trim().length > 0;
+                const infoCol = document.createElement("div");
+                infoCol.className = "task-info-col";
+                const nameRow = document.createElement("div");
+                nameRow.className = "task-name-row";
+                const nameSpan = document.createElement("span");
+                nameSpan.className = "task-name";
+                nameSpan.textContent = task.name;
+                nameRow.appendChild(nameSpan);
+                infoCol.appendChild(nameRow);
+                if (task.projectNumber && task.projectNumber.trim().length > 0) {
+                    const pnDiv = document.createElement("div");
+                    pnDiv.className = "task-project-number";
+                    pnDiv.textContent = task.projectNumber;
+                    infoCol.appendChild(pnDiv);
+                }
+                if (hasComment) {
+                    const copyBtn = document.createElement("button");
+                    copyBtn.className = "btn-comment-copy";
+                    copyBtn.title = "Enkeltklikk: Vis kommentar / Dobbeltklikk: Kopier";
+                    let clickCount = 0;
+                    let singleClickTimer = null;
+                    copyBtn.addEventListener("click", (e) => {
+                        e.stopPropagation(); 
+                        clickCount++;
+                        if (clickCount === 1) {
+                            singleClickTimer = setTimeout(() => {
+                                clickCount = 0;
+                                if (task.comment && !showAllComments) {
+                                    toggleCommentDropdown(task.id);
+                                    updateUI();
+                                }
+                            }, 250); 
+                        } else if (clickCount === 2) {
+                            clearTimeout(singleClickTimer);
+                            clickCount = 0;
+                            if (task.comment) {
+                                navigator.clipboard.writeText(task.comment)
+                                    .then(() => {
+                                        const parentLi = copyBtn.closest('.task-list-item');
+                                        if (parentLi) {
+                                            const nameEl = parentLi.querySelector('.task-name');
+                                            if (nameEl) {
+                                                nameEl.classList.remove('text-flash-anim');
+                                                void nameEl.offsetWidth; 
+                                                nameEl.classList.add('text-flash-anim');
+                                                setTimeout(() => { nameEl.classList.remove('text-flash-anim'); }, 700);
+                                            }
+                                        }
+                                    });
+                            }
+                        }
+                    });
+                    copyBtn.addEventListener("dblclick", (e) => { e.stopPropagation(); });
+                    left.appendChild(copyBtn);
+                }
+                left.appendChild(infoCol);
+                const timeSpan = document.createElement("span");
+                timeSpan.className = "task-time";
+                const startLabel = formatTimeOfDay(task.firstStartAt || task.createdAt || task.lastStartMs);
+                let rawMs;
+                if (task.isActive) rawMs = getTaskElapsedMs(task);
+                else rawMs = task.totalMs || getTaskElapsedMs(task);
+                let displayMs = rawMs;
+                let isRounded = false;
+                if (isRoundingEnabled) {
+                    displayMs = getRoundedMs(rawMs);
+                    isRounded = true;
+                }
+                if (isRounded) timeSpan.classList.add('text-rounded');
+                if (task.isActive) {
+                    const showSec = false; 
+                    const elapsed = formatDuration(displayMs, showSec);
+                    timeSpan.textContent = `${startLabel} – ${elapsed}`;
+                } else {
+                    const total = formatDuration(displayMs, false);
+                    timeSpan.textContent = total;
+                }
+                li.appendChild(left);
+                li.appendChild(timeSpan);
+                taskListEl.appendChild(li);
+                const commentText = (typeof task.comment === "string") ? task.comment.trim() : "";
+                const shouldShowComment = commentText.length > 0 && (showAllComments || expandedCommentTaskId === task.id);
+                if (shouldShowComment) {
+                    const commentRow = document.createElement("div");
+                    commentRow.className = "task-comment-row";
+                    const box = document.createElement("div");
+                    box.className = "task-comment-box";
+                    box.textContent = task.comment;
+                    commentRow.appendChild(box);
+                    taskListEl.appendChild(commentRow);
+                }
+            });
+        }
+        if (data.tasks.length > 0 && !activeTask) clearButtonEl.disabled = false;
+        else clearButtonEl.disabled = true;
+        const hasInput = taskInputEl.value.trim().length > 0;
+        startButtonEl.style.backgroundColor = "";
+        startButtonEl.style.color = "";
+        if (activeTask) {
+            if (selectedTaskId !== null) {
+                startButtonEl.textContent = "Gjenoppta arbeid";
+                startButtonEl.style.backgroundColor = "var(--dot-green)";
+                selectionInfoEl.textContent = "Du har valgt et prosjekt. Trykk for å bytte til dette.";
+            } else if (hasInput) {
+                startButtonEl.textContent = "Start arbeid";
+                startButtonEl.style.backgroundColor = "var(--dot-green)";
+                selectionInfoEl.textContent = "Trykk for å starte det nye prosjektet.";
+            } else {
+                startButtonEl.textContent = "Arbeid pågår";
+                startButtonEl.style.backgroundColor = "var(--dot-green)";
+                selectionInfoEl.textContent = "En oppgave er aktiv.";
+            }
+        } else {
+            if (selectedTaskId !== null) {
+                startButtonEl.textContent = "Gjenoppta arbeid";
+                startButtonEl.style.backgroundColor = "var(--dot-green)";
+                selectionInfoEl.textContent = "Du har valgt et prosjekt. Trykk for å gjenoppta.";
+            } else if (hasInput) {
+                startButtonEl.textContent = "Start arbeid";
+                startButtonEl.style.backgroundColor = "var(--dot-green)";
+                selectionInfoEl.textContent = "Trykk for å starte.";
+            } else {
+                startButtonEl.textContent = "Start arbeid";
+                if (data.tasks.length > 0) startButtonEl.style.backgroundColor = "#4b5563"; 
+                else startButtonEl.style.backgroundColor = "var(--dot-green)";
+                selectionInfoEl.textContent = "Skriv inn et prosjekt og trykk Enter eller «Start arbeid».";
+            }
+        }
+        const hasArchives = data.archives && data.archives.length > 0;
+        clearArchivesButtonEl.disabled = !hasArchives;
+        exportButtonEl.disabled = !hasArchives;
+        updateArchivesUI();
+        drawTaskChart();
+        renderDayTimeline();
+    }
+
+    function exportArchivesToCsv(archivesInput = null) {
+        const archivesToExport = archivesInput || data.archives;
+        if (!archivesToExport || archivesToExport.length === 0) return false;
+        const rows = [];
+        rows.push([ "Uke", "Dag", "Prosjekt", "Timer og minutter", "Arbeid startet", "Arbeid avsluttet", "Gjenopptatt", "Antall", "Prosjektnummer", "Kommentar" ]);
+        const archivesSorted = [...archivesToExport].sort((a, b) => {
+            const ta = a.createdAt ? new Date(a.createdAt).getTime() : (a.id || 0);
+            const tb = b.createdAt ? new Date(b.createdAt).getTime() : (b.id || 0);
+            return tb - ta;
+        });
+        let previousWeek = null;
+        archivesSorted.forEach(archive => {
+            let dateObj = null;
+            if (archive.createdAt) dateObj = new Date(archive.createdAt);
+            else dateObj = new Date(archive.id);
+            const currentWeek = getISOWeek(dateObj);
+            if (previousWeek !== null && currentWeek !== previousWeek) rows.push([]); 
+            previousWeek = currentWeek;
+            let dayName = dateObj.toLocaleDateString("nb-NO", { weekday: 'long' });
+            dayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+            (archive.tasks || []).forEach(task => {
+                const name = task.name || "";
+                const durationHM = formatHoursMinutes(task.totalMs || 0);
+                const startStr = formatTimeOfDay(task.firstStartAt || task.createdAt);
+                const endStr = formatTimeOfDay(task.lastEndAt || dateObj.getTime());
+                const resumeCount = task.resumeCount || 0;
+                const resumedText = resumeCount > 0 ? "Ja" : "Nei";
+                let projectNumber = typeof task.projectNumber === "string" ? task.projectNumber : "";
+                
+                // Fix for large numbers displaying as E+ in Excel
+                // We wrap purely numeric strings in ="value" to force Excel to treat them as text
+                if (/^\d+$/.test(projectNumber) && projectNumber.length > 5) {
+                    projectNumber = `="${projectNumber}"`;
+                }
+
+                const comment = typeof task.comment === "string" ? task.comment : "";
+                rows.push([ String(currentWeek), dayName, name, durationHM, startStr, endStr, resumedText, String(resumeCount), projectNumber, comment ]);
+            });
+        });
+        function toCsvField(value) {
+            const s = String(value).replace(/"/g, '""');
+            return `"${s}"`;
+        }
+        const csvContent = "\uFEFF" + rows.map(row => row.map(toCsvField).join(";")).join("\r\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const now = new Date();
+        const timestamp = now.toISOString().replace(/[:T]/g, "-").split(".")[0];
+        let filename = "historikk_" + timestamp + ".csv";
+        if (archivesInput) filename = "ukes_eksport_" + timestamp + ".csv";
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        return true;
+    }
+
+    function initOverdueSelects() {
+        if (overdueHourEl.options.length === 0) {
+            for (let h = 0; h < 24; h++) {
+                const opt = document.createElement("option");
+                opt.value = h;
+                opt.textContent = String(h).padStart(2, "0");
+                overdueHourEl.appendChild(opt);
+            }
+        }
+        if (overdueMinuteEl.options.length === 0) {
+            for (let m = 0; m < 60; m++) {
+                const opt = document.createElement("option");
+                opt.value = m;
+                opt.textContent = String(m).padStart(2, "0");
+                overdueMinuteEl.appendChild(opt);
+            }
+        }
+        const now = new Date();
+        overdueHourEl.value = now.getHours();
+        overdueMinuteEl.value = now.getMinutes();
+    }
+    function showOverduePopup(task) {
+        initOverdueSelects();
+        overdueTaskNameEl.textContent = task.name;
+        overdueOverlayEl.classList.add("show");
+        overduePopupShown = true;
+    }
+    function hideOverduePopup() { overdueOverlayEl.classList.remove("show"); }
+    function checkOverdueActiveTask() {
+        const activeTask = getActiveTask();
+        if (!activeTask || overduePopupShown) return;
+        const elapsed = getTaskElapsedMs(activeTask);
+        const tenHoursMs = 10 * 60 * 60 * 1000;
+        if (elapsed > tenHoursMs) showOverduePopup(activeTask);
+    }
+    function showClearArchivesPopup() {
+        if (!data.archives || data.archives.length === 0) return;
+        clearArchivesOverlayEl.classList.add("show");
+    }
+    function hideClearArchivesPopup() { clearArchivesOverlayEl.classList.remove("show"); }
+    function deleteAllArchives() {
+        data.archives = [];
+        saveToStorage();
+        updateUI();
+    }
+    function showClearTodayPopup() {
+        if (data.tasks.length === 0) return;
+        clearTodayOverlayEl.classList.add("show");
+    }
+    function hideClearTodayPopup() { clearTodayOverlayEl.classList.remove("show"); }
+
+    function enableCompactMode() {
+        if (taskListEl) taskListEl.classList.add("compact-mode");
+        if (taskListWrapperEl) taskListWrapperEl.classList.add("compact-active");
+    }
+    function disableCompactMode() {
+        if (taskListEl) taskListEl.classList.remove("compact-mode");
+        if (taskListWrapperEl) taskListWrapperEl.classList.remove("compact-active");
+    }
+    function autoResizeSplitter() {
+        const items = document.querySelectorAll('#taskList .task-list-item');
+        let maxW = 0;
+        const tmp = document.createElement('span');
+        tmp.style.visibility = 'hidden';
+        tmp.style.position = 'absolute';
+        tmp.style.whiteSpace = 'nowrap';
+        tmp.style.fontSize = '0.95rem'; 
+        tmp.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        document.body.appendChild(tmp);
+        items.forEach(row => {
+            const nameEl = row.querySelector('.task-name');
+            const projectEl = row.querySelector('.task-project-number');
+            let rowW = 0;
+            if (nameEl) {
+                tmp.textContent = nameEl.textContent;
+                rowW = Math.max(rowW, tmp.getBoundingClientRect().width);
+            }
+            if (projectEl) {
+                tmp.style.fontSize = '0.75rem';
+                tmp.textContent = projectEl.textContent;
+                const pW = tmp.getBoundingClientRect().width;
+                if (pW > rowW) rowW = pW; 
+                tmp.style.fontSize = '0.95rem'; 
+            }
+            if (rowW > maxW) maxW = rowW;
+        });
+        document.body.removeChild(tmp);
+        const basePadding = 100; 
+        const idealGap = maxW + basePadding;
+        if (taskListWrapperEl) taskListWrapperEl.style.setProperty('--dynamic-gap', idealGap + "px");
+    }
+
+    function openSettingsModal() {
+        renderProfileOptions();
+        const youtubeBtn = document.getElementById('youtubeButton');
+        if (youtubeLink === "PLACEHOLDER") {
+            youtubeBtn.disabled = true;
+            youtubeBtn.style.opacity = "0.5";
+            youtubeBtn.style.cursor = "not-allowed";
+            youtubeBtn.title = "Ingen video tilgjengelig";
+            youtubeBtn.onclick = null;
+            youtubeBtn.classList.remove('btn-rainbow-hover');
+        } else {
+            youtubeBtn.disabled = false;
+            youtubeBtn.style.opacity = "1";
+            youtubeBtn.style.cursor = "pointer";
+            youtubeBtn.title = "Åpne video i ny fane";
+            youtubeBtn.onclick = () => window.open(youtubeLink, '_blank');
+        }
+        settingsOverlayEl.classList.add("show");
+        profileHelperTextEl.textContent = "";
+    }
+    function closeSettingsModal() {
+        settingsOverlayEl.classList.remove("show");
+        profileHelperTextEl.textContent = "";
+    }
+    function renderProfileOptions() {
+        profileSelectEl.innerHTML = "";
+        profiles.forEach(p => {
+            const opt = document.createElement("option");
+            opt.value = p;
+            opt.textContent = p;
+            if (p === currentProfile) opt.selected = true;
+            profileSelectEl.appendChild(opt);
+        });
+        if (profiles.length > 1 && currentProfile !== "Standard") {
+            deleteProfileButtonEl.style.display = "inline-block";
+            deleteProfileButtonEl.disabled = false;
+        } else {
+            deleteProfileButtonEl.style.display = "none";
+            deleteProfileButtonEl.disabled = true;
+        }
+    }
+    function switchProfile(newProfileName) {
+        if (!profiles.includes(newProfileName)) return;
+        if (newProfileName === currentProfile) return;
+        saveToStorage(); 
+        saveDayTimelineSettings();
+        currentProfile = newProfileName;
+        saveProfiles();
+        loadFromStorage();
+        loadDayTimelineSettings();
+        selectedTaskId = null;
+        suggestionIndex = -1;
+        filteredSuggestions = [];
+        showAllComments = false;
+        expandedCommentTaskId = null;
+        taskInputEl.value = "";
+        clearSuggestions();
+        disableCompactMode();
+        renderDayTimeline();
+        updateUI();
+        updateProfileButton();
+        profileHelperTextEl.textContent = `Byttet til profil: ${newProfileName}`;
+        profileHelperTextEl.style.color = "var(--text)";
+        renderProfileOptions();
+    }
+    function createNewProfile(e) {
+        if(e) e.preventDefault();
+        const name = newProfileNameEl.value.trim();
+        if (!name) {
+            profileHelperTextEl.textContent = "Vennligst skriv inn et navn.";
+            profileHelperTextEl.style.color = "var(--danger)";
+            return;
+        }
+        const exists = profiles.some(p => p.toLowerCase() === name.toLowerCase());
+        if (exists) {
+            profileHelperTextEl.textContent = "Profilen finnes allerede.";
+            profileHelperTextEl.style.color = "var(--danger)";
+            return;
+        }
+        saveToStorage(); 
+        saveDayTimelineSettings();
+        profiles.push(name);
+        currentProfile = name;
+        saveProfiles();
+        loadFromStorage();
+        loadDayTimelineSettings();
+        selectedTaskId = null;
+        taskInputEl.value = "";
+        clearSuggestions();
+        disableCompactMode();
+        renderDayTimeline();
+        updateUI();
+        updateProfileButton();
+        newProfileNameEl.value = "";
+        profileHelperTextEl.textContent = `Opprettet og byttet til: ${name}`;
+        profileHelperTextEl.style.color = "var(--dot-green)";
+        renderProfileOptions();
+    }
+    function showDeleteProfilePopup() {
+        if (currentProfile === "Standard") { alert("Du kan ikke slette Standard-profilen."); return; }
+        deleteProfileNameDisplayEl.textContent = currentProfile;
+        deleteProfileOverlayEl.classList.add("show");
+        closeSettingsModal();
+    }
+    function hideDeleteProfilePopup() {
+        deleteProfileOverlayEl.classList.remove("show");
+        openSettingsModal(); 
+    }
+    function executeDeleteProfile() {
+        const profileToDelete = currentProfile;
+        if (profileToDelete === "Standard") return;
+        const storageKey = STORAGE_KEY_PREFIX + profileToDelete;
+        const timelineKey = TIMELINE_KEY_PREFIX + profileToDelete;
+        localStorage.removeItem(storageKey);
+        localStorage.removeItem(timelineKey);
+        profiles = profiles.filter(p => p !== profileToDelete);
+        currentProfile = "Standard";
+        saveProfiles();
+        loadFromStorage();
+        loadDayTimelineSettings();
+        selectedTaskId = null;
+        taskInputEl.value = "";
+        clearSuggestions();
+        disableCompactMode();
+        renderDayTimeline();
+        updateUI();
+        updateProfileButton();
+        deleteProfileOverlayEl.classList.remove("show");
+        openSettingsModal();
+        profileHelperTextEl.textContent = `Profil "${profileToDelete}" ble slettet.`;
+        profileHelperTextEl.style.color = "var(--text)";
+    }
+    function executeSaveAndDeleteProfile() {
+        downloadBackup();
+        setTimeout(() => { executeDeleteProfile(); }, 1000);
+    }
+    function generateDemoData() {
+        if (!confirm("Dette vil opprette en stor testprofil (6 mnd, full historikk) og laste den ned som 'testprofil.json'. Vil du fortsette?")) return;
+
+        const demoProfileName = "Testprofil (Tung)";
+        
+        // Add to profiles if missing
+        if (!profiles.includes(demoProfileName)) {
+            profiles.push(demoProfileName);
+            saveProfiles();
+        }
+        
+        const taskNamesList = [
+            "Morgenmøte", "Prosjektering - Bygg A", "Befaring ute", "Lunsj", 
+            "Dokumentasjon FDV", "Koordinering TEK", "E-post og administrasjon",
+            "Tegningsrevisjon", "Kvalitetssikring (KS)", "Kundesamtale", 
+            "Modellering BIM", "Statusmøte med Byggherre"
+        ];
+        
+        const demoData = {
+            tasks: [],
+            archives: [],
+            taskNames: taskNamesList,
+            projectNumbers: {}
+        };
+
+        // Populate project numbers
+        demoData.taskNames.forEach((name, i) => {
+            demoData.projectNumbers[normalizeTaskName(name)] = String(1000 + i);
+        });
+
+        const longComments = [
+            "Gjennomførte full revisjon av tegninger i henhold til nye krav fra byggherre. Oppdaget noen avvik i sone 3 som må utbedres snarest før neste milepæl.",
+            "Langt møte med prosjektgruppen angående fremdrift og leveranser. Vi ble enige om å fremskynde fase 2 med to uker for å rekke ferien.",
+            "Koordinering mot elektro og VVS på byggeplass. Det var kollisjoner i himling som krevde omprosjektering på stedet. Løsning avklart med bas.",
+            "Utarbeidelse av FDV-dokumentasjon for overlevering. Sjekkliste punkt 1-50 gjennomgått og verifisert OK. Mangler kun sluttattest fra RIE.",
+            "Befaring på taket for å sjekke lekkasje etter styrtregnet. Fant ingen synlige skader på tekkingen, men mistenker utett beslag rundt pipen som må byttes.",
+            "Oppdatering av BIM-modell etter kollisjonskontroll i Solibri. Flyttet kanaler i korridor 2. etasje for å gi plass til kabelbroer.",
+            "Gjennomgang av endringsmeldinger med entreprenør. Diskuterte kostnadskonsekvenser av endret gulvbelegg i fellesarealer.",
+            "Skriving av referat fra byggemøte. Sendt ut til alle deltakere med frist for merknader innen fredag.",
+            "Forberedelse til presentasjon for styringsgruppen. Laget nye visualiseringer av fasadealternativene.",
+            "Generell administrasjon og sortering av innboks etter ferieavvikling. Oppdaterte timelister og fakturagrunnlag."
+        ];
+
+        const now = new Date();
+        const startDate = new Date();
+        startDate.setMonth(now.getMonth() - 6);
+        // Ensure we start at the beginning of that week to look nice if needed, but simple subtraction is fine.
+        
+        // Iterate from today back to startDate
+        let curr = new Date(now);
+        curr.setHours(0,0,0,0);
+        
+        // Helper to check weekends
+        const isWeekend = (d) => d.getDay() === 0 || d.getDay() === 6;
+
+        while (curr >= startDate) {
+            if (!isWeekend(curr)) {
+                
+                const tasksForDay = [];
+                // Target: 5 to 8 tasks
+                const numTasks = Math.floor(Math.random() * 4) + 5; // 5, 6, 7, or 8
+                
+                // Workday: 07:00 to 16:00 = 9 hours = 540 minutes
+                const dayStartHour = 7;
+                const totalMinutes = 9 * 60; 
+                
+                // We need random cut points. 
+                // To insure no "empty space", we simply divide the 540 minutes into N segments
+                // and assign them sequentially.
+                
+                let cuts = [0];
+                while (cuts.length < numTasks) {
+                    // Pick a random time between 0 and totalMinutes
+                    const r = Math.floor(Math.random() * (totalMinutes - 40)) + 20; 
+                    // Simple check to avoid cuts too close to each other (min 20 min tasks)
+                    let valid = true;
+                    for (let c of cuts) {
+                        if (Math.abs(c - r) < 20) valid = false;
+                    }
+                    if (valid) cuts.push(r);
+                }
+                cuts.push(totalMinutes);
+                cuts.sort((a,b) => a - b);
+                
+                // Base timestamp for the day at 07:00
+                let dayTimestamp = new Date(curr);
+                dayTimestamp.setHours(dayStartHour, 0, 0, 0);
+                const dayBaseTime = dayTimestamp.getTime();
+                
+                for (let i = 0; i < numTasks; i++) {
+                    const startMin = cuts[i];
+                    const endMin = cuts[i+1];
+                    const durationMins = endMin - startMin;
+                    const durationMs = durationMins * 60000;
+                    
+                    const taskName = demoData.taskNames[Math.floor(Math.random() * demoData.taskNames.length)];
+                    const comment = longComments[Math.floor(Math.random() * longComments.length)];
+                    const pn = demoData.projectNumbers[normalizeTaskName(taskName)];
+                    
+                    const startAt = dayBaseTime + (startMin * 60000);
+                    const endAt = startAt + durationMs;
+                    
+                    // Note: In archive lists, we usually display them as is. 
+                    // In `tasks` (today), we unshift to put newest on top.
+                    // For `tasksForDay` array here, let's build it chronologically first.
+                    
+                    tasksForDay.push({ 
+                        id: startAt + i, 
+                        name: taskName,
+                        totalMs: durationMs,
+                        isActive: false,
+                        resumed: false,
+                        createdAt: startAt,
+                        firstStartAt: startAt,
+                        lastEndAt: endAt,
+                        resumeCount: 0,
+                        comment: comment,
+                        projectNumber: pn,
+                        startAdjusted: false
+                    });
+                }
+                
+                // If it is TODAY
+                if (sameLocalDate(curr, now)) {
+                    // Current tasks usually displayed newest first (descending start time) in the UI list
+                    demoData.tasks = [...tasksForDay].reverse();
+                } else {
+                    const label = new Date(curr).toLocaleDateString("nb-NO", {
+                        weekday: "long", year: "numeric", month: "short", day: "numeric"
+                    });
+                    
+                    // Archive tasks are stored chronologically in the day (morning to evening) usually?
+                    // Actually, let's keep them chronological (Morning first) inside the archive array 
+                    // so they list correctly if the UI renders them in order.
+                    // The UI renders `archive.tasks` via iteration. If we want Morning at top, use chronological.
+                    // If we want Newest (Afternoon) at top, use reverse.
+                    // Standard log logic: usually time flows down. Let's do Morning at top.
+                    
+                    demoData.archives.push({
+                        id: curr.getTime(),
+                        label: label,
+                        createdAt: new Date(curr).toISOString(),
+                        tasks: tasksForDay // Chronological [07:00, 09:00...]
+                    });
+                }
+            }
+            
+            // Go back one day
+            curr.setDate(curr.getDate() - 1);
+        }
+        
+        // Archives are sorted by Date descending (Newest date first)
+        demoData.archives.sort((a,b) => b.id - a.id);
+
+        // --- TRIGGER DOWNLOAD IMMEDIATELY ---
+        const jsonStr = JSON.stringify({
+            profile: demoProfileName,
+            timestamp: new Date().toISOString(),
+            timelineSettings: {
+                dayStartMin: 7 * 60, dayEndMin: 16 * 60, // Set timeline to match the data (07-16)
+                coreStartMin: 9 * 60, coreEndMin: 14 * 60,
+                lunchStartMin: 11 * 60, lunchEndMin: 11 * 60 + 30
+            },
+            data: demoData
+        }, null, 2);
+
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "testprofil.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // Also auto-load it for convenience
+        const storageKey = STORAGE_KEY_PREFIX + demoProfileName;
+        const timelineKey = TIMELINE_KEY_PREFIX + demoProfileName;
+        
+        localStorage.setItem(storageKey, JSON.stringify(demoData));
+        localStorage.setItem(timelineKey, JSON.stringify({
+            dayStartMin: 420, dayEndMin: 960, coreStartMin: 540, coreEndMin: 840, lunchStartMin: 660, lunchEndMin: 690
+        }));
+
+        currentProfile = demoProfileName;
+        saveProfiles();
+        loadFromStorage();
+        loadDayTimelineSettings();
+        selectedTaskId = null;
+        disableCompactMode();
+        updateUI();
+        renderDayTimeline();
+        updateProfileButton();
+        renderProfileOptions();
+        
+        closeSettingsModal();
+    }
+
+    async function downloadBackup() {
+        const payload = {
+            profile: currentProfile,
+            timestamp: new Date().toISOString(),
+            data: data,
+            timelineSettings: dayTimelineSettings
+        };
+        const jsonStr = JSON.stringify(payload, null, 2);
+        const safeName = currentProfile.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const dateStr = new Date().toISOString().split('T')[0];
+        const filename = `backup_${safeName}_${dateStr}.json`;
+
+        if (window.showSaveFilePicker) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: filename,
+                    types: [{
+                        description: 'JSON Backup',
+                        accept: {'application/json': ['.json']},
+                    }],
+                });
+                const writable = await handle.createWritable();
+                await writable.write(jsonStr);
+                await writable.close();
+                return;
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+                console.warn('File System Access API error:', err);
+            }
+        }
+
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    function triggerUpload() { backupFileInputEl.click(); }
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        e.target.value = ""; 
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const json = JSON.parse(evt.target.result);
+                if (json && json.data && Array.isArray(json.data.tasks)) {
+                    const importedProfileName = json.profile || "Importert";
+                    if (currentProfile !== importedProfileName) {
+                        saveToStorage();
+                        saveDayTimelineSettings();
+                    }
+                    if (!profiles.includes(importedProfileName)) {
+                        profiles.push(importedProfileName);
+                        saveProfiles(); 
+                    }
+                    const backupTimestamp = json.timestamp ? new Date(json.timestamp).getTime() : Date.now();
+                    json.data.tasks.forEach(t => {
+                        if (t.isActive) {
+                            t.isActive = false;
+                            if (t.lastStartMs && !isNaN(backupTimestamp) && backupTimestamp > t.lastStartMs) {
+                                const diff = backupTimestamp - t.lastStartMs;
+                                t.totalMs = (t.totalMs || 0) + diff;
+                            }
+                            t.lastStartMs = null;
+                            t.lastEndAt = !isNaN(backupTimestamp) ? backupTimestamp : Date.now();
+                        }
+                    });
+                    const targetStorageKey = STORAGE_KEY_PREFIX + importedProfileName;
+                    const targetTimelineKey = TIMELINE_KEY_PREFIX + importedProfileName;
+                    localStorage.setItem(targetStorageKey, JSON.stringify(json.data));
+                    if (json.timelineSettings) {
+                        localStorage.setItem(targetTimelineKey, JSON.stringify(json.timelineSettings));
+                    } else {
+                        const defaults = {
+                            dayStartMin: 7 * 60, dayEndMin: 17 * 60,
+                            coreStartMin: 9 * 60, coreEndMin: 15 * 60,
+                            lunchStartMin: 11 * 60 + 30, lunchEndMin: 12 * 60
+                        };
+                        localStorage.setItem(targetTimelineKey, JSON.stringify(defaults));
+                    }
+                    currentProfile = importedProfileName;
+                    saveProfiles(); 
+                    loadFromStorage();
+                    loadDayTimelineSettings();
+                    selectedTaskId = null;
+                    disableCompactMode();
+                    updateUI();
+                    renderDayTimeline();
+                    updateProfileButton();
+                    renderProfileOptions(); 
+                    closeSettingsModal();
+                } else {
+                    alert("Ugyldig filformat. Filen mangler nødvendige data.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Kunne ikke lese filen.");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    let themeClickCount = 0;
+    let themeResetTimer = null;
+    themeToggleButtonEl.addEventListener("click", () => {
+        clearTimeout(themeResetTimer);
+        themeClickCount++;
+        themeResetTimer = setTimeout(() => { themeClickCount = 0; }, 500); 
+        if (themeClickCount === 3) {
+            document.body.classList.add("theme-dark"); 
+            document.body.classList.add("theme-black"); 
+            saveTheme("black");
+            themeClickCount = 0;
+            clearTimeout(themeResetTimer);
+        } else {
+            if (document.body.classList.contains("theme-black")) {
+                document.body.classList.remove("theme-black");
+                document.body.classList.remove("theme-dark");
+                saveTheme("light");
+                themeClickCount = 0; 
+                clearTimeout(themeResetTimer);
+            } else {
+                const isDark = document.body.classList.toggle("theme-dark");
+                document.body.classList.remove("theme-black");
+                saveTheme(isDark ? "dark" : "light");
+            }
+        }
+        drawTaskChart();
+        renderDayTimeline();
+        updateTimelineNowDot();
+    });
+    
+    if (profileButtonEl) profileButtonEl.addEventListener("click", openSettingsModal);
+    if (settingsCloseButtonEl) settingsCloseButtonEl.addEventListener("click", closeSettingsModal);
+    if (settingsDoneButtonEl) settingsDoneButtonEl.addEventListener("click", closeSettingsModal);
+    if (createProfileButtonEl) createProfileButtonEl.addEventListener("click", createNewProfile);
+    if (deleteProfileButtonEl) {
+        deleteProfileButtonEl.addEventListener("click", (e) => {
+            e.preventDefault();
+            showDeleteProfilePopup();
+        });
+    }
+    if (deleteProfileCancelBtnEl) deleteProfileCancelBtnEl.addEventListener("click", hideDeleteProfilePopup);
+    if (deleteProfileConfirmBtnEl) deleteProfileConfirmBtnEl.addEventListener("click", executeDeleteProfile);
+    if (deleteProfileSaveDeleteBtnEl) deleteProfileSaveDeleteBtnEl.addEventListener("click", executeSaveAndDeleteProfile);
+    if (profileSelectEl) profileSelectEl.addEventListener("change", (e) => { switchProfile(e.target.value); });
+    if (downloadBackupButtonEl) downloadBackupButtonEl.addEventListener("click", downloadBackup);
+    if (uploadBackupButtonEl) uploadBackupButtonEl.addEventListener("click", triggerUpload);
+    if (backupFileInputEl) backupFileInputEl.addEventListener("change", handleFileSelect);
+    if (generateTestDataButtonEl) generateTestDataButtonEl.addEventListener("click", generateDemoData);
+
+    toggleAllCommentsButtonEl.addEventListener("click", () => {
+        if (toggleAllCommentsButtonEl.disabled) return;
+        showAllComments = !showAllComments;
+        expandedCommentTaskId = null;
+        updateUI();
+        saveToStorage();
+    });
+
+    if (copyOneNoteButtonEl) {
+        copyOneNoteButtonEl.addEventListener("click", () => {
+            if (data.tasks.length === 0) return;
+            const escapeHtml = (text) => {
+                if (!text) return "";
+                return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            };
+            const plainText = data.tasks.map(t => {
+                let ms = t.isActive ? getTaskElapsedMs(t) : (t.totalMs || 0);
+                if (isRoundingEnabled) ms = getRoundedMs(ms);
+                const timeStr = formatDuration(ms, false);
+                const comment = t.comment || "";
+                return `${t.name}\n${timeStr}\n-\n${comment}`;
+            }).join("\n\n");
+            const htmlContent = data.tasks.map(t => {
+                let ms = t.isActive ? getTaskElapsedMs(t) : (t.totalMs || 0);
+                if (isRoundingEnabled) ms = getRoundedMs(ms);
+                const timeStr = formatDuration(ms, false);
+                const safeName = escapeHtml(t.name);
+                const safeComment = escapeHtml(t.comment || "").replace(/\n/g, "<br>"); 
+                return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>-<br>${safeComment}</div>`;
+            }).join("");
+            try {
+                const clipboardItem = new ClipboardItem({
+                    "text/plain": new Blob([plainText], { type: "text/plain" }),
+                    "text/html": new Blob([htmlContent], { type: "text/html" })
+                });
+                navigator.clipboard.write([clipboardItem]).then(() => {
+                    const originalText = copyOneNoteButtonEl.textContent;
+                    copyOneNoteButtonEl.textContent = "Kopiert!";
+                    setTimeout(() => { copyOneNoteButtonEl.textContent = originalText; }, 1500);
+                });
+            } catch (e) {
+                navigator.clipboard.writeText(plainText);
+                alert("Kopierte som ren tekst (nettleseren støttet ikke rik formatering).");
+            }
+        });
+    }
+
+    if (toggleListHeightButtonEl) {
+        toggleListHeightButtonEl.addEventListener("click", () => {
+            if (toggleListHeightButtonEl.disabled) return;
+            isTaskListExpanded = !isTaskListExpanded;
+            if (isTaskListExpanded) {
+                taskListEl.classList.add("expanded");
+                toggleListHeightButtonEl.textContent = "Minimer liste";
+            } else {
+                taskListEl.classList.remove("expanded");
+                toggleListHeightButtonEl.textContent = "Utvid liste";
+            }
+        });
+    }
+    if (toggleRoundingButtonEl) {
+        toggleRoundingButtonEl.addEventListener("click", () => {
+            isRoundingEnabled = !isRoundingEnabled;
+            if (isRoundingEnabled) {
+                toggleRoundingButtonEl.classList.add("btn-rounding-active");
+                toggleRoundingButtonEl.textContent = "Avrunding PÅ";
+            } else {
+                toggleRoundingButtonEl.classList.remove("btn-rounding-active");
+                toggleRoundingButtonEl.textContent = "Avrund tid";
+            }
+            updateUI();
+        });
+    }
+    if (resizeHandleEl && taskListWrapperEl) {
+        let isResizing = false;
+        resizeHandleEl.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            resizeHandleEl.classList.add('resizing');
+            resizeHandleEl.classList.remove('handle-release-anim'); 
+            document.body.style.cursor = 'col-resize'; 
+            e.preventDefault(); 
+        });
+        resizeHandleEl.addEventListener('touchstart', (e) => {
+            isResizing = true;
+            resizeHandleEl.classList.add('resizing');
+            resizeHandleEl.classList.remove('handle-release-anim');
+            e.preventDefault();
+        });
+        resizeHandleEl.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const containerWidth = taskListWrapperEl.offsetWidth;
+            const newGap = Math.max(50, containerWidth - 140);
+            taskListWrapperEl.style.setProperty('--dynamic-gap', newGap + "px");
+        });
+        const handleMove = (clientX) => {
+            if (!isResizing) return;
+            const rect = taskListWrapperEl.getBoundingClientRect();
+            let newGap = clientX - rect.left;
+            if (newGap < 50) newGap = 50;
+            if (newGap > rect.width - 50) newGap = rect.width - 50;
+            taskListWrapperEl.style.setProperty('--dynamic-gap', newGap + "px");
+        };
+        document.addEventListener('mousemove', (e) => handleMove(e.clientX));
+        document.addEventListener('touchmove', (e) => handleMove(e.touches[0].clientX));
+        const stopResize = () => {
+            if (isResizing) {
+                isResizing = false;
+                resizeHandleEl.classList.remove('resizing');
+                resizeHandleEl.classList.add('handle-release-anim'); 
+                document.body.style.cursor = '';
+            }
+        };
+        document.addEventListener('mouseup', stopResize);
+        document.addEventListener('touchend', stopResize);
+    }
+
+    startButtonEl.addEventListener("click", () => {
+        if (selectedTaskId !== null) { resumeTask(selectedTaskId); } 
+        else {
+            const name = taskInputEl.value.trim();
+            if (!name) return;
+            startOrResumeByName(name);
+        }
+    });
+    endButtonEl.addEventListener("click", () => {
+        finalizeActiveTask();
+        saveToStorage();
+        updateUI();
+        autoResizeSplitter(); 
+        enableCompactMode();  
+        // Switch to Work Mode automatically when ending day
+        saveTimelineMode('work');
+        renderDayTimeline();
+        
+        if (autoSaveOnEndDay) {
+            downloadBackup();
+        }
+    });
+    transferTimeButtonEl.addEventListener("click", () => { if (!transferTimeButtonEl.disabled) showTransferPopup(); });
+    transferCloseButtonEl.addEventListener("click", () => hideTransferPopup());
+    transferCancelButtonEl.addEventListener("click", () => hideTransferPopup());
+    transferConfirmButtonEl.addEventListener("click", () => transferTimeConfirm());
+    adjustStartButtonEl.addEventListener("click", () => { if (!adjustStartButtonEl.disabled) showAdjustStartPopup(); });
+    adjustStartCloseButtonEl.addEventListener("click", () => hideAdjustStartPopup());
+    adjustStartCancelButtonEl.addEventListener("click", () => hideAdjustStartPopup());
+    adjustStartConfirmButtonEl.addEventListener("click", () => adjustStartConfirm());
+    clearButtonEl.addEventListener("click", () => { if (!clearButtonEl.disabled) showClearTodayPopup(); });
+    clearTodayCancelButtonEl.addEventListener("click", () => hideClearTodayPopup());
+    clearTodayConfirmButtonEl.addEventListener("click", () => { hideClearTodayPopup(); clearAndArchiveTasks(); });
+    exportButtonEl.addEventListener("click", () => exportArchivesToCsv());
+    clearArchivesButtonEl.addEventListener("click", () => showClearArchivesPopup());
+    clearArchivesDeleteButtonEl.addEventListener("click", () => { deleteAllArchives(); hideClearArchivesPopup(); });
+    clearArchivesExportDeleteButtonEl.addEventListener("click", () => {
+        const ok = exportArchivesToCsv();
+        if (ok) deleteAllArchives();
+        hideClearArchivesPopup();
+    });
+    clearArchivesCloseButtonEl.addEventListener("click", () => hideClearArchivesPopup());
+    clearArchivesCancelButtonEl.addEventListener("click", () => hideClearArchivesPopup());
+    overdueConfirmButtonEl.addEventListener("click", () => {
+        const hour = parseInt(overdueHourEl.value, 10);
+        const minute = parseInt(overdueMinuteEl.value, 10);
+        const activeBefore = getActiveTask();
+        finalizeActiveTaskAt(hour, minute);
+        let archiveBaseTs = null;
+        if (activeBefore) {
+            const sameTask = data.tasks.find(t => t.id === activeBefore.id);
+            if (sameTask && sameTask.lastEndAt) archiveBaseTs = sameTask.lastEndAt;
+        }
+        hideOverduePopup();
+        saveToStorage();
+        clearAndArchiveTasks(archiveBaseTs);
+    });
+    projectCloseButtonEl.addEventListener("click", () => hideProjectPopup());
+    projectCancelButtonEl.addEventListener("click", () => hideProjectPopup());
+    projectConfirmButtonEl.addEventListener("click", () => confirmProjectPopup());
+    projectNumberInputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); confirmProjectPopup(); }
+        if (e.key === "Escape") { e.preventDefault(); hideProjectPopup(); }
+    });
+    commentCloseButtonEl.addEventListener("click", () => hideCommentPopup());
+    commentCancelButtonEl.addEventListener("click", () => hideCommentPopup());
+    commentSaveButtonEl.addEventListener("click", () => saveComment());
+    commentTextareaEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveComment(); }
+    });
+    restoreDayCancelButtonEl.addEventListener("click", () => hideRestoreDayPopup());
+    restoreDayConfirmButtonEl.addEventListener("click", () => restoreDayConfirm());
+
+    taskInputEl.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            if (!Array.isArray(filteredSuggestions) || filteredSuggestions.length === 0) renderSuggestions();
+            if (filteredSuggestions.length === 0) return;
+            e.preventDefault();
+            if (e.key === "ArrowDown") suggestionIndex = (suggestionIndex + 1 + filteredSuggestions.length) % filteredSuggestions.length;
+            else suggestionIndex = (suggestionIndex - 1 + filteredSuggestions.length) % filteredSuggestions.length;
+            renderSuggestions();
+            return;
+        }
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const hasSelection = suggestionIndex >= 0 && suggestionIndex < filteredSuggestions.length && filteredSuggestions.length > 0;
+            if (hasSelection) {
+                const name = filteredSuggestions[suggestionIndex];
+                selectedTaskId = null;
+                startOrResumeByName(name);
+            } else {
+                selectedTaskId = null;
+                const name = taskInputEl.value.trim();
+                if (!name) return;
+                startOrResumeByName(name);
+            }
+            return;
+        }
+        if (e.key === "Escape") { if (filteredSuggestions.length > 0) { e.preventDefault(); clearSuggestions(); } return; }
+    });
+    taskInputEl.addEventListener("input", () => {
+        if (selectedTaskId !== null) { selectedTaskId = null; }
+        updateUI(); 
+        suggestionIndex = -1;
+        renderSuggestions();
+    });
+    taskInputEl.addEventListener("focus", () => { suggestionIndex = -1; renderSuggestions(); });
+    taskInputEl.addEventListener("blur", () => { setTimeout(() => clearSuggestions(), 150); });
+
+    let taskClickTimer = null;
+    taskListEl.addEventListener("click", (e) => {
+        if (taskClickTimer) clearTimeout(taskClickTimer);
+        const li = e.target.closest(".task-list-item");
+        if (!li) return;
+        const id = Number(li.dataset.id);
+        if (!id) return;
+        const task = data.tasks.find(t => t.id === id);
+        if (!task) return;
+        if (task.isActive) return;
+        taskClickTimer = setTimeout(() => {
+            selectedTaskId = (selectedTaskId === id) ? null : id;
+            updateUI();
+            taskClickTimer = null;
+        }, 220);
+    });
+    taskListEl.addEventListener("dblclick", (e) => {
+        if (taskClickTimer) { clearTimeout(taskClickTimer); taskClickTimer = null; }
+        const li = e.target.closest(".task-list-item");
+        if (!li) return;
+        const id = Number(li.dataset.id);
+        if (!id) return;
+        const task = data.tasks.find(t => t.id === id);
+        if (!task) return;
+        showCommentPopup(task);
+    });
+
+    function animateChart() {
+        drawTaskChart();
+        requestAnimationFrame(animateChart);
+    }
+
+    if (dayTimelineCurtainCloseEl) dayTimelineCurtainCloseEl.addEventListener("click", () => closeDayTimelineCurtain());
+    if (dayTimelineFromEl) {
+        dayTimelineFromEl.addEventListener("change", () => applyDayTimelineCurtainChange());
+        dayTimelineFromEl.addEventListener("input", () => applyDayTimelineCurtainChange());
+    }
+    if (dayTimelineToEl) {
+        dayTimelineToEl.addEventListener("change", () => applyDayTimelineCurtainChange());
+        dayTimelineToEl.addEventListener("input", () => applyDayTimelineCurtainChange());
+    }
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            if (deleteProfileOverlayEl && deleteProfileOverlayEl.classList.contains("show")) { hideDeleteProfilePopup(); return; }
+            if (settingsOverlayEl && settingsOverlayEl.classList.contains("show")) { closeSettingsModal(); return; }
+            if (projectOverlayEl && projectOverlayEl.classList.contains("show")) { hideProjectPopup(); return; }
+            if (overdueOverlayEl && overdueOverlayEl.classList.contains("show")) { hideOverduePopup(); return; }
+            if (clearArchivesOverlayEl && clearArchivesOverlayEl.classList.contains("show")) { hideClearArchivesPopup(); return; }
+            if (clearTodayOverlayEl && clearTodayOverlayEl.classList.contains("show")) { hideClearTodayPopup(); return; }
+            if (commentOverlayEl && commentOverlayEl.classList.contains("show")) { hideCommentPopup(); return; }
+            if (transferOverlayEl && transferOverlayEl.classList.contains("show")) { hideTransferPopup(); return; }
+            if (adjustStartOverlayEl && adjustStartOverlayEl.classList.contains("show")) { hideAdjustStartPopup(); return; }
+            if (restoreDayOverlayEl && restoreDayOverlayEl.classList.contains("show")) { hideRestoreDayPopup(); return; }
+            if (dayTimelineCurtainEl && dayTimelineCurtainEl.classList.contains("open")) { closeDayTimelineCurtain(); return; }
+        }
+        if (e.key === "Enter") {
+            if (adjustStartOverlayEl && adjustStartOverlayEl.classList.contains("show")) {
+                e.preventDefault();
+                adjustStartConfirm();
+            }
+        }
+    });
+
+    window.addEventListener("resize", () => updateTimelineNowDot());
+
+    loadTheme();
+    loadProfiles();
+    loadFromStorage();
+    loadDayTimelineSettings();
+    loadAutoSaveSetting();
+    renderDayTimeline();
+    updateUI();
+    updateCurrentTimeDisplay();
+    updateProfileButton(); 
+    
+    if (autoSaveToggleEl) {
+        autoSaveToggleEl.addEventListener("change", (e) => {
+            autoSaveOnEndDay = e.target.checked;
+            localStorage.setItem(AUTO_SAVE_KEY, String(autoSaveOnEndDay));
+        });
+    }
+
+    requestAnimationFrame(animateChart);
+
+    function updateActiveTaskTimer() {
+        let totalDayMs = 0;
+        data.tasks.forEach(t => {
+            if (t.isActive) totalDayMs += getTaskElapsedMs(t);
+            else totalDayMs += (t.totalMs || 0);
+        });
+        currentTaskTimeEl.classList.remove("text-rounded-green");
+        if (isRoundingEnabled) {
+            const displayTotalMs = getRoundedMs(totalDayMs);
+            currentTaskTimeEl.classList.add("text-rounded-green");
+            currentTaskTimeEl.innerHTML = formatDuration(displayTotalMs, false);
+        } else {
+            if (totalDayMs > 0) {
+                currentTaskTimeEl.innerHTML = formatColoredDuration(totalDayMs);
+            } else {
+                currentTaskTimeEl.innerHTML = `<span class="time-digit-neutral">00</span>:<span class="time-digit-neutral">00</span>:<span class="time-digit-neutral">00</span>`;
+            }
+        }
+        const activeTask = getActiveTask();
+        if (activeTask) {
+            const li = taskListEl.querySelector(`.task-list-item[data-id="${activeTask.id}"]`);
+            if (li) {
+                const timeSpan = li.querySelector(".task-time");
+                if (timeSpan) {
+                    const startLabel = formatTimeOfDay(activeTask.firstStartAt || activeTask.createdAt || activeTask.lastStartMs);
+                    let rawMs = getTaskElapsedMs(activeTask);
+                    let displayMs = rawMs;
+                    let isRounded = false;
+                    if (isRoundingEnabled) {
+                        displayMs = getRoundedMs(rawMs);
+                        isRounded = true;
+                    }
+                    if (isRounded) timeSpan.classList.add('text-rounded');
+                    else timeSpan.classList.remove('text-rounded');
+                    const elapsed = formatDuration(displayMs, false);
+                    timeSpan.textContent = `${startLabel} – ${elapsed}`;
+                }
+            }
+        }
+    }
+
+    setInterval(() => {
+        updateCurrentTimeDisplay();
+        updateActiveTaskTimer(); 
+        updateTimelineNowDot();
+        checkOverdueActiveTask();
+    }, 1000);
+</script>
+
+</body>
+</html>
