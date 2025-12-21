@@ -24,4 +24,4 @@ All intellectual property rights remain the exclusive property of the
 copyright holder.
 
 
-Pages website: 
+Pages website: https://granbim.github.io/BIM-Timef-ring/
