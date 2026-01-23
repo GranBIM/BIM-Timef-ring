@@ -260,7 +260,24 @@
         }
         .suggestion-delete:hover { color: #ef4444; }
 
-        .helper-text {
+        
+
+        .suggestion-actions{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            flex-shrink: 0;
+        }
+        .suggestion-edit{
+            margin-left: 0.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+        .suggestion-edit:hover{ color: var(--dot-green); }
+.helper-text {
             font-size: 0.8rem;
             color: #6b7280;
             margin-top: 0.25rem;
@@ -688,7 +705,31 @@
         .task-selected { background: rgba(37,99,235,0.12); }
         .task-active { font-weight: 600; }
 
-        #youtubeButton:not(:disabled):hover {
+        /* Green text logic for Arbeidsliste (dagens)
+           - Default: active task is green
+           - Temporary (when a different task is clicked): active becomes normal, selected becomes green for 10s
+        */
+        .task-list-item.task-active{
+            color: var(--dot-green);
+        }
+        .task-list-item.task-active .task-time{
+            color: var(--dot-green);
+        }
+
+        body.temp-task-selection .task-list-item.task-active{
+            color: inherit;
+        }
+        body.temp-task-selection .task-list-item.task-active .task-time{
+            color: inherit;
+        }
+        body.temp-task-selection .task-list-item.task-selected{
+            color: var(--dot-green);
+        }
+        body.temp-task-selection .task-list-item.task-selected .task-time{
+            color: var(--dot-green);
+        }
+
+#youtubeButton:not(:disabled):hover {
             color: var(--dot-green);
         }
 
@@ -1303,21 +1344,27 @@ if (El && archiveListEl) {
                        .replace(/'/g, "&#039;");
         };
 
+
+        const roundingOn = isRoundingEnabled || (toggleRoundingButtonEl && toggleRoundingButtonEl.classList.contains("btn-rounding-active"));
+
         const plainText = archive.tasks.map(t => {
             let ms = t.totalMs || 0;
-            if (isRoundingEnabled) ms = getRoundedMs(ms);
+            if (roundingOn) ms = getRoundedMs(ms);
             const timeStr = formatDuration(ms, false);
             const comment = t.comment || "";
-            return `${t.name}\n${timeStr}\n-\n${comment}`;
+            return `${t.name}
+${timeStr}
+${comment}
+-`;
         }).join("\n\n");
 
         const htmlContent = archive.tasks.map(t => {
             let ms = t.totalMs || 0;
-            if (isRoundingEnabled) ms = getRoundedMs(ms);
+            if (roundingOn) ms = getRoundedMs(ms);
             const timeStr = formatDuration(ms, false);
             const safeName = escapeHtml(t.name);
             const safeComment = escapeHtml(t.comment || "").replace(/\n/g, "<br>");
-            return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>-<br>${safeComment}</div>`;
+            return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>${safeComment}<br>-</div>`;
         }).join("");
 
         const clipboardItem = new ClipboardItem({
@@ -1354,7 +1401,7 @@ setInterval(() => {
     <div class="header-right">
         <button id="themeToggleButton" class="btn-secondary" type="button" title="Bytt mellom lys, mørk og svart modus">Darkmode</button>
         <button id="profileButton" class="btn-secondary" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Brukerprofil</button>
-        <div style="margin-top:0.25rem;">Utviklet av Mathias Weiseth Gran, BIM Tekniker</div>
+        <div style="margin-top:0.25rem;">Utviklet av Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 23.01.2026</div>
     </div>
 </header>
 
@@ -1543,11 +1590,9 @@ setInterval(() => {
         <div style="margin-top: 1rem; border-top: 1px solid var(--border-soft); padding-top: 1rem; text-align: center;">
             <button id="youtubeButton" class="btn-secondary" style="width: 100%;">Se instruksjonsvideo</button>
         </div>
-
-        <div class="modal-footer">
-            <button id="settingsDoneButton" class="modal-button-primary">Ferdig</button>
-        </div>
-    </div>
+    
+        <div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC = lukk og lagre</div>
+</div>
 </div>
 
 <div id="deleteProfileOverlay" class="overlay">
@@ -1571,7 +1616,12 @@ setInterval(() => {
         <button class="modal-close" id="projectCloseButton">&times;</button>
         <h2>Prosjektnummer</h2>
         <p>Legg inn prosjektnummer for prosjektet:</p>
+        <p class="helper-text" style="margin-top:0.25rem;">Prosjektnummer kan ignoreres eller føres inn senere med blyant knappen</p>
         <p><strong id="projectTaskName"></strong></p>
+
+        <div class="modal-row" id="projectNameEditRow" style="width:100%; display:none;">
+            <input id="projectNameEditInput" class="modal-input" type="text" placeholder="Prosjektnavn …" />
+        </div>
 
         <div class="modal-row" style="width:100%;">
             <input id="projectNumberInput" class="modal-input" type="text" placeholder="Prosjektnummer …" />
@@ -1753,6 +1803,7 @@ setInterval(() => {
     };
 
     let selectedTaskId = null;
+    let tempTaskSelectionTimer = null;
     let overduePopupShown = false;
     let endDayPressedAtMs = null;
 
@@ -1812,7 +1863,14 @@ setInterval(() => {
     const projectConfirmButtonEl = document.getElementById("projectConfirmButton");
     const projectTaskNameEl = document.getElementById("projectTaskName");
     const projectNumberInputEl = document.getElementById("projectNumberInput");
+    const projectNameEditInputEl = document.getElementById("projectNameEditInput");
+    const projectNameEditRowEl = document.getElementById("projectNameEditRow");
 
+    const projectConfirmDefaultText = projectConfirmButtonEl ? projectConfirmButtonEl.textContent : "Start";
+    let projectPopupMode = "start"; // "start" | "edit"
+
+
+    let projectEditOriginalName = null;
     const overdueOverlayEl = document.getElementById("overdueOverlay");
     const overdueTaskNameEl = document.getElementById("overdueTaskName");
     const overdueHourEl = document.getElementById("overdueHour");
@@ -2599,9 +2657,23 @@ setInterval(() => {
             const labelSpan = document.createElement("span");
             labelSpan.className = "suggestion-label";
             labelSpan.textContent = name;
+            const actions = document.createElement("span");
+            actions.className = "suggestion-actions";
+
+            const editBtn = document.createElement("button");
+            editBtn.className = "suggestion-edit";
+            editBtn.textContent = "✎";
+            editBtn.title = "Rediger prosjektnummer";
+            editBtn.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showProjectEditPopup(name);
+            });
+
             const deleteBtn = document.createElement("button");
             deleteBtn.className = "suggestion-delete";
             deleteBtn.textContent = "X";
+            deleteBtn.title = "Fjern fra historikk";
             deleteBtn.addEventListener("mousedown", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -2609,8 +2681,12 @@ setInterval(() => {
                 renderSuggestions();
                 taskInputEl.focus();
             });
+
+            actions.appendChild(editBtn);
+            actions.appendChild(deleteBtn);
+
             item.appendChild(labelSpan);
-            item.appendChild(deleteBtn);
+            item.appendChild(actions);
             item.addEventListener("mousedown", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -2639,6 +2715,50 @@ setInterval(() => {
         else delete data.projectNumbers[key];
     }
 
+
+
+    function renameTaskNameEverywhere(oldName, newName) {
+        const oldKey = normalizeTaskName(oldName);
+        const newKey = normalizeTaskName(newName);
+        if (!oldKey || !newKey) return;
+        if (oldKey === newKey) return;
+
+        data.tasks.forEach(t => {
+            if (normalizeTaskName(t.name) === oldKey) t.name = newName;
+        });
+
+        (data.archives || []).forEach(a => {
+            (a.tasks || []).forEach(t => {
+                if (normalizeTaskName(t.name) === oldKey) t.name = newName;
+            });
+        });
+
+        if (Array.isArray(data.taskNames)) {
+            data.taskNames = data.taskNames.map(n => (normalizeTaskName(n) === oldKey ? newName : n));
+
+            const seen = new Set();
+            data.taskNames = data.taskNames.filter(n => {
+                const k = normalizeTaskName(n);
+                if (!k) return false;
+                if (seen.has(k)) return false;
+                seen.add(k);
+                return true;
+            });
+        }
+
+        if (data.projectNumbers && typeof data.projectNumbers === "object") {
+            const oldVal = data.projectNumbers[oldKey];
+            if (oldVal && !data.projectNumbers[newKey]) {
+                data.projectNumbers[newKey] = oldVal;
+            }
+            delete data.projectNumbers[oldKey];
+        }
+
+        if (selectedTaskId) {
+            const exists = data.tasks.some(t => t.id === selectedTaskId);
+            if (!exists) selectedTaskId = null;
+        }
+    }
     function findTaskByName(name) {
         const key = normalizeTaskName(name);
         if (!key) return null;
@@ -2785,22 +2905,85 @@ setInterval(() => {
     }
 
     function showProjectPopup(taskName) {
+        projectPopupMode = "start";
+        projectEditOriginalName = null;
+        if (projectNameEditRowEl) projectNameEditRowEl.style.display = "none";
+        if (projectNameEditInputEl) projectNameEditInputEl.value = "";
+        if (projectConfirmButtonEl) projectConfirmButtonEl.textContent = projectConfirmDefaultText;
+
         pendingNewTaskName = (taskName || "").trim();
         if (!pendingNewTaskName) return;
         projectTaskNameEl.textContent = pendingNewTaskName;
         projectNumberInputEl.value = getStoredProjectNumberForName(pendingNewTaskName) || "";
         projectOverlayEl.classList.add("show");
-        setTimeout(() => projectNumberInputEl.focus(), 0);
+        setTimeout(() => {
+            if (projectPopupMode === "edit" && projectNameEditInputEl) projectNameEditInputEl.focus();
+            else projectNumberInputEl.focus();
+        }, 0);
     }
+
+    // Opens the same popup, but only for editing the stored project number (no task start)
+    function showProjectEditPopup(taskName) {
+        projectPopupMode = "edit";
+        if (projectConfirmButtonEl) projectConfirmButtonEl.textContent = "Lagre";
+
+        pendingNewTaskName = (taskName || "").trim();
+        projectEditOriginalName = pendingNewTaskName;
+        if (projectNameEditRowEl) projectNameEditRowEl.style.display = "block";
+        if (projectNameEditInputEl) projectNameEditInputEl.value = pendingNewTaskName;
+        if (!pendingNewTaskName) return;
+        projectTaskNameEl.textContent = pendingNewTaskName;
+        projectNumberInputEl.value = getStoredProjectNumberForName(pendingNewTaskName) || "";
+        projectOverlayEl.classList.add("show");
+        setTimeout(() => {
+            if (projectPopupMode === "edit" && projectNameEditInputEl) projectNameEditInputEl.focus();
+            else projectNumberInputEl.focus();
+        }, 0);
+    }
+
     function hideProjectPopup() {
         projectOverlayEl.classList.remove("show");
         pendingNewTaskName = null;
+        projectEditOriginalName = null;
         projectNumberInputEl.value = "";
+        if (projectNameEditInputEl) projectNameEditInputEl.value = "";
+        if (projectNameEditRowEl) projectNameEditRowEl.style.display = "none";
+        projectPopupMode = "start";
+        if (projectConfirmButtonEl) projectConfirmButtonEl.textContent = projectConfirmDefaultText;
     }
+
     function confirmProjectPopup() {
         if (!pendingNewTaskName) return;
         const projectNo = (projectNumberInputEl.value || "").trim();
-        startNewTask(pendingNewTaskName, projectNo);
+
+        if (projectPopupMode === "edit") {
+            const newName = (projectNameEditInputEl ? projectNameEditInputEl.value : pendingNewTaskName || "").trim();
+            const finalName = newName || pendingNewTaskName;
+
+            if (projectEditOriginalName && finalName && normalizeTaskName(finalName) !== normalizeTaskName(projectEditOriginalName)) {
+                renameTaskNameEverywhere(projectEditOriginalName, finalName);
+            }
+
+            setStoredProjectNumberForName(finalName, projectNo);
+
+            const key = normalizeTaskName(finalName);
+            if (key) {
+                data.tasks.forEach(t => {
+                    if (normalizeTaskName(t.name) === key) t.projectNumber = projectNo;
+                });
+                (data.archives || []).forEach(a => {
+                    (a.tasks || []).forEach(t => {
+                        if (normalizeTaskName(t.name) === key) t.projectNumber = projectNo;
+                    });
+                });
+            }
+
+            saveToStorage();
+            updateUI();
+            hideProjectPopup();
+            return;
+        }
+startNewTask(pendingNewTaskName, projectNo);
         hideProjectPopup();
     }
 
@@ -3429,6 +3612,14 @@ setInterval(() => {
     function updateUI() {
         normalizeActivePosition();
         const activeTask = getActiveTask();
+        // Reset temporary selection mode if it no longer applies
+        if (document.body.classList.contains("temp-task-selection")) {
+            if (!selectedTaskId || !activeTask || selectedTaskId === activeTask.id) {
+                if (tempTaskSelectionTimer) { clearTimeout(tempTaskSelectionTimer); tempTaskSelectionTimer = null; }
+                document.body.classList.remove("temp-task-selection");
+            }
+        }
+
         const currentTaskCardEl = document.getElementById("currentTaskCard");
         if (currentTaskCardEl) {
             currentTaskCardEl.classList.remove("card-active-mode", "card-active-mode-resumed");
@@ -4155,9 +4346,8 @@ setInterval(() => {
             timelineSettings: dayTimelineSettings
         };
         const jsonStr = JSON.stringify(payload, null, 2);
-        const safeName = currentProfile.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        const dateStr = new Date().toISOString().split('T')[0];
-        const filename = `backup_${safeName}_${dateStr}.json`;
+        const safeName = currentProfile.replace(/[^a-z0-9]/gi, '_');
+        const filename = `${safeName}.json`;
 
         if (window.showSaveFilePicker) {
             try {
@@ -4286,6 +4476,17 @@ setInterval(() => {
     
     if (profileButtonEl) profileButtonEl.addEventListener("click", openSettingsModal);
     if (settingsCloseButtonEl) settingsCloseButtonEl.addEventListener("click", closeSettingsModal);
+
+    // ESC: lukk og lagre når profil/innstillinger er åpne
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (!settingsOverlayEl || !settingsOverlayEl.classList.contains("show")) return;
+        e.preventDefault();
+        saveToStorage();
+        saveProfiles();
+        saveDayTimelineSettings();
+        closeSettingsModal();
+    });
     if (settingsDoneButtonEl) settingsDoneButtonEl.addEventListener("click", closeSettingsModal);
     if (createProfileButtonEl) createProfileButtonEl.addEventListener("click", createNewProfile);
     if (deleteProfileButtonEl) {
@@ -4328,20 +4529,25 @@ setInterval(() => {
                 if (!text) return "";
                 return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
             };
+
+            const roundingOn = isRoundingEnabled || (toggleRoundingButtonEl && toggleRoundingButtonEl.classList.contains("btn-rounding-active"));
             const plainText = tasksToCopy.map(t => {
                 let ms = t.isActive ? getTaskElapsedMs(t) : (t.totalMs || 0);
-                if (isRoundingEnabled) ms = getRoundedMs(ms);
+                if (roundingOn) ms = getRoundedMs(ms);
                 const timeStr = formatDuration(ms, false);
                 const comment = t.comment || "";
-                return `${t.name}\n${timeStr}\n-\n${comment}`;
+                return `${t.name}
+${timeStr}
+${comment}
+-`;
             }).join("\n\n");
             const htmlContent = tasksToCopy.map(t => {
                 let ms = t.isActive ? getTaskElapsedMs(t) : (t.totalMs || 0);
-                if (isRoundingEnabled) ms = getRoundedMs(ms);
+                if (roundingOn) ms = getRoundedMs(ms);
                 const timeStr = formatDuration(ms, false);
                 const safeName = escapeHtml(t.name);
                 const safeComment = escapeHtml(t.comment || "").replace(/\n/g, "<br>"); 
-                return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>-<br>${safeComment}</div>`;
+                return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>${safeComment}<br>-</div>`;
             }).join("");
             try {
                 const clipboardItem = new ClipboardItem({
@@ -4533,8 +4739,10 @@ setInterval(() => {
     });
     taskInputEl.addEventListener("input", () => {
         if (selectedTaskId !== null) { selectedTaskId = null; }
-        updateUI(); 
-        suggestionIndex = -1;
+        if (tempTaskSelectionTimer) { clearTimeout(tempTaskSelectionTimer); tempTaskSelectionTimer = null; }
+        document.body.classList.remove("temp-task-selection");
+        updateUI();
+suggestionIndex = -1;
         renderSuggestions();
     });
     taskInputEl.addEventListener("focus", () => { suggestionIndex = -1; renderSuggestions(); });
@@ -4549,9 +4757,37 @@ setInterval(() => {
         if (!id) return;
         const task = data.tasks.find(t => t.id === id);
         if (!task) return;
-        if (task.isActive) return;
         taskClickTimer = setTimeout(() => {
+            // Allow selecting the active task as well
+            if (task.isActive) {
+                selectedTaskId = (selectedTaskId === id) ? null : id;
+                if (tempTaskSelectionTimer) { clearTimeout(tempTaskSelectionTimer); tempTaskSelectionTimer = null; }
+                document.body.classList.remove("temp-task-selection");
+                updateUI();
+                taskClickTimer = null;
+                return;
+            }
+
             selectedTaskId = (selectedTaskId === id) ? null : id;
+
+            // Temporary text color logic (10s):
+            // If a non-active task is selected, show selected in green and mute active green.
+            if (tempTaskSelectionTimer) {
+                clearTimeout(tempTaskSelectionTimer);
+                tempTaskSelectionTimer = null;
+            }
+            const active = getActiveTask();
+            if (selectedTaskId && active && selectedTaskId !== active.id) {
+                document.body.classList.add("temp-task-selection");
+                tempTaskSelectionTimer = setTimeout(() => {
+                    document.body.classList.remove("temp-task-selection");
+                    tempTaskSelectionTimer = null;
+                    updateUI();
+                }, 10000);
+            } else {
+                document.body.classList.remove("temp-task-selection");
+            }
+
             updateUI();
             taskClickTimer = null;
         }, 220);
@@ -4715,19 +4951,22 @@ if (El && archiveListEl) {
 
         const plainText = archive.tasks.map(t => {
             let ms = t.totalMs || 0;
-            if (isRoundingEnabled) ms = getRoundedMs(ms);
+            if (roundingOn) ms = getRoundedMs(ms);
             const timeStr = formatDuration(ms, false);
             const comment = t.comment || "";
-            return `${t.name}\n${timeStr}\n-\n${comment}`;
+            return `${t.name}
+${timeStr}
+${comment}
+-`;
         }).join("\n\n");
 
         const htmlContent = archive.tasks.map(t => {
             let ms = t.totalMs || 0;
-            if (isRoundingEnabled) ms = getRoundedMs(ms);
+            if (roundingOn) ms = getRoundedMs(ms);
             const timeStr = formatDuration(ms, false);
             const safeName = escapeHtml(t.name);
             const safeComment = escapeHtml(t.comment || "").replace(/\n/g, "<br>");
-            return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>-<br>${safeComment}</div>`;
+            return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>${safeComment}<br>-</div>`;
         }).join("");
 
         const clipboardItem = new ClipboardItem({
