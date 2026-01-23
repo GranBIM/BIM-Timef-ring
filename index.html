@@ -1230,7 +1230,30 @@
             background-color: var(--dot-green);
         }
 
-    </style>
+    
+@keyframes blink-blue-copy {
+    0% { box-shadow: 0 0 0 0 rgba(37,99,235,0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(37,99,235,0); }
+    100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); }
+}
+.copy-ready-blink {
+    animation: blink-blue-copy 1.2s ease-in-out 1;
+}
+
+#:not([disabled]):hover {
+    transform: translateY(-1px);
+}
+
+
+/* Ensure comment line breaks are visible when list is expanded */
+.task-list.expanded .task-comment,
+.task-list.expanded .task-comment-box,
+.task-list.expanded textarea,
+.task-list.expanded .comment {
+    white-space: pre-wrap;
+}
+
+</style>
 <script type="importmap">
 {
   "imports": {
@@ -1239,6 +1262,86 @@
     "recharts": "https://esm.sh/recharts@^3.6.0"
   }
 }
+
+// Enable copy button when selecting a historical day
+if (archiveListEl && copyOneNoteButtonEl) {
+    archiveListEl.addEventListener("click", (e) => {
+        archiveListEl.querySelectorAll(".archive-summary").forEach(el => el.classList.remove("selected"));
+        const dayItem = e.target.closest(".archive-summary");
+        if (!dayItem) return;
+
+        selectedArchiveForCopy = dayItem.getAttribute("data-archive-id");
+        const archive = data.archives.find(a => a.id === selectedArchiveForCopy);
+        copyOverrideTasks = archive ? archive.tasks : null;
+
+        copyOneNoteButtonEl.disabled = false;
+        copyOneNoteButtonEl.classList.remove("copy-ready-blink");
+        void copyOneNoteButtonEl.offsetWidth;
+        copyOneNoteButtonEl.classList.add("copy-ready-blink");
+        setTimeout(() => {
+            copyOneNoteButtonEl.classList.remove("copy-ready-blink");
+        }, 1300);
+    });
+}
+
+// Dedicated OneNote copy for history (day-level)
+if (El && archiveListEl) {
+    El.addEventListener("click", () => {
+        const selectedDay = archiveListEl.querySelector(".archive-summary.selected");
+        if (!selectedDay) return;
+
+        const archiveId = selectedDay.getAttribute("data-archive-id");
+        const archive = data.archives.find(a => a.id === archiveId);
+        if (!archive || !Array.isArray(archive.tasks)) return;
+
+        const escapeHtml = (text) => {
+            if (!text) return "";
+            return text.replace(/&/g, "&amp;")
+                       .replace(/</g, "&lt;")
+                       .replace(/>/g, "&gt;")
+                       .replace(/"/g, "&quot;")
+                       .replace(/'/g, "&#039;");
+        };
+
+        const plainText = archive.tasks.map(t => {
+            let ms = t.totalMs || 0;
+            if (isRoundingEnabled) ms = getRoundedMs(ms);
+            const timeStr = formatDuration(ms, false);
+            const comment = t.comment || "";
+            return `${t.name}\n${timeStr}\n-\n${comment}`;
+        }).join("\n\n");
+
+        const htmlContent = archive.tasks.map(t => {
+            let ms = t.totalMs || 0;
+            if (isRoundingEnabled) ms = getRoundedMs(ms);
+            const timeStr = formatDuration(ms, false);
+            const safeName = escapeHtml(t.name);
+            const safeComment = escapeHtml(t.comment || "").replace(/\n/g, "<br>");
+            return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>-<br>${safeComment}</div>`;
+        }).join("");
+
+        const clipboardItem = new ClipboardItem({
+            "text/plain": new Blob([plainText], { type: "text/plain" }),
+            "text/html": new Blob([htmlContent], { type: "text/html" })
+        });
+
+        navigator.clipboard.write([clipboardItem]);
+    });
+}
+
+
+
+
+// Auto-trigger "Tøm og arkiver" when 10h is reached AFTER end day is pressed
+setInterval(() => {
+    if (!endDayPressedAtMs) return;
+    if (getTotalWorkedMsToday() < 10 * 60 * 60 * 1000) return;
+
+    // Trigger the exact existing flow
+    clearTodayConfirmButtonEl.click();
+    endDayPressedAtMs = null;
+}, 1000);
+
 </script>
 </head>
 <body>
@@ -1276,7 +1379,14 @@
         <div id="dayTimelineCurtain" class="timeline-curtain">
             <div class="timeline-curtain-header">
                 <div id="dayTimelineCurtainTitle" class="timeline-curtain-title">Juster tid</div>
-                <button id="dayTimelineCurtainClose" type="button" class="timeline-curtain-close">Lukk</button>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem;">
+                    <button id="dayTimelineResetButton" type="button" class="timeline-curtain-close">
+                        Tilbakestill tidslinjen
+                    </button>
+                    <button id="dayTimelineCurtainClose" type="button" class="timeline-curtain-close">
+                        Lukk
+                    </button>
+                </div>
             </div>
 
             <div class="timeline-curtain-row">
@@ -1367,6 +1477,7 @@
     <div class="card-header">
         <span><strong>Historikk</strong></span>
         <div class="card-header-buttons">
+            
             <button id="exportButton" class="btn-secondary" title="Last ned all historikk som CSV">Eksporter til Excel</button>
             <button id="clearArchivesButton" class="btn-secondary" title="Slett all historikk permanent">Slett historikk</button>
         </div>
@@ -1643,6 +1754,7 @@
 
     let selectedTaskId = null;
     let overduePopupShown = false;
+    let endDayPressedAtMs = null;
 
     let suggestionIndex = -1;
     let filteredSuggestions = [];
@@ -1655,6 +1767,11 @@
 
     let pendingNewTaskName = null;
     let timelineMode = localStorage.getItem('taskTimeTracker_timeline_mode') || 'setup';
+
+    function getTotalWorkedMsToday(){
+        return data.tasks.reduce((s,t)=>s+(t.totalMs||0),0);
+    }
+
 
     const timeNowEl = document.getElementById("timeNow");
     const taskInputEl = document.getElementById("taskInput");
@@ -1684,6 +1801,7 @@
     const toggleRoundingButtonEl = document.getElementById("toggleRoundingButton");
     
     const copyOneNoteButtonEl = document.getElementById("copyOneNoteButton");
+    const El = document.getElementById("");
 
     const resizeHandleEl = document.getElementById("resizeHandle");
     const taskListWrapperEl = document.querySelector(".task-list-wrapper");
@@ -1782,6 +1900,23 @@
     const dayTimelineCurtainEl = document.getElementById("dayTimelineCurtain");
     const dayTimelineCurtainTitleEl = document.getElementById("dayTimelineCurtainTitle");
     const dayTimelineCurtainCloseEl = document.getElementById("dayTimelineCurtainClose");
+    const dayTimelineResetButtonEl = document.getElementById("dayTimelineResetButton");
+
+    if (dayTimelineResetButtonEl) {
+        dayTimelineResetButtonEl.addEventListener("click", () => {
+            dayTimelineSettings = {
+                dayStartMin: 7 * 60,
+                dayEndMin: 17 * 60,
+                coreStartMin: 9 * 60,
+                coreEndMin: 15 * 60,
+                lunchStartMin: 11 * 60 + 30,
+                lunchEndMin: 12 * 60
+            };
+            localStorage.removeItem(getTimelineKey());
+            renderDayTimeline();
+        });
+    }
+
     const dayTimelineFromEl = document.getElementById("dayTimelineFrom");
     const dayTimelineToEl = document.getElementById("dayTimelineTo");
     const dayTimelineCurtainHintEl = document.getElementById("dayTimelineCurtainHint");
@@ -1799,6 +1934,9 @@
     let dayTimelineBlockChange = false;
     let isTaskListExpanded = false;
     let isRoundingEnabled = false;
+    let selectedArchiveForCopy = null;
+    let copyOverrideTasks = null;
+    let copySourceTasks = null;
 
     function loadTheme() {
         const t = localStorage.getItem(THEME_KEY);
@@ -2603,7 +2741,8 @@
     }
 
     function clearAndArchiveTasks(archiveBaseTs = null) {
-        if (data.tasks.length === 0) return;
+        const tasksToCopy = copySourceTasks || data.tasks;
+            if (tasksToCopy.length === 0) return;
         const now = new Date();
         const archiveTimestamp = (archiveBaseTs && !isNaN(archiveBaseTs)) ? archiveBaseTs : now.getTime();
         const archiveDateObj = new Date(archiveTimestamp);
@@ -3626,7 +3765,8 @@
         updateUI();
     }
     function showClearTodayPopup() {
-        if (data.tasks.length === 0) return;
+        const tasksToCopy = copySourceTasks || data.tasks;
+            if (tasksToCopy.length === 0) return;
         clearTodayOverlayEl.classList.add("show");
     }
     function hideClearTodayPopup() { clearTodayOverlayEl.classList.remove("show"); }
@@ -4173,19 +4313,29 @@
 
     if (copyOneNoteButtonEl) {
         copyOneNoteButtonEl.addEventListener("click", () => {
-            if (data.tasks.length === 0) return;
+             let originalTasks = null;
+             if (selectedArchiveForCopy) {
+                 const archive = data.archives.find(a => a.id === selectedArchiveForCopy);
+                 if (archive && Array.isArray(archive.tasks)) {
+                     originalTasks = data.tasks;
+                     data.tasks = archive.tasks;
+                 }
+             }
+
+            const tasksToCopy = copySourceTasks || data.tasks;
+            if (tasksToCopy.length === 0) return;
             const escapeHtml = (text) => {
                 if (!text) return "";
                 return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
             };
-            const plainText = data.tasks.map(t => {
+            const plainText = tasksToCopy.map(t => {
                 let ms = t.isActive ? getTaskElapsedMs(t) : (t.totalMs || 0);
                 if (isRoundingEnabled) ms = getRoundedMs(ms);
                 const timeStr = formatDuration(ms, false);
                 const comment = t.comment || "";
                 return `${t.name}\n${timeStr}\n-\n${comment}`;
             }).join("\n\n");
-            const htmlContent = data.tasks.map(t => {
+            const htmlContent = tasksToCopy.map(t => {
                 let ms = t.isActive ? getTaskElapsedMs(t) : (t.totalMs || 0);
                 if (isRoundingEnabled) ms = getRoundedMs(ms);
                 const timeStr = formatDuration(ms, false);
@@ -4289,6 +4439,7 @@
         }
     });
     endButtonEl.addEventListener("click", () => {
+        endDayPressedAtMs = Date.now();
         finalizeActiveTask();
         saveToStorage();
         updateUI();
@@ -4521,10 +4672,89 @@
         updateTimelineNowDot();
         checkOverdueActiveTask();
     }, 1000);
+
+// Enable copy button when selecting a historical day
+if (archiveListEl && copyOneNoteButtonEl) {
+    archiveListEl.addEventListener("click", (e) => {
+        archiveListEl.querySelectorAll(".archive-summary").forEach(el => el.classList.remove("selected"));
+        const dayItem = e.target.closest(".archive-summary");
+        if (!dayItem) return;
+
+        selectedArchiveForCopy = dayItem.getAttribute("data-archive-id");
+        const archive = data.archives.find(a => a.id === selectedArchiveForCopy);
+        copyOverrideTasks = archive ? archive.tasks : null;
+
+        copyOneNoteButtonEl.disabled = false;
+        copyOneNoteButtonEl.classList.remove("copy-ready-blink");
+        void copyOneNoteButtonEl.offsetWidth;
+        copyOneNoteButtonEl.classList.add("copy-ready-blink");
+        setTimeout(() => {
+            copyOneNoteButtonEl.classList.remove("copy-ready-blink");
+        }, 1300);
+    });
+}
+
+// Dedicated OneNote copy for history (day-level)
+if (El && archiveListEl) {
+    El.addEventListener("click", () => {
+        const selectedDay = archiveListEl.querySelector(".archive-summary.selected");
+        if (!selectedDay) return;
+
+        const archiveId = selectedDay.getAttribute("data-archive-id");
+        const archive = data.archives.find(a => a.id === archiveId);
+        if (!archive || !Array.isArray(archive.tasks)) return;
+
+        const escapeHtml = (text) => {
+            if (!text) return "";
+            return text.replace(/&/g, "&amp;")
+                       .replace(/</g, "&lt;")
+                       .replace(/>/g, "&gt;")
+                       .replace(/"/g, "&quot;")
+                       .replace(/'/g, "&#039;");
+        };
+
+        const plainText = archive.tasks.map(t => {
+            let ms = t.totalMs || 0;
+            if (isRoundingEnabled) ms = getRoundedMs(ms);
+            const timeStr = formatDuration(ms, false);
+            const comment = t.comment || "";
+            return `${t.name}\n${timeStr}\n-\n${comment}`;
+        }).join("\n\n");
+
+        const htmlContent = archive.tasks.map(t => {
+            let ms = t.totalMs || 0;
+            if (isRoundingEnabled) ms = getRoundedMs(ms);
+            const timeStr = formatDuration(ms, false);
+            const safeName = escapeHtml(t.name);
+            const safeComment = escapeHtml(t.comment || "").replace(/\n/g, "<br>");
+            return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>-<br>${safeComment}</div>`;
+        }).join("");
+
+        const clipboardItem = new ClipboardItem({
+            "text/plain": new Blob([plainText], { type: "text/plain" }),
+            "text/html": new Blob([htmlContent], { type: "text/html" })
+        });
+
+        navigator.clipboard.write([clipboardItem]);
+    });
+}
+
+
+
+
+// Auto-trigger "Tøm og arkiver" when 10h is reached AFTER end day is pressed
+setInterval(() => {
+    if (!endDayPressedAtMs) return;
+    if (getTotalWorkedMsToday() < 10 * 60 * 60 * 1000) return;
+
+    // Trigger the exact existing flow
+    clearTodayConfirmButtonEl.click();
+    endDayPressedAtMs = null;
+}, 1000);
+
 </script>
 
 </body>
 
 </html>
-
 
