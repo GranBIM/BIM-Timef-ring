@@ -1294,6 +1294,43 @@
     white-space: pre-wrap;
 }
 
+
+        .btn-delete-time {
+            opacity: 0.45;
+            filter: saturate(0.7);
+            cursor: pointer;
+        }
+        .btn-delete-time:hover {
+            opacity: 0.85;
+            background-color: var(--danger) !important;
+            color: #ffffff !important;
+            border-color: var(--danger-border) !important;
+        }
+
+
+        .modal-button-primary.danger{
+            background-color: var(--danger) !important;
+            color: #ffffff !important;
+            border-color: var(--danger-border) !important;
+        }
+        .modal-button-primary.danger:hover{
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.20);
+        }
+
+        /* Subtract-time mode: make stepper button red (override default green) */
+        .btn-stepper.danger-stepper{
+            background-color: var(--danger) !important;
+            color: #ffffff !important;
+        }
+        .btn-stepper.danger-stepper:hover{
+            background-color: var(--danger) !important;
+        }
+
+        /* Utvid liste: ensure expansion always affects visible scroll container */
+        .task-list-wrapper.expanded .task-list{
+            max-height: none !important;
+            overflow-y: visible;
+        }
 </style>
 <script type="importmap">
 {
@@ -1486,7 +1523,7 @@ setInterval(() => {
             </div>
             <div id="currentTaskName" class="current-task-title">Ingen aktivt prosjekt</div>
             <div class="current-task-actions">
-                <button id="transferTimeButton" class="btn-secondary" disabled title="Flytt tid mellom prosjekter">Overfør tid</button>
+                <button id="transferTimeButton" class="btn-secondary" disabled title="Flytt tid mellom prosjekter">Overfør tid mellom</button>
                 <button id="adjustStartButton" class="btn-secondary" disabled title="Legg til tid på aktivt prosjekt">Tilfør tid</button>
             </div>
             <div class="inline-note" id="currentTaskHint"></div>
@@ -1700,7 +1737,7 @@ setInterval(() => {
 <div id="transferOverlay" class="overlay">
     <div class="modal">
         <button class="modal-close" id="transferCloseButton">&times;</button>
-        <h2>Overfør tid</h2>
+        <h2>Overfør tid mellom</h2>
         <p>
             Velg «Fra prosjekt» og «Til prosjekt». Det er ikke mulig å overføre mer tid enn det som er registrert på «Fra».
         </p>
@@ -1758,7 +1795,7 @@ setInterval(() => {
                     +15 min
                 </button>
             </div>
-            <div class="helper-text" style="text-align:center; margin-top:0.5rem;">
+            <div id="adjustStepperHelp" class="helper-text" style="text-align:center; margin-top:0.5rem;">
                 Enkeltrykk = +15 min<br>Dobbeltrykk = -15 min
             </div>
         </div>
@@ -1807,6 +1844,9 @@ setInterval(() => {
     let overduePopupShown = false;
     let endDayPressedAtMs = null;
 
+
+    let adjustPopupMode = "normal";
+    let adjustPopupTargetId = null;
     let suggestionIndex = -1;
     let filteredSuggestions = [];
 
@@ -1917,6 +1957,7 @@ setInterval(() => {
     const adjustAddTimeDisplayEl = document.getElementById("adjustAddTimeDisplay");
     const adjustTimeStepperBtnEl = document.getElementById("adjustTimeStepperBtn");
 
+    const adjustStepperHelpEl = document.getElementById("adjustStepperHelp");
     const restoreDayOverlayEl = document.getElementById("restoreDayOverlay");
     const restoreDayTextEl = document.getElementById("restoreDayText");
     const restoreDayCancelButtonEl = document.getElementById("restoreDayCancelButton");
@@ -3175,8 +3216,45 @@ startNewTask(pendingNewTaskName, projectNo);
     }
     function showAdjustStartPopup() {
         const active = getActiveTask();
-        if (!active) return;
-        
+
+        // Special mode: After "Avslutt dagens arbeid" – allow subtract-only time correction
+        if (!active) {
+            if (!(endDayPressedAtMs && data.tasks.length > 0)) return;
+
+            const fallbackId = (data.tasks[0] ? data.tasks[0].id : null);
+            const targetId = (selectedTaskId !== null) ? selectedTaskId : fallbackId;
+            const target = data.tasks.find(t => t.id === targetId) || null;
+            if (!target) return;
+
+            adjustPopupMode = "subtract";
+            adjustPopupTargetId = target.id;
+
+            addedMinutesBuffer = 0;
+            updateAddTimeDisplay();
+
+            adjustStartTitleEl.textContent = "Trekk fra tid";
+            adjustStartDescEl.textContent = "Trekk fra tid på valgt prosjekt.";
+
+            adjustStartModeTimeEl.style.display = "none";
+            adjustStartModeAddEl.style.display = "block";
+
+            if (adjustTimeStepperBtnEl) {
+                adjustTimeStepperBtnEl.textContent = "-15 min";
+                adjustTimeStepperBtnEl.classList.add("danger-stepper");
+                adjustTimeStepperBtnEl.title = "Enkeltrykk: -15 min | Dobbeltrykk: +15 min (angre)";
+            }
+            if (adjustStepperHelpEl) {
+                adjustStepperHelpEl.innerHTML = "Enkeltrykk = -15 min<br>Dobbeltrykk = +15 min (angre)";
+            }
+
+                        adjustStartOverlayEl.classList.add("show");
+            return;
+        }
+
+        adjustPopupMode = "normal";
+        adjustPopupTargetId = null;
+        if (adjustStartConfirmButtonEl) adjustStartConfirmButtonEl.classList.remove("danger");
+
         // Check if this is the ONLY task
         if (data.tasks.length === 1) {
             // MODE 1: Set Start Time
@@ -3196,7 +3274,16 @@ startNewTask(pendingNewTaskName, projectNo);
             // MODE 2: Add Duration
             addedMinutesBuffer = 0;
             updateAddTimeDisplay();
-            
+
+            if (adjustTimeStepperBtnEl) {
+                adjustTimeStepperBtnEl.classList.remove("danger-stepper");
+                adjustTimeStepperBtnEl.textContent = "+15 min";
+                adjustTimeStepperBtnEl.title = "Enkeltrykk: +15 min | Dobbeltrykk: -15 min";
+            }
+            if (adjustStepperHelpEl) {
+                adjustStepperHelpEl.innerHTML = "Enkeltrykk = +15 min<br>Dobbeltrykk = -15 min";
+            }
+
             adjustStartTitleEl.textContent = "Tilfør tid";
             adjustStartDescEl.textContent = "Juster tid på det aktive prosjektet.";
             
@@ -3206,11 +3293,24 @@ startNewTask(pendingNewTaskName, projectNo);
         
         adjustStartOverlayEl.classList.add("show");
     }
-    function hideAdjustStartPopup() { adjustStartOverlayEl.classList.remove("show"); }
+    function hideAdjustStartPopup() {
+        if (adjustStartConfirmButtonEl) adjustStartConfirmButtonEl.classList.remove("danger"); adjustStartOverlayEl.classList.remove("show"); }
     function adjustStartConfirm() {
         const active = getActiveTask();
-        if (!active) return;
-        
+        if (!active && adjustPopupMode !== "subtract") return;
+
+        if (adjustPopupMode === "subtract") {
+            const target = data.tasks.find(t => t.id === adjustPopupTargetId) || null;
+            if (!target) { hideAdjustStartPopup(); return; }
+            if (addedMinutesBuffer === 0) { hideAdjustStartPopup(); return; }
+            const msToReduce = addedMinutesBuffer * 60 * 1000;
+            reduceTimeFromTask(target, msToReduce);
+            saveToStorage();
+            updateUI();
+            hideAdjustStartPopup();
+            return;
+        }
+
         if (data.tasks.length === 1) {
             // MODE 1: Set Start Time Logic
             const h = parseInt(adjustStartHourEl.value, 10);
@@ -3662,12 +3762,13 @@ startNewTask(pendingNewTaskName, projectNo);
             transferTimeButtonEl.disabled = !canTransfer;
             const canAdjust = canAdjustStartForActive();
             adjustStartButtonEl.disabled = !canAdjust;
-            adjustStartButtonEl.classList.remove("btn-hover-blue", "btn-hover-green");
+            adjustStartButtonEl.classList.remove("btn-hover-blue", "btn-hover-green", "btn-delete-time");
             if (taskCount > 1) {
                 adjustStartButtonEl.textContent = "Tilfør tid";
                 adjustStartButtonEl.classList.add("btn-hover-green");
             } else {
                 adjustStartButtonEl.textContent = "Legg til starttid";
+                adjustStartButtonEl.title = "";
                 adjustStartButtonEl.classList.add("btn-hover-blue");
             }
             currentTaskHintEl.textContent = canAdjust
@@ -3681,9 +3782,17 @@ startNewTask(pendingNewTaskName, projectNo);
             endButtonEl.disabled = true;
             const canTransfer = data.tasks.length >= 2 && data.tasks.some(t => getTaskElapsedMs(t) > 0);
             transferTimeButtonEl.disabled = !canTransfer;
-            adjustStartButtonEl.disabled = true;
-            adjustStartButtonEl.classList.remove("btn-hover-blue", "btn-hover-green");
-            adjustStartButtonEl.textContent = "Legg til starttid"; 
+            adjustStartButtonEl.classList.remove("btn-hover-blue", "btn-hover-green", "btn-delete-time");
+            if (endDayPressedAtMs && data.tasks.length > 0) {
+                adjustStartButtonEl.disabled = false;
+                adjustStartButtonEl.classList.add("btn-delete-time");
+                adjustStartButtonEl.textContent = "Trekk fra tid";
+                adjustStartButtonEl.title = "Trekk fra tid på det markerte prosjektet";
+            } else {
+                adjustStartButtonEl.disabled = true;
+                adjustStartButtonEl.textContent = "Legg til starttid";
+                adjustStartButtonEl.title = "";
+            }
             currentTaskHintEl.textContent = "";
         }
         const anyComments = hasAnyCommentsInTasks();
@@ -4568,13 +4677,14 @@ ${comment}
 
     if (toggleListHeightButtonEl) {
         toggleListHeightButtonEl.addEventListener("click", () => {
-            if (toggleListHeightButtonEl.disabled) return;
-            isTaskListExpanded = !isTaskListExpanded;
-            if (isTaskListExpanded) {
+            const isExpanded = taskListEl.classList.contains("expanded");
+            if (!isExpanded) {
                 taskListEl.classList.add("expanded");
+                if (taskListWrapperEl) taskListWrapperEl.classList.add("expanded");
                 toggleListHeightButtonEl.textContent = "Minimer liste";
             } else {
                 taskListEl.classList.remove("expanded");
+                if (taskListWrapperEl) taskListWrapperEl.classList.remove("expanded");
                 toggleListHeightButtonEl.textContent = "Utvid liste";
             }
         });
@@ -4757,29 +4867,23 @@ suggestionIndex = -1;
         if (!id) return;
         const task = data.tasks.find(t => t.id === id);
         if (!task) return;
-        taskClickTimer = setTimeout(() => {
-            // Allow selecting the active task as well
-            if (task.isActive) {
-                selectedTaskId = (selectedTaskId === id) ? null : id;
-                if (tempTaskSelectionTimer) { clearTimeout(tempTaskSelectionTimer); tempTaskSelectionTimer = null; }
-                document.body.classList.remove("temp-task-selection");
-                updateUI();
-                taskClickTimer = null;
-                return;
-            }
 
+        taskClickTimer = setTimeout(() => {
             selectedTaskId = (selectedTaskId === id) ? null : id;
 
-            // Temporary text color logic (10s):
-            // If a non-active task is selected, show selected in green and mute active green.
             if (tempTaskSelectionTimer) {
                 clearTimeout(tempTaskSelectionTimer);
                 tempTaskSelectionTimer = null;
             }
+
             const active = getActiveTask();
-            if (selectedTaskId && active && selectedTaskId !== active.id) {
+
+            // Temporary green selection (10s) both during normal day and after end day.
+            // When there is an active task and a different task is clicked, mute active green.
+            if (selectedTaskId && ((!active) || (active && selectedTaskId !== active.id))) {
                 document.body.classList.add("temp-task-selection");
                 tempTaskSelectionTimer = setTimeout(() => {
+                    selectedTaskId = null;
                     document.body.classList.remove("temp-task-selection");
                     tempTaskSelectionTimer = null;
                     updateUI();
