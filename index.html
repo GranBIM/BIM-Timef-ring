@@ -1438,7 +1438,7 @@ setInterval(() => {
     <div class="header-right">
         <button id="themeToggleButton" class="btn-secondary" type="button" title="Bytt mellom lys, mørk og svart modus">Darkmode</button>
         <button id="profileButton" class="btn-secondary" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Brukerprofil</button>
-        <div style="margin-top:0.25rem;">Utviklet av Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 23.01.2026</div>
+        <div style="margin-top:0.25rem;">Utviklet av Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 24.01.2026</div>
     </div>
 </header>
 
@@ -3232,7 +3232,7 @@ startNewTask(pendingNewTaskName, projectNo);
             addedMinutesBuffer = 0;
             updateAddTimeDisplay();
 
-            adjustStartTitleEl.textContent = "Trekk fra tid";
+            adjustStartTitleEl.textContent = `Trekk tid fra: ${target.name}`;
             adjustStartDescEl.textContent = "Trekk fra tid på valgt prosjekt.";
 
             adjustStartModeTimeEl.style.display = "none";
