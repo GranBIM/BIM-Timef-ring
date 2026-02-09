@@ -2,7 +2,7 @@
 <html lang="nb">
 <head>
     <meta charset="UTF-8">
-    <title>Tidsregistrering</title>
+    <title>BIMføring tidsregistrering</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         * { box-sizing: border-box; }
@@ -1412,33 +1412,19 @@ ${comment}
         navigator.clipboard.write([clipboardItem]);
     });
 }
-
-
-
-
-// Auto-trigger "Tøm og arkiver" when 10h is reached AFTER end day is pressed
-setInterval(() => {
-    if (!endDayPressedAtMs) return;
-    if (getTotalWorkedMsToday() < 10 * 60 * 60 * 1000) return;
-
-    // Trigger the exact existing flow
-    clearTodayConfirmButtonEl.click();
-    endDayPressedAtMs = null;
-}, 1000);
-
 </script>
 </head>
 <body>
 
 <header class="header-bar">
     <div class="header-left">
-        <h1>Tidsregistrering</h1>
+        <h1>BIMføring tidsregistrering</h1>
         <div class="time-now" id="timeNow"></div>
     </div>
     <div class="header-right">
-        <button id="themeToggleButton" class="btn-secondary" type="button" title="Bytt mellom lys, mørk og svart modus">Darkmode</button>
+        <button id="themeToggleButton" class="btn-secondary" type="button" title="Bytt mellom lys, mørk og svart modus">Mørkmodus</button>
         <button id="profileButton" class="btn-secondary" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Brukerprofil</button>
-        <div style="margin-top:0.25rem;">Utviklet av Mathias Weiseth Gran, BIM Tekniker <3<br>siste endring: 01.02.2026</div>
+        <div style="margin-top:0.25rem;">Utviklet av:<br>Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 09.02.2026</div>
     </div>
 </header>
 
@@ -1600,7 +1586,7 @@ setInterval(() => {
 
         <div class="settings-section">
             <h3>Sikkerhetskopiering (Data)</h3>
-            <p>Sikkerhetskopiering av oppsett og data kan lagres manuelt eller du kan få en popup melding med valg av plassering hver gang du avslutter dagens arbeid. Hvis nettleseren ikke støtter denne funksjonen så benyttes standard plassering for nedlastinger</p>
+            <p>Sikkerhetskopi av oppsett og data kan lagres manuelt, eller du kan få en popup-melding med valg av lagringsplassering hver gang du avslutter dagens arbeid. Hvis nettleseren ikke støtter denne funksjonen, brukes standard plassering for nedlastinger. Knappen «Gjenopprett profil» brukes til å gjenopprette brukerprofilen.</p>
             <div class="modal-row">
                 <button id="downloadBackupButton" class="btn-secondary">Last ned profil (.json)</button>
                 <button id="uploadBackupButton" class="btn-secondary">Gjenopprett profil</button>
@@ -1625,7 +1611,7 @@ setInterval(() => {
         </div>
 
         <div style="margin-top: 1rem; border-top: 1px solid var(--border-soft); padding-top: 1rem; text-align: center;">
-            <button id="youtubeButton" class="btn-secondary" style="width: 100%;">Se instruksjonsvideo</button>
+            <button id="youtubeButton" class="btn-secondary" style="width: 100%;">Se Dokumentasjon</button>
         </div>
     
         <div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC = lukk og lagre</div>
@@ -1653,7 +1639,7 @@ setInterval(() => {
         <button class="modal-close" id="projectCloseButton">&times;</button>
         <h2>Prosjektnummer</h2>
         <p>Legg inn prosjektnummer for prosjektet:</p>
-        <p class="helper-text" style="margin-top:0.25rem;">Prosjektnummer kan ignoreres eller føres inn senere med blyant knappen</p>
+        <p class="helper-text" style="margin-top:0.25rem;">Prosjektnummeret kan stå tomt, men da får du en påminnelse neste gang det brukes. Du kan legge det inn senere, eller redigere det med blyantknappen.</p>
         <p><strong id="projectTaskName"></strong></p>
 
         <div class="modal-row" id="projectNameEditRow" style="width:100%; display:none;">
@@ -1826,7 +1812,7 @@ setInterval(() => {
     const PROFILES_KEY = "taskTimeTracker_profiles_list";
     const AUTO_SAVE_KEY = "taskTimeTracker_autoSave_v1";
 
-    const youtubeLink = "https://youtu.be/TdPEXtNpUE8";
+    const Docsgoogle = "https://docs.google.com/document/d/1F1nFT4N_02xjNeQDJxTPKbGvzK9YwYhb8l9dYR565vw/edit?usp=sharing";
 
     let profiles = ["Standard"];
     let currentProfile = "Standard";
@@ -4047,13 +4033,7 @@ startNewTask(pendingNewTaskName, projectNo);
         overduePopupShown = true;
     }
     function hideOverduePopup() { overdueOverlayEl.classList.remove("show"); }
-    function checkOverdueActiveTask() {
-        const activeTask = getActiveTask();
-        if (!activeTask || overduePopupShown) return;
-        const elapsed = getTaskElapsedMs(activeTask);
-        const tenHoursMs = 10 * 60 * 60 * 1000;
-        if (elapsed > tenHoursMs) showOverduePopup(activeTask);
-    }
+    function checkOverdueActiveTask() { return; }
     function showClearArchivesPopup() {
         if (!data.archives || data.archives.length === 0) return;
         clearArchivesOverlayEl.classList.add("show");
@@ -4115,7 +4095,7 @@ startNewTask(pendingNewTaskName, projectNo);
     function openSettingsModal() {
         renderProfileOptions();
         const youtubeBtn = document.getElementById('youtubeButton');
-        if (youtubeLink === "PLACEHOLDER") {
+        if (Docsgoogle === "PLACEHOLDER") {
             youtubeBtn.disabled = true;
             youtubeBtn.style.opacity = "0.5";
             youtubeBtn.style.cursor = "not-allowed";
@@ -4126,8 +4106,8 @@ startNewTask(pendingNewTaskName, projectNo);
             youtubeBtn.disabled = false;
             youtubeBtn.style.opacity = "1";
             youtubeBtn.style.cursor = "pointer";
-            youtubeBtn.title = "Åpne video i ny fane";
-            youtubeBtn.onclick = () => window.open(youtubeLink, '_blank');
+            youtubeBtn.title = "Åpne dokumentasjon i ny fane";
+            youtubeBtn.onclick = () => window.open(Docsgoogle, '_blank');
         }
         settingsOverlayEl.classList.add("show");
         profileHelperTextEl.textContent = "";
@@ -5010,7 +4990,6 @@ suggestionIndex = -1;
         updateCurrentTimeDisplay();
         updateActiveTaskTimer(); 
         updateTimelineNowDot();
-        checkOverdueActiveTask();
     }, 1000);
 
 // Enable copy button when selecting a historical day
@@ -5081,20 +5060,6 @@ ${comment}
         navigator.clipboard.write([clipboardItem]);
     });
 }
-
-
-
-
-// Auto-trigger "Tøm og arkiver" when 10h is reached AFTER end day is pressed
-setInterval(() => {
-    if (!endDayPressedAtMs) return;
-    if (getTotalWorkedMsToday() < 10 * 60 * 60 * 1000) return;
-
-    // Trigger the exact existing flow
-    clearTodayConfirmButtonEl.click();
-    endDayPressedAtMs = null;
-}, 1000);
-
 </script>
 
 </body>
