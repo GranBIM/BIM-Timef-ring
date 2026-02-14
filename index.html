@@ -40,7 +40,11 @@
             --select-text: #111827;
 
             --btn-copy-bg: #6b7280; 
-        }
+
+            --fav-divider: #000000;
+        
+            --outdated-bg: rgba(156,163,175,0.20);
+}
 
         body.theme-dark{
             --bg: #0b1220;
@@ -63,7 +67,11 @@
             --select-text: #111827;
 
             --btn-copy-bg: #4b5563;
-        }
+
+            --fav-divider: #ffffff;
+        
+            --outdated-bg: rgba(156,163,175,0.16);
+}
 
         body.theme-black{
             --bg: #000000;
@@ -84,11 +92,17 @@
 
             --select-bg: #000000;
             --select-text: #e5e7eb;
-        }
+
+            --fav-divider: #ffffff;
+        
+            --outdated-bg: rgba(156,163,175,0.12);
+}
         
         body.theme-black .card, 
         body.theme-black .modal {
             border: 1px solid #333;
+        
+            position: relative;
         }
 
         body {
@@ -106,7 +120,26 @@
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
-        .header-left h1 {
+        
+        /* App-notat indikator (rosa prikk ved tittel) */
+        #appNotesButton{
+            position: relative;
+            display: inline-block;
+        }
+        #appNotesIndicator{
+            position: absolute;
+            left: -14px;          /* venstre for teksten uten å flytte den */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--comment-pink);
+            display: none;        /* vises kun når notater finnes */
+            pointer-events: none;
+        }
+
+.header-left h1 {
             margin: 0 0 0.25rem;
             font-size: 1.5rem;
         }
@@ -190,6 +223,7 @@
         .task-input-wrapper {
             position: relative;
             flex: 1;
+            z-index: 600;
         }
 
         .task-input-row input {
@@ -228,12 +262,17 @@
             border: 1px solid var(--border);
             border-radius: 0.5rem;
             box-shadow: 0 4px 8px rgba(15,23,42,0.15);
-            max-height: 240px;
-            overflow-y: auto;
-            z-index: 30;
+            height: var(--suggestions-height, 240px);
+            max-height: 60vh;
+            overflow: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+            resize: vertical;
+            z-index: 650;
             font-size: 0.9rem;
             display: none;
         }
+        #taskSuggestions::-webkit-scrollbar { width: 0; height: 0; }
 
         .suggestion-item {
             display: flex;
@@ -244,20 +283,92 @@
         }
         .suggestion-item:hover { background: var(--hover); }
         .suggestion-item.selected { background: rgba(37,99,235,0.12); }
+        .suggestion-divider{
+            height: 1px;
+            width: 100%;
+            background: var(--fav-divider);
+            margin: 2px 0;
+            opacity: 0.9;
+            flex-shrink: 0;
+        }
+
+
+        .project-outdated-wrap{
+            /* In-flow placement under project number field (same vertical rhythm as other rows) */
+            position: relative;
+            left: auto;
+            bottom: auto;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            z-index: 2;
+        }
+        .outdated-label{
+            display:flex;
+            align-items:center;
+            gap:0.45rem;
+            font-size: 0.85rem;
+            color: var(--muted);
+            user-select:none;
+        }
+        .outdated-checkbox{
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            background: transparent;
+            appearance: none;
+            -webkit-appearance: none;
+            outline: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .outdated-checkbox:checked{
+            background: #9ca3af;
+        }
+        .suggestion-item.task-outdated{
+            background: var(--outdated-bg);
+        }
+        /* Favorite projects: highlight in the top project suggestion list */
+        .suggestion-item.is-fav-row {
+            cursor: grab;
+            background: rgba(250, 204, 21, 0.22);
+        }
+        .suggestion-item.is-fav-row:hover { background: rgba(250, 204, 21, 0.32); }
+        .suggestion-item.is-fav-row.selected { background: rgba(250, 204, 21, 0.42); }
+        .suggestion-item.is-fav-row.dragging { opacity: 0.6; cursor: grabbing; }
+        .suggestion-item.drop-above { border-top: 2px solid rgba(37,99,235,0.8); }
+        .suggestion-item.drop-below { border-bottom: 2px solid rgba(37,99,235,0.8); }
+
+        .suggestion-item.drop-into { outline: none !important; }
+        .suggestion-item.group-item { font-weight: 600; }
+        .suggestion-item.group-header { font-weight: 600; opacity: 0.9; }
+        .suggestion-item.group-header .suggestion-label { font-style: italic; }
         .suggestion-label {
             flex: 1;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .suggestion-delete {
-            margin-left: 0.5rem;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-size: 0.8rem;
-            color: #9ca3af;
-        }
+        .suggestion-delete{
+    margin-left: 0.5rem;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 0.5rem;
+    line-height: 1;
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
         .suggestion-delete:hover { color: #ef4444; }
 
         
@@ -269,14 +380,39 @@
             flex-shrink: 0;
         }
         .suggestion-edit{
-            margin-left: 0.5rem;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-size: 0.85rem;
-            color: #9ca3af;
-        }
+    margin-left: 0.5rem;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 0.5rem;
+    line-height: 1;
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
         .suggestion-edit:hover{ color: var(--dot-green); }
+.suggestion-fav{
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 0.5rem;
+    line-height: 1;
+    font-size: 0.9rem;
+    color: #9ca3af;
+}
+        .suggestion-fav.is-fav{ color: #fbbf24; }
+        .suggestion-fav:hover{ color: #f59e0b; }
 .helper-text {
             font-size: 0.8rem;
             color: #6b7280;
@@ -702,6 +838,59 @@
         }
         body.theme-dark .task-time { color: #cbd5e1; }
 
+        /* FAVORITT (gul markering) */
+        .task-list-item.task-favorite{
+            background: rgba(251,191,36,0.22);
+        }
+        .task-list-item.task-favorite:hover{
+            background: rgba(251,191,36,0.28);
+        }
+        body.theme-dark .task-list-item.task-favorite{
+            background: rgba(251,191,36,0.16);
+        }
+        body.theme-dark .task-list-item.task-favorite:hover{
+            background: rgba(251,191,36,0.22);
+        }
+
+        /* I kompakt modus har .task-time egen bakgrunn – slå den av for favoritter,
+           ellers blir høyre del "maskert". */
+        .task-list.compact-mode .task-list-item.task-favorite .task-time{
+            background: transparent;
+        }
+
+        /* Kommentar-boksen under raden */
+        .task-comment-row.task-favorite .task-comment-box{
+            background: rgba(251,191,36,0.14);
+            border-color: rgba(251,191,36,0.55);
+        }
+        body.theme-dark .task-comment-row.task-favorite .task-comment-box{
+            background: rgba(251,191,36,0.10);
+            border-color: rgba(251,191,36,0.45);
+        }
+
+        /* ====== FAVORITT: kun i øverste forslagliste (taskSuggestions) ======
+           Arbeidsliste (dagens) skal IKKE ha gul fyllfarge, selv om task-favorite class finnes.
+        */
+        #taskList .task-list-item.task-favorite,
+        #taskList .task-list-item.task-favorite:hover{
+            background: transparent !important;
+        }
+
+        /* Kommentar-boksen under raden (dagens) skal heller ikke bli gul */
+        #taskList .task-comment-row.task-favorite .task-comment-box{
+            background: rgba(148,163,184,0.08) !important;
+            border-color: var(--border) !important;
+        }
+
+        body.theme-dark #taskList .task-list-item.task-favorite,
+        body.theme-dark #taskList .task-list-item.task-favorite:hover{
+            background: transparent !important;
+        }
+        body.theme-dark #taskList .task-comment-row.task-favorite .task-comment-box{
+            background: rgba(148,163,184,0.10) !important;
+            border-color: var(--border) !important;
+        }
+
         .task-selected { background: rgba(37,99,235,0.12); }
         .task-active { font-weight: 600; }
 
@@ -752,7 +941,20 @@
             max-height: none;
         }
 
-        .month-group {
+        
+        .year-group {
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .year-summary {
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+.month-group {
             margin-top: 1rem;
             margin-bottom: 0.5rem;
         }
@@ -978,6 +1180,13 @@
             min-height: 120px;
             resize: vertical;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            overflow: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge legacy */
+        }
+        .modal-textarea::-webkit-scrollbar{
+            width: 0;
+            height: 0;
         }
 
         .modal-footer {
@@ -1281,7 +1490,7 @@
     animation: blink-blue-copy 1.2s ease-in-out 1;
 }
 
-#:not([disabled]):hover {
+button:not([disabled]):hover {
     transform: translateY(-1px);
 }
 
@@ -1331,7 +1540,61 @@
             max-height: none !important;
             overflow-y: visible;
         }
-</style>
+
+        /* Group edit modal */
+        .group-edit-backdrop{
+            position: fixed;
+            inset: 0;
+            background: var(--modal-backdrop);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+        .group-edit-modal{
+            width: min(520px, 95vw);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            overflow: hidden;
+        }
+        .group-edit-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .group-edit-title{ font-weight: 700; }
+        .group-edit-close{
+            border: 1px solid var(--border);
+            background: var(--btn-bg);
+            color: var(--text);
+            border-radius: 10px;
+            width: 34px;
+            height: 34px;
+            line-height: 30px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .group-edit-body{ padding: 1rem; display:flex; flex-direction:column; gap: 0.5rem; }
+        .group-edit-label{ font-size: 0.9rem; color: var(--muted); margin-top: 0.35rem; }
+        .group-edit-input{
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--select-bg);
+            color: var(--text);
+            font-size: 1rem;
+        }
+        .group-edit-colorrow{ display:flex; align-items:center; gap: 0.75rem; }
+        .group-edit-color{ width: 56px; height: 40px; padding:0; border: 1px solid var(--border); border-radius: 10px; background: transparent; cursor: pointer;}
+        .group-edit-actions{ display:flex; justify-content:flex-end; gap: 0.5rem; margin-top: 0.75rem; }
+
+    </style>
 <script type="importmap">
 {
   "imports": {
@@ -1339,6 +1602,49 @@
     "react/": "https://esm.sh/react@^19.2.3/",
     "recharts": "https://esm.sh/recharts@^3.6.0"
   }
+}
+</script>
+
+<script>
+// Clipboard helper: supports Firefox (fallback to writeText / execCommand)
+async function copyToClipboard(htmlContent, plainText) {
+    try {
+        if (window.isSecureContext && navigator.clipboard) {
+            // Rich clipboard (Chrome/Edge/Safari etc.)
+            if (navigator.clipboard.write && window.ClipboardItem) {
+                const clipboardItem = new ClipboardItem({
+                    'text/plain': new Blob([plainText], { type: 'text/plain' }),
+                    'text/html': new Blob([htmlContent], { type: 'text/html' })
+                });
+                await navigator.clipboard.write([clipboardItem]);
+                return true;
+            }
+            // Plain text fallback (Firefox)
+            if (navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(plainText);
+                return true;
+            }
+        }
+    } catch (err) {
+        // fall through
+    }
+
+    // Last resort fallback
+    try {
+        const ta = document.createElement('textarea');
+        ta.value = plainText;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.top = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return !!ok;
+    } catch (err) {
+        return false;
+    }
 }
 
 // Enable copy button when selecting a historical day
@@ -1364,7 +1670,7 @@ if (archiveListEl && copyOneNoteButtonEl) {
 
 // Dedicated OneNote copy for history (day-level)
 if (El && archiveListEl) {
-    El.addEventListener("click", () => {
+    El.addEventListener("click", async () => {
         const selectedDay = archiveListEl.querySelector(".archive-summary.selected");
         if (!selectedDay) return;
 
@@ -1404,12 +1710,7 @@ ${comment}
             return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>${safeComment}<br>-</div>`;
         }).join("");
 
-        const clipboardItem = new ClipboardItem({
-            "text/plain": new Blob([plainText], { type: "text/plain" }),
-            "text/html": new Blob([htmlContent], { type: "text/html" })
-        });
-
-        navigator.clipboard.write([clipboardItem]);
+        await copyToClipboard(htmlContent, plainText);
     });
 }
 </script>
@@ -1418,13 +1719,13 @@ ${comment}
 
 <header class="header-bar">
     <div class="header-left">
-        <h1>BIMføring tidsregistrering</h1>
+        <h1 id="appNotesButton" style="cursor:pointer;"><span id="appNotesIndicator" aria-hidden="true"></span>BIMføring tidsregistrering</h1>
         <div class="time-now" id="timeNow"></div>
     </div>
     <div class="header-right">
         <button id="themeToggleButton" class="btn-secondary" type="button" title="Bytt mellom lys, mørk og svart modus">Mørkmodus</button>
         <button id="profileButton" class="btn-secondary" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Brukerprofil</button>
-        <div style="margin-top:0.25rem;">Utviklet av:<br>Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 09.02.2026</div>
+        <div style="margin-top:0.25rem;">Utviklet av:<br>Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 14.02.2026</div>
     </div>
 </header>
 
@@ -1606,8 +1907,8 @@ ${comment}
 
         <div class="settings-section" style="border-bottom: 1px solid var(--border-soft); padding-bottom: 1rem; margin-bottom: 1.25rem;">
             <h3>Testdata</h3>
-            <p>Generer en komplett profil med 6 måneders historikk for testing.</p>
-            <button id="generateTestDataButton" class="btn-secondary">Generer Testdata (6 mnd)</button>
+            <p>Generer en komplett profil med 3 års historikk for testing.</p>
+            <button id="generateTestDataButton" class="btn-secondary">Generer Testdata (3 år)</button>
         </div>
 
         <div style="margin-top: 1rem; border-top: 1px solid var(--border-soft); padding-top: 1rem; text-align: center;">
@@ -1634,6 +1935,20 @@ ${comment}
     </div>
 </div>
 
+
+<div id="deleteTaskOverlay" class="overlay">
+    <div class="modal">
+        <h2>Slett prosjekt</h2>
+        <p>Er du sikker på at du vil slette <strong id="deleteTaskNameDisplay"></strong> fra historikk?</p>
+        <p class="helper-text" style="margin-top:0.25rem;">Ved å slette så fjernes prosjektet og tilhørende prosjektnummer fra historikken. Dersom prosjektet kan bli benyttet igjen ved en senere anledning, anbefales det i stedet å markere det som «utgått». Dette gjøres ved å trykke på blyantknappen til høyre for prosjektet. Utgåtte prosjekter bevares nederst i listen.</p>
+        <div class="modal-footer" style="justify-content: space-between;">
+            <button id="deleteTaskCancelBtn" class="btn-secondary" type="button">Angre</button>
+            <button id="deleteTaskConfirmBtn" class="modal-button-primary" type="button" style="background: var(--danger);">Bekreft</button>
+        </div>
+        <div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC eller klikk utenfor = angre</div>
+    </div>
+</div>
+
 <div id="projectOverlay" class="overlay">
     <div class="modal">
         <button class="modal-close" id="projectCloseButton">&times;</button>
@@ -1650,6 +1965,13 @@ ${comment}
             <input id="projectNumberInput" class="modal-input" type="text" placeholder="Prosjektnummer …" />
         </div>
 
+
+        <div id="projectOutdatedWrap" class="project-outdated-wrap" style="display:none;">
+            <label class="outdated-label" title="Marker prosjektet som utgått">
+                <input id="projectOutdatedCheckbox" class="outdated-checkbox" type="checkbox" />
+                <span>Utgått</span>
+            </label>
+        </div>
         <div class="modal-footer">
             <button id="projectCancelButton" class="btn-secondary" type="button">Avbryt</button>
             <button id="projectConfirmButton" class="modal-button-primary" type="button">Start arbeid</button>
@@ -1811,6 +2133,7 @@ ${comment}
     const TIMELINE_KEY_PREFIX = "taskTimeTracker_timeline_";
     const PROFILES_KEY = "taskTimeTracker_profiles_list";
     const AUTO_SAVE_KEY = "taskTimeTracker_autoSave_v1";
+    const SUGGESTIONS_HEIGHT_KEY_PREFIX = "taskTimeTracker_suggestions_height_";
 
     const Docsgoogle = "https://docs.google.com/document/d/1F1nFT4N_02xjNeQDJxTPKbGvzK9YwYhb8l9dYR565vw/edit?usp=sharing";
 
@@ -1822,7 +2145,10 @@ ${comment}
         tasks: [],
         archives: [],
         taskNames: [],
-        projectNumbers: {}
+        projectNumbers: {},
+        favorites: {},
+        favoritesOrder: [],
+        outdated: {}
     };
 
     let selectedTaskId = null;
@@ -1835,6 +2161,20 @@ ${comment}
     let adjustPopupTargetId = null;
     let suggestionIndex = -1;
     let filteredSuggestions = [];
+
+    // Drag & drop ordering for favorites in suggestion list
+    let dragFavKey = null;
+    let dragOverFavKey = null;
+    let dragInsertAfter = false;
+
+    let isReorderingFavorites = false;
+
+    
+    let isPointerDownOnTaskSuggestion = false;
+    let currentGroupId = null;
+    let dragTaskKey = null;
+    let suppressNextSuggestionClick = false;
+    let escListenerAdded = false;
 
     let commentEditingTaskId = null;
     let pendingRestoreArchiveId = null;
@@ -1853,7 +2193,31 @@ ${comment}
     const timeNowEl = document.getElementById("timeNow");
     const taskInputEl = document.getElementById("taskInput");
     const taskSuggestionsEl = document.getElementById("taskSuggestions");
-    const startButtonEl = document.getElementById("startButton");
+    
+    // Keep suggestions open while pointer is held down on a suggestion item.
+    // This prevents the blur->clearSuggestions timeout from hiding the list before drag begins.
+    if (taskSuggestionsEl) {
+        const markPointerDown = (e) => {
+            const li = e.target.closest('.task-list-item');
+            if (!li) return;
+            isPointerDownOnTaskSuggestion = true;
+        };
+        // Support both Pointer Events and classic Mouse Events (some browsers/configs only fire mouse events).
+        taskSuggestionsEl.addEventListener('pointerdown', markPointerDown);
+        taskSuggestionsEl.addEventListener('mousedown', markPointerDown);
+    }
+
+    const releaseTaskSuggestionPointer = () => {
+        if (!isPointerDownOnTaskSuggestion) return;
+        isPointerDownOnTaskSuggestion = false;
+        if (!isReorderingFavorites && document.activeElement !== taskInputEl) {
+            clearSuggestions();
+        }
+    };
+    document.addEventListener('pointerup', releaseTaskSuggestionPointer);
+    document.addEventListener('pointercancel', releaseTaskSuggestionPointer);
+    document.addEventListener('mouseup', releaseTaskSuggestionPointer);
+const startButtonEl = document.getElementById("startButton");
     const endButtonEl = document.getElementById("endButton");
     const clearButtonEl = document.getElementById("clearButton");
     const exportButtonEl = document.getElementById("exportButton");
@@ -1891,6 +2255,9 @@ ${comment}
     const projectNumberInputEl = document.getElementById("projectNumberInput");
     const projectNameEditInputEl = document.getElementById("projectNameEditInput");
     const projectNameEditRowEl = document.getElementById("projectNameEditRow");
+
+    const projectOutdatedWrapEl = document.getElementById("projectOutdatedWrap");
+    const projectOutdatedCheckboxEl = document.getElementById("projectOutdatedCheckbox");
 
     const projectConfirmDefaultText = projectConfirmButtonEl ? projectConfirmButtonEl.textContent : "Start";
     let projectPopupMode = "start"; // "start" | "edit"
@@ -1967,6 +2334,25 @@ ${comment}
     const generateTestDataButtonEl = document.getElementById("generateTestDataButton");
 
     const deleteProfileOverlayEl = document.getElementById("deleteProfileOverlay");
+
+    const deleteTaskOverlayEl = document.getElementById("deleteTaskOverlay");
+    const deleteTaskNameDisplayEl = document.getElementById("deleteTaskNameDisplay");
+    const deleteTaskConfirmBtnEl = document.getElementById("deleteTaskConfirmBtn");
+    const deleteTaskCancelBtnEl = document.getElementById("deleteTaskCancelBtn");
+    let pendingDeleteTaskName = null;
+
+    function showDeleteTaskPopup(taskName){
+        pendingDeleteTaskName = (taskName || "").trim();
+        if (!pendingDeleteTaskName || !deleteTaskOverlayEl) return;
+        if (deleteTaskNameDisplayEl) deleteTaskNameDisplayEl.textContent = pendingDeleteTaskName;
+        deleteTaskOverlayEl.classList.add("show");
+        setTimeout(() => { deleteTaskConfirmBtnEl && deleteTaskConfirmBtnEl.focus(); }, 0);
+    }
+
+    function hideDeleteTaskPopup(){
+        pendingDeleteTaskName = null;
+        if (deleteTaskOverlayEl) deleteTaskOverlayEl.classList.remove("show");
+    }
     const deleteProfileNameDisplayEl = document.getElementById("deleteProfileNameDisplay");
     const deleteProfileCancelBtnEl = document.getElementById("deleteProfileCancelBtn");
     const deleteProfileSaveDeleteBtnEl = document.getElementById("deleteProfileSaveDeleteBtn");
@@ -1988,7 +2374,7 @@ ${comment}
     const dayTimelineResetButtonEl = document.getElementById("dayTimelineResetButton");
 
     if (dayTimelineResetButtonEl) {
-        dayTimelineResetButtonEl.addEventListener("click", () => {
+        dayTimelineResetButtonEl.addEventListener("click", async () => {
             dayTimelineSettings = {
                 dayStartMin: 7 * 60,
                 dayEndMin: 17 * 60,
@@ -2074,6 +2460,41 @@ ${comment}
     function getStorageKey() { return STORAGE_KEY_PREFIX + currentProfile; }
     function getTimelineKey() { return TIMELINE_KEY_PREFIX + currentProfile; }
 
+function getSuggestionsHeightKey() { return SUGGESTIONS_HEIGHT_KEY_PREFIX + currentProfile; }
+
+function applyStoredSuggestionsHeight() {
+    if (!taskSuggestionsEl) return;
+    const raw = localStorage.getItem(getSuggestionsHeightKey());
+    const px = raw ? parseInt(raw, 10) : NaN;
+    if (!isNaN(px) && px >= 80 && px <= 1200) {
+        taskSuggestionsEl.style.setProperty('--suggestions-height', px + "px");
+    } else {
+        taskSuggestionsEl.style.removeProperty('--suggestions-height');
+    }
+}
+
+function initSuggestionsResizePersistence() {
+    if (!taskSuggestionsEl || typeof ResizeObserver === "undefined") return;
+
+    let saveTimer = null;
+    const ro = new ResizeObserver((entries) => {
+        const entry = entries && entries[0];
+        if (!entry) return;
+
+        // Ignore when hidden (display:none -> height 0)
+        if (taskSuggestionsEl.style.display === "none") return;
+
+        const h = Math.round(entry.contentRect.height);
+        if (h < 80) return;
+
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+            localStorage.setItem(getSuggestionsHeightKey(), String(h));
+        }, 150);
+    });
+    ro.observe(taskSuggestionsEl);
+}
+
     function updateProfileButton() {
         if (!profileButtonEl) return;
         profileButtonEl.style.backgroundColor = "";
@@ -2093,7 +2514,7 @@ ${comment}
         const key = getStorageKey();
         const raw = localStorage.getItem(key);
         
-        data = { tasks: [], archives: [], taskNames: [], projectNumbers: {} };
+        data = { tasks: [], archives: [], taskNames: [], projectNumbers: {}, favorites: {}, favoritesOrder: [] };
 
         if (raw) {
             try {
@@ -2103,6 +2524,10 @@ ${comment}
                     data.archives = Array.isArray(parsed.archives) ? parsed.archives : [];
                     data.taskNames = Array.isArray(parsed.taskNames) ? parsed.taskNames : [];
                     data.projectNumbers = (parsed.projectNumbers && typeof parsed.projectNumbers === "object") ? parsed.projectNumbers : {};
+                    data.favorites = (parsed.favorites && typeof parsed.favorites === "object") ? parsed.favorites : {};
+                    data.favoritesOrder = Array.isArray(parsed.favoritesOrder) ? parsed.favoritesOrder.filter(x => typeof x === "string") : [];
+
+                    data.outdated = (parsed.outdated && typeof parsed.outdated === "object") ? parsed.outdated : {};
 
                     data.tasks.forEach(t => {
                         if (!t) return;
@@ -2117,6 +2542,17 @@ ${comment}
                             if (typeof t.comment !== "string") t.comment = "";
                             if (typeof t.projectNumber !== "string") t.projectNumber = "";
                         });
+                    });
+
+
+                    // Normalize outdated mapping (backward compatibility)
+                    if (!data.outdated || typeof data.outdated !== "object") data.outdated = {};
+                    Object.keys(data.outdated).forEach(k => {
+                        const v = data.outdated[k];
+                        if (v === true) data.outdated[k] = { manual: true };
+                        else if (v === false) data.outdated[k] = { manual: false };
+                        else if (!v || typeof v !== "object") delete data.outdated[k];
+                        else if (typeof v.manual !== "boolean") v.manual = false;
                     });
 
                     if (!parsed.projectNumbers || typeof parsed.projectNumbers !== "object") {
@@ -2642,9 +3078,19 @@ ${comment}
         if (idx !== -1) {
             data.taskNames.splice(idx, 1);
             const key = normalizeTaskName(name);
+
             if (key && data.projectNumbers && Object.prototype.hasOwnProperty.call(data.projectNumbers, key)) {
                 delete data.projectNumbers[key];
             }
+
+            // also remove favorite flag + ordering
+            if (key && data.favorites && Object.prototype.hasOwnProperty.call(data.favorites, key)) {
+                delete data.favorites[key];
+            }
+            if (Array.isArray(data.favoritesOrder) && key) {
+                data.favoritesOrder = data.favoritesOrder.filter(k => k !== key);
+            }
+
             saveToStorage();
         }
     }
@@ -2658,34 +3104,566 @@ ${comment}
         }
     }
 
+
+    function getFavoriteRankForName(name) {
+        const key = normalizeTaskName(name);
+        if (!key) return 999999;
+        if (!Array.isArray(data.favoritesOrder)) data.favoritesOrder = [];
+        const idx = data.favoritesOrder.indexOf(key);
+        return (idx === -1) ? 999999 : idx;
+    }
+
+
+    function ensureOutdatedData(){
+        if (!data.outdated || typeof data.outdated !== "object") data.outdated = {};
+    }
+
+    function getLastUsedMsForName(name){
+        const key = normalizeTaskName(name);
+        if (!key) return 0;
+        let best = 0;
+
+        // Active list
+        (data.tasks || []).forEach(t => {
+            if (!t || normalizeTaskName(t.name) !== key) return;
+            best = Math.max(best, t.lastEndAt || 0, t.firstStartAt || 0, t.createdAt || 0, t.lastStartMs || 0);
+        });
+
+        // Archives
+        (data.archives || []).forEach(a => {
+            (a.tasks || []).forEach(t => {
+                if (!t || normalizeTaskName(t.name) !== key) return;
+                best = Math.max(best, t.lastEndAt || 0, t.firstStartAt || 0, t.createdAt || 0);
+            });
+        });
+
+        // Fallback: if never used, treat as old
+        return best || 0;
+    }
+
+    function isOutdatedForName(name){
+        ensureOutdatedData();
+        const key = normalizeTaskName(name);
+        if (!key) return false;
+
+        const entry = data.outdated[key];
+        const lastUsed = getLastUsedMsForName(name);
+        const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+        const autoOutdated = lastUsed > 0 && (Date.now() - lastUsed) >= THIRTY_DAYS_MS;
+
+        // Manual override always wins
+        if (entry && typeof entry === "object" && entry.manual === true) return true;
+
+        // Auto: only if lastUsed qualifies
+        if (entry && typeof entry === "object" && entry.manual === false) {
+            if (autoOutdated) return true;
+            // Auto flag no longer valid -> clear it
+            delete data.outdated[key];
+            return false;
+        }
+
+        // No entry: auto mark if qualifies
+        if (autoOutdated) {
+            data.outdated[key] = { manual: false };
+            return true;
+        }
+        return false;
+    }
+
+    function setOutdatedForName(name, isOutdated, manual = true){
+        ensureOutdatedData();
+        const key = normalizeTaskName(name);
+        if (!key) return;
+        if (isOutdated) data.outdated[key] = { manual: !!manual };
+        else delete data.outdated[key];
+    }
+
+    function clearAutoOutdatedForName(name){
+        ensureOutdatedData();
+        const key = normalizeTaskName(name);
+        if (!key) return;
+        const entry = data.outdated[key];
+        if (entry && typeof entry === "object" && entry.manual === false) {
+            delete data.outdated[key];
+        }
+    }
+
+    function reorderFavoriteKeys(srcKey, targetKey, insertAfter) {
+        if (!srcKey || !targetKey) return;
+        if (!Array.isArray(data.favoritesOrder)) data.favoritesOrder = [];
+        // Ensure both are present
+        if (data.favoritesOrder.indexOf(srcKey) === -1) data.favoritesOrder.unshift(srcKey);
+        if (data.favoritesOrder.indexOf(targetKey) === -1) data.favoritesOrder.push(targetKey);
+
+        const list = data.favoritesOrder.filter(k => k !== srcKey);
+        const tIdx = list.indexOf(targetKey);
+        if (tIdx === -1) {
+            // fallback: append
+            list.push(srcKey);
+        } else {
+            const insertIdx = insertAfter ? (tIdx + 1) : tIdx;
+            list.splice(insertIdx, 0, srcKey);
+        }
+        data.favoritesOrder = list;
+        saveToStorage();
+    }
+
+    
+    function ensureGroupData(){
+        if (!data.groups || !Array.isArray(data.groups)) data.groups = [];
+        if (!data.taskToGroup || typeof data.taskToGroup !== "object") data.taskToGroup = {};
+        if (typeof data.nextGroupIndex !== "number" || !isFinite(data.nextGroupIndex) || data.nextGroupIndex < 1) data.nextGroupIndex = 1;
+
+        // Clean up: remove missing tasks from groups, and drop empty groups
+        const keyToName = {};
+        (data.taskNames || []).forEach(n => { const k = normalizeTaskName(n); if (k) keyToName[k] = n; });
+
+        data.groups = data.groups.map(g => {
+            if (!g || typeof g !== "object") return null;
+            if (!g.id) g.id = "g_" + Math.random().toString(36).slice(2, 10);
+            if (!g.name) g.name = "Gruppe";
+            if (!Array.isArray(g.items)) g.items = [];
+            if (typeof g.color !== 'string') g.color = '';
+            g.items = g.items.filter(k => !!keyToName[k]);
+            return g;
+        }).filter(g => g && Array.isArray(g.items) && g.items.length >= 2);
+
+        // Rebuild taskToGroup based on groups
+        const newMap = {};
+        data.groups.forEach(g => g.items.forEach(k => { newMap[k] = g.id; }));
+        data.taskToGroup = newMap;
+
+        // If we were inside a group that got removed, exit
+        if (currentGroupId && !data.groups.some(g => g.id === currentGroupId)) currentGroupId = null;
+    }
+
+    function getGroupById(groupId){
+        ensureGroupData();
+        return data.groups.find(g => g.id === groupId) || null;
+    }
+
+    function getGroupIdForTaskKey(taskKey){
+        ensureGroupData();
+        return data.taskToGroup[taskKey] || null;
+    }
+
+    function makeNextGroupName(){
+        ensureGroupData();
+        const name = "Gruppe " + data.nextGroupIndex;
+        data.nextGroupIndex += 1;
+        return name;
+    }
+
+    function createGroupWithKeys(taskKeys){
+        ensureGroupData();
+        const unique = Array.from(new Set((taskKeys || []).filter(Boolean)));
+        if (unique.length < 2) return null;
+        const g = {
+            id: "g_" + Math.random().toString(36).slice(2, 10),
+            name: makeNextGroupName(),
+            items: unique,
+            color: ''
+        };
+        data.groups.unshift(g);
+        unique.forEach(k => { data.taskToGroup[k] = g.id; });
+        saveToStorage();
+        return g;
+    }
+
+    function addTaskKeyToGroup(taskKey, groupId){
+        ensureGroupData();
+        const g = getGroupById(groupId);
+        if (!g) return;
+        if (!g.items.includes(taskKey)) g.items.push(taskKey);
+        data.taskToGroup[taskKey] = g.id;
+        saveToStorage();
+    }
+
+    function mergeGroups(intoGroupId, fromGroupId){
+        ensureGroupData();
+        if (!intoGroupId || !fromGroupId || intoGroupId === fromGroupId) return;
+        const into = getGroupById(intoGroupId);
+        const from = getGroupById(fromGroupId);
+        if (!into || !from) return;
+
+        from.items.forEach(k => {
+            if (!into.items.includes(k)) into.items.push(k);
+            data.taskToGroup[k] = into.id;
+        });
+
+        data.groups = data.groups.filter(g => g.id !== from.id);
+        saveToStorage();
+    }
+
+    function groupTasksByKeys(srcKey, targetKey){
+        ensureGroupData();
+        if (!srcKey || !targetKey || srcKey === targetKey) return;
+
+        const srcGroupId = getGroupIdForTaskKey(srcKey);
+        const tgtGroupId = getGroupIdForTaskKey(targetKey);
+
+        if (!srcGroupId && !tgtGroupId) {
+            // Group creation by dragging project onto another project is disabled.
+            return;
+        }
+        if (srcGroupId && !tgtGroupId) {
+            addTaskKeyToGroup(targetKey, srcGroupId);
+            return;
+        }
+        if (!srcGroupId && tgtGroupId) {
+            addTaskKeyToGroup(srcKey, tgtGroupId);
+            return;
+        }
+        // Both grouped
+        if (srcGroupId === tgtGroupId) return;
+        // Merge src into target's group (stable expectation: drop ON target -> target wins)
+        mergeGroups(tgtGroupId, srcGroupId);
+    }
+
+    function enterGroupView(groupId){
+        currentGroupId = groupId || null;
+        renderSuggestions();
+        taskSuggestionsEl && (taskSuggestionsEl.style.display = "block");
+    }
+
+    function exitGroupView(){
+        currentGroupId = null;
+        renderSuggestions();
+        taskSuggestionsEl && (taskSuggestionsEl.style.display = "block");
+    }
+
     function renderSuggestions() {
         if (!taskSuggestionsEl) return;
+
+        // Ensure ESC handler exists (one-time)
+        if (!escListenerAdded) {
+            escListenerAdded = true;
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" || e.key === "Esc") {
+                    if (currentGroupId) {
+                        e.preventDefault();
+                        exitGroupView();
+                        taskInputEl && taskInputEl.focus();
+                    }
+                }
+            }, true);
+        }
+
         const focused = document.activeElement === taskInputEl;
-        if (!focused || !Array.isArray(data.taskNames) || data.taskNames.length === 0) {
+        const overlayOpen = (projectOverlayEl && projectOverlayEl.classList.contains("show"));
+        // Allow suggestions to stay rendered/refresh while project edit popup is open
+        if ((!focused && !overlayOpen) || !Array.isArray(data.taskNames) || data.taskNames.length === 0) {
             clearSuggestions();
             return;
         }
+
+        ensureGroupData();
+
         const query = taskInputEl.value.trim().toLowerCase();
-        filteredSuggestions = data.taskNames.filter(name => {
+        const keyToName = {};
+        data.taskNames.forEach(n => { const k = normalizeTaskName(n); if (k) keyToName[k] = n; });
+
+        const nameMatches = (name) => {
             if (!query) return true;
-            return name.toLowerCase().includes(query);
-        });
-        if (filteredSuggestions.length === 0) {
+            return (name || "").toLowerCase().includes(query);
+        };
+
+        // ---- Build view model: group header + groups + tasks
+        const rows = [];
+
+        if (currentGroupId) {
+            const g = getGroupById(currentGroupId);
+            if (!g) {
+                currentGroupId = null;
+            } else {
+                // Optional back row
+                rows.push({ type: "groupHeader", label: "← Tilbake", groupId: currentGroupId });
+
+                const namesInGroup = g.items
+                    .map(k => keyToName[k])
+                    .filter(Boolean)
+                    .filter(nameMatches);
+
+                // Favorites first (and ordered) within group too
+                namesInGroup.sort((a, b) => {
+                    const fa = isFavoriteForName(a);
+                    const fb = isFavoriteForName(b);
+                    if (fa && fb) return getFavoriteRankForName(a) - getFavoriteRankForName(b);
+                    if (fa !== fb) return fa ? -1 : 1;
+                    return data.taskNames.indexOf(a) - data.taskNames.indexOf(b);
+                });
+
+                namesInGroup.forEach(n => rows.push({ type: "task", name: n }));
+            }
+        }
+
+        if (!currentGroupId) {
+            // Groups (shown as rows)
+            const groupRows = data.groups
+                .map(g => {
+                    const memberNames = (g.items || []).map(k => keyToName[k]).filter(Boolean);
+                    const matches = (!query)
+                        ? true
+                        : (g.name || "").toLowerCase().includes(query) || memberNames.some(n => nameMatches(n));
+                    return matches ? { type: "group", group: g, count: memberNames.length } : null;
+                })
+                .filter(Boolean);
+
+            // Ungrouped tasks
+            let taskRows = data.taskNames
+                .filter(name => {
+                    const k = normalizeTaskName(name);
+                    if (!k) return false;
+                    if (data.taskToGroup[k]) return false; // grouped -> hidden in main
+                    return nameMatches(name);
+                });
+
+            // Favorites first (and ordered)
+            taskRows.sort((a, b) => {
+                const fa = isFavoriteForName(a);
+                const fb = isFavoriteForName(b);
+                if (fa && fb) return getFavoriteRankForName(a) - getFavoriteRankForName(b);
+                if (fa !== fb) return fa ? -1 : 1;
+                return data.taskNames.indexOf(a) - data.taskNames.indexOf(b);
+            });
+
+            // Favorites ALWAYS on top, regardless of groups
+            const favTasks = taskRows.filter(n => isFavoriteForName(n));
+            const nonFavTasks = taskRows.filter(n => !isFavoriteForName(n));
+
+            favTasks.forEach(n => rows.push({ type: "task", name: n }));
+            groupRows.forEach(gr => rows.push(gr));
+            const activeNonFav = nonFavTasks.filter(n => !isOutdatedForName(n));
+            const outdatedNonFav = nonFavTasks.filter(n => isOutdatedForName(n));
+            activeNonFav.forEach(n => rows.push({ type: "task", name: n }));
+            if (outdatedNonFav.length > 0) rows.push({ type: "outdatedDivider" });
+            outdatedNonFav.forEach(n => rows.push({ type: "task", name: n }));
+        }
+
+        if (rows.length === 0) {
             clearSuggestions();
             return;
         }
-        if (suggestionIndex >= filteredSuggestions.length) suggestionIndex = -1;
+
+        // selection index only applies to task rows
+        const taskRowIndexes = rows.map((r, i) => (r.type === "task" ? i : -1)).filter(i => i !== -1);
+        if (suggestionIndex >= taskRowIndexes.length) suggestionIndex = -1;
+
+        // Arrow navigation + Enter uses this list
+        const orderedTaskNames = rows.filter(r => r.type === "task").map(r => r.name);
+        filteredSuggestions = orderedTaskNames;
+
+        // Insert divider after the last favorite (only if there are non-favorites below)
+        let lastFavTaskIndex = -1;
+        orderedTaskNames.forEach((n, i) => { if (isFavoriteForName(n)) lastFavTaskIndex = i; });
 
         taskSuggestionsEl.innerHTML = "";
-        filteredSuggestions.forEach((name, idx) => {
+
+        const clearDragIndicators = () => {
+            document.querySelectorAll(".suggestion-item.drop-above, .suggestion-item.drop-below, .suggestion-item.drop-into, .suggestion-item.dragging")
+                .forEach(el => el.classList.remove("drop-above", "drop-below", "drop-into", "dragging"));
+        };
+
+        let taskCounter = -1;
+        rows.forEach((row) => {
+
+            if (row.type === "groupHeader") {
+                const item = document.createElement("div");
+                item.className = "suggestion-item group-header";
+                const labelSpan = document.createElement("span");
+                labelSpan.className = "suggestion-label";
+                labelSpan.textContent = row.label || "← Tilbake";
+                const actions = document.createElement("span");
+                actions.className = "suggestion-actions";
+                item.appendChild(labelSpan);
+                item.appendChild(actions);
+                // Allow dropping tasks onto the group row (adds task into group)
+                item.addEventListener("dragover", (e) => {
+                    if (!dragTaskKey) return;
+                    e.preventDefault();
+                    });
+                item.addEventListener("dragleave", () => {
+                    });
+                item.addEventListener("drop", (e) => {
+                    if (!dragTaskKey) return;
+                    e.preventDefault();
+                    const srcKey = dragTaskKey;
+                    const srcGroupId = getGroupIdForTaskKey(srcKey);
+                    const tgtGroupId = g.id;
+
+                    if (srcGroupId && srcGroupId !== tgtGroupId) {
+                        // merge groups into target
+                        mergeGroups(tgtGroupId, srcGroupId);
+                    } else if (!srcGroupId) {
+                        addTaskKeyToGroup(srcKey, tgtGroupId);
+                    }
+                    suppressNextSuggestionClick = true;
+                    renderSuggestions();
+                    taskInputEl && taskInputEl.focus();
+                });
+
+                item.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    exitGroupView();
+                    taskInputEl && taskInputEl.focus();
+                });
+                taskSuggestionsEl.appendChild(item);
+                return;
+            }
+
+            if (row.type === "group") {
+                const g = row.group;
+                const item = document.createElement("div");
+                item.className = "suggestion-item group-item";
+                const labelSpan = document.createElement("span");
+                labelSpan.className = "suggestion-label";
+                labelSpan.textContent = (g.name || "Gruppe") + " (" + (row.count || 0) + ")";
+                if (g.color) { labelSpan.style.color = g.color; }
+
+                const actions = document.createElement("span");
+                actions.className = "suggestion-actions";
+                item.appendChild(labelSpan);
+                item.appendChild(actions);
+                item.addEventListener("click", (e) => {
+                    // don't start project, open group
+                    e.preventDefault();
+                    enterGroupView(g.id);
+                    taskInputEl && taskInputEl.focus();
+                });
+                item.addEventListener("dblclick", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openGroupEditModal(g.id);
+                });
+                taskSuggestionsEl.appendChild(item);
+                return;
+            }
+
+            if (row.type === "outdatedDivider") {
+                const divider = document.createElement("div");
+                divider.className = "suggestion-divider";
+                taskSuggestionsEl.appendChild(divider);
+                return;
+            }
+
+            // ---- Task row
+            const name = row.name;
+            taskCounter += 1;
+
             const item = document.createElement("div");
             item.className = "suggestion-item";
-            if (idx === suggestionIndex) item.classList.add("selected");
+            if (isOutdatedForName(name)) item.classList.add("task-outdated");
+            if (taskCounter === suggestionIndex) item.classList.add("selected");
+
             const labelSpan = document.createElement("span");
             labelSpan.className = "suggestion-label";
             labelSpan.textContent = name;
+
             const actions = document.createElement("span");
             actions.className = "suggestion-actions";
+
+            const favBtn = document.createElement("button");
+            favBtn.className = "suggestion-fav";
+            const favOn = isFavoriteForName(name);
+            const taskKey = normalizeTaskName(name);
+            const favKey = taskKey;
+
+            // Drag: always allow dragging tasks (used for grouping),
+            // but favorite rows also support reorder among favorites.
+            if (taskKey) {
+                item.draggable = true;
+
+                item.addEventListener("dragstart", (e) => {
+                    dragTaskKey = taskKey;
+
+                    if (favOn && favKey) {
+                        isReorderingFavorites = true;
+                        dragFavKey = favKey;
+                        dragOverFavKey = null;
+                        dragInsertAfter = false;
+                        item.classList.add("dragging");
+                        e.dataTransfer.effectAllowed = "move";
+                        try { e.dataTransfer.setData("text/plain", favKey); } catch (err) {}
+                    } else {
+                        isReorderingFavorites = false;
+                        dragFavKey = null;
+                        dragOverFavKey = null;
+                        dragInsertAfter = false;
+                        item.classList.add("dragging");
+                        e.dataTransfer.effectAllowed = "move";
+                        try { e.dataTransfer.setData("text/plain", taskKey); } catch (err) {}
+                    }
+                });
+
+                item.addEventListener("dragend", () => {
+                    isReorderingFavorites = false;
+                    dragFavKey = null;
+                    dragOverFavKey = null;
+                    dragInsertAfter = false;
+                    dragTaskKey = null;
+                    clearDragIndicators();
+                });
+
+                item.addEventListener("dragover", (e) => {
+                    if (!dragTaskKey || !taskKey || dragTaskKey === taskKey) return;
+
+                    // Allow drop
+                    e.preventDefault();
+
+                    const targetIsFav = !!data.favorites && !!data.favorites[taskKey];
+                    const srcIsFav = !!data.favorites && !!data.favorites[dragTaskKey];
+
+                    clearDragIndicators();
+
+                    // If both are favorites AND we are in reorder mode -> show above/below indicator
+                    if (isReorderingFavorites && srcIsFav && targetIsFav) {
+                        const rect = item.getBoundingClientRect();
+                        const after = (e.clientY - rect.top) > (rect.height / 2);
+                        dragOverFavKey = taskKey;
+                        dragInsertAfter = after;
+                        item.classList.add(after ? "drop-below" : "drop-above");
+                    } else {
+                        // Otherwise: grouping drop
+                        }
+                });
+
+                item.addEventListener("drop", (e) => {
+                    if (!dragTaskKey || !taskKey || dragTaskKey === taskKey) return;
+                    e.preventDefault();
+
+                    const targetIsFav = !!data.favorites && !!data.favorites[taskKey];
+                    const srcIsFav = !!data.favorites && !!data.favorites[dragTaskKey];
+
+                    // Reorder favorites only if both are favorites and reorder mode is active
+                    if (isReorderingFavorites && srcIsFav && targetIsFav && dragFavKey && dragOverFavKey) {
+                        reorderFavoriteKeys(dragFavKey, dragOverFavKey, dragInsertAfter);
+                        suppressNextSuggestionClick = true;
+                        renderSuggestions();
+                        taskInputEl && taskInputEl.focus();
+                        return;
+                    }
+
+                    // Grouping: drop a task ON another task
+                    groupTasksByKeys(dragTaskKey, taskKey);
+                    suppressNextSuggestionClick = true;
+                    renderSuggestions();
+                    taskInputEl && taskInputEl.focus();
+                });
+            }
+
+            // Keep cursor affordance for favorites
+            if (favOn && favKey) item.classList.add("is-fav-row");
+
+            favBtn.textContent = favOn ? "★" : "☆";
+            if (favOn) favBtn.classList.add("is-fav");
+            favBtn.title = favOn ? "Fjern favoritt" : "Merk som favoritt";
+            favBtn.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleFavoriteForName(name);
+                renderSuggestions();
+                taskInputEl.focus();
+            });
 
             const editBtn = document.createElement("button");
             editBtn.className = "suggestion-edit";
@@ -2704,26 +3682,37 @@ ${comment}
             deleteBtn.addEventListener("mousedown", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                removeTaskNameFromHistory(name);
-                renderSuggestions();
-                taskInputEl.focus();
+                showDeleteTaskPopup(name);
+                taskInputEl && taskInputEl.blur();
             });
 
+            actions.appendChild(favBtn);
             actions.appendChild(editBtn);
             actions.appendChild(deleteBtn);
 
             item.appendChild(labelSpan);
             item.appendChild(actions);
-            item.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+
+            item.addEventListener("click", (e) => {
+                // Ignore clicks from action buttons
+                if (e.target && (e.target.closest && e.target.closest(".suggestion-actions"))) return;
+                if (suppressNextSuggestionClick) { suppressNextSuggestionClick = false; return; }
                 selectedTaskId = null;
                 startOrResumeByName(name);
             });
+
             taskSuggestionsEl.appendChild(item);
+
+            if (taskCounter === lastFavTaskIndex && lastFavTaskIndex !== -1 && lastFavTaskIndex < orderedTaskNames.length - 1) {
+                const div = document.createElement("div");
+                div.className = "suggestion-divider";
+                taskSuggestionsEl.appendChild(div);
+            }
         });
+
         taskSuggestionsEl.style.display = "block";
     }
+
 
     function getStoredProjectNumberForName(name) {
         const key = normalizeTaskName(name);
@@ -2742,6 +3731,32 @@ ${comment}
         else delete data.projectNumbers[key];
     }
 
+
+    function isFavoriteForName(name) {
+        const key = normalizeTaskName(name);
+        if (!key) return false;
+        if (!data.favorites || typeof data.favorites !== "object") data.favorites = {};
+        return !!data.favorites[key];
+    }
+
+    function toggleFavoriteForName(name) {
+        const key = normalizeTaskName(name);
+        if (!key) return;
+        if (!data.favorites || typeof data.favorites !== "object") data.favorites = {};
+        if (!Array.isArray(data.favoritesOrder)) data.favoritesOrder = [];
+
+        if (data.favorites[key]) {
+            delete data.favorites[key];
+            // remove from order list
+            data.favoritesOrder = data.favoritesOrder.filter(k => k !== key);
+        } else {
+            data.favorites[key] = true;
+            // move to top of favorites list
+            data.favoritesOrder = data.favoritesOrder.filter(k => k !== key);
+            data.favoritesOrder.unshift(key);
+        }
+        saveToStorage();
+    }
 
 
     function renameTaskNameEverywhere(oldName, newName) {
@@ -2779,7 +3794,17 @@ ${comment}
                 data.projectNumbers[newKey] = oldVal;
             }
             delete data.projectNumbers[oldKey];
+        
+        ensureOutdatedData();
+        if (data.outdated && typeof data.outdated === "object") {
+            const entry = data.outdated[oldKey];
+            if (entry && !data.outdated[newKey]) {
+                data.outdated[newKey] = entry;
+            }
+            delete data.outdated[oldKey];
         }
+
+}
 
         if (selectedTaskId) {
             const exists = data.tasks.some(t => t.id === selectedTaskId);
@@ -2800,6 +3825,7 @@ ${comment}
         // Reset to Setup mode when starting/resuming a task
         saveTimelineMode('setup');
 
+        clearAutoOutdatedForName(trimmed);
         if (existing) {
             if (existing.isActive) {
                 selectedTaskId = null;
@@ -2935,13 +3961,17 @@ ${comment}
         projectPopupMode = "start";
         projectEditOriginalName = null;
         if (projectNameEditRowEl) projectNameEditRowEl.style.display = "none";
+        if (projectOutdatedWrapEl) projectOutdatedWrapEl.style.display = "none";
         if (projectNameEditInputEl) projectNameEditInputEl.value = "";
+        if (projectOutdatedCheckboxEl) projectOutdatedCheckboxEl.checked = false;
+        if (projectOutdatedWrapEl) projectOutdatedWrapEl.style.display = "none";
         if (projectConfirmButtonEl) projectConfirmButtonEl.textContent = projectConfirmDefaultText;
 
         pendingNewTaskName = (taskName || "").trim();
         if (!pendingNewTaskName) return;
         projectTaskNameEl.textContent = pendingNewTaskName;
         projectNumberInputEl.value = getStoredProjectNumberForName(pendingNewTaskName) || "";
+        if (projectOutdatedCheckboxEl) projectOutdatedCheckboxEl.checked = isOutdatedForName(pendingNewTaskName);
         projectOverlayEl.classList.add("show");
         setTimeout(() => {
             if (projectPopupMode === "edit" && projectNameEditInputEl) projectNameEditInputEl.focus();
@@ -2957,10 +3987,17 @@ ${comment}
         pendingNewTaskName = (taskName || "").trim();
         projectEditOriginalName = pendingNewTaskName;
         if (projectNameEditRowEl) projectNameEditRowEl.style.display = "block";
+        if (projectOutdatedWrapEl) projectOutdatedWrapEl.style.display = "flex";
         if (projectNameEditInputEl) projectNameEditInputEl.value = pendingNewTaskName;
         if (!pendingNewTaskName) return;
         projectTaskNameEl.textContent = pendingNewTaskName;
         projectNumberInputEl.value = getStoredProjectNumberForName(pendingNewTaskName) || "";
+
+        // Ensure checkbox visual state doesn't carry over from previously edited projects
+        if (projectOutdatedCheckboxEl) {
+            projectOutdatedCheckboxEl.checked = isOutdatedForName(pendingNewTaskName);
+        }
+
         projectOverlayEl.classList.add("show");
         setTimeout(() => {
             if (projectPopupMode === "edit" && projectNameEditInputEl) projectNameEditInputEl.focus();
@@ -2992,6 +4029,11 @@ ${comment}
             }
 
             setStoredProjectNumberForName(finalName, projectNo);
+
+            // Utgått (manuell markering)
+            if (projectOutdatedCheckboxEl) {
+                setOutdatedForName(finalName, projectOutdatedCheckboxEl.checked, true);
+            }
 
             const key = normalizeTaskName(finalName);
             if (key) {
@@ -3430,10 +4472,12 @@ startNewTask(pendingNewTaskName, projectNo);
         const openDayIds = new Set();
         const openWeekKeys = new Set();
         const openMonthKeys = new Set();
+        const openYearKeys = new Set();
         if (hasExisting) {
             archiveListEl.querySelectorAll("details.archive-group[open]").forEach(el => openDayIds.add(Number(el.dataset.id)));
             archiveListEl.querySelectorAll("details.week-group[open]").forEach(el => openWeekKeys.add(el.dataset.key));
             archiveListEl.querySelectorAll("details.month-group[open]").forEach(el => openMonthKeys.add(el.dataset.key));
+            archiveListEl.querySelectorAll("details.year-group[open]").forEach(el => openYearKeys.add(el.dataset.year));
         }
         archiveListEl.innerHTML = "";
         
@@ -3463,22 +4507,70 @@ startNewTask(pendingNewTaskName, projectNo);
         });
 
         const showMonthHeader = uniqueWeeks.size >= 4;
-        const groupedData = new Map();
+        
+        const currentYear = new Date().getFullYear();
+
+        // Keep chronological (newest first) ordering exactly as sortedArchives, but split into year containers.
+        const archivesByYear = new Map();
+        const yearOrder = [];
         sortedArchives.forEach(arch => {
             const d = arch.createdAt ? new Date(arch.createdAt) : new Date(arch.id);
-            const year = d.getFullYear();
-            const month = d.getMonth(); 
-            const week = getISOWeek(d);
-            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
-            const weekKey = `${year}-${String(week).padStart(2, '0')}`;
-            if (!groupedData.has(monthKey)) groupedData.set(monthKey, new Map());
-            const monthMap = groupedData.get(monthKey);
-            if (!monthMap.has(weekKey)) monthMap.set(weekKey, []);
-            monthMap.get(weekKey).push(arch);
+            const y = d.getFullYear();
+            if (!archivesByYear.has(y)) {
+                archivesByYear.set(y, []);
+                yearOrder.push(y);
+            }
+            archivesByYear.get(y).push(arch);
         });
 
-        groupedData.forEach((monthMap, monthKey) => {
-            let monthContainer = archiveListEl;
+        yearOrder.forEach((year) => {
+            let yearContainer = archiveListEl;
+
+            // Only show a Year-level grouping when we are past that year (i.e. not the current year).
+            if (year !== currentYear) {
+                const yearDetails = document.createElement('details');
+                yearDetails.className = 'year-group';
+                yearDetails.dataset.year = String(year);
+                if (hasExisting && openYearKeys.has(String(year))) yearDetails.open = true;
+
+                // Tooltip: year total
+                let totalYearMs = 0;
+                (archivesByYear.get(year) || []).forEach(a => {
+                    (a.tasks || []).forEach(t => totalYearMs += (t.totalMs || 0));
+                });
+
+                yearDetails.addEventListener("toggle", (e) => {
+                    if (!yearDetails.open) {
+                        const childDetails = yearDetails.querySelectorAll("details");
+                        childDetails.forEach(cd => cd.removeAttribute("open"));
+                    }
+                });
+
+                const yearSummary = document.createElement('summary');
+                yearSummary.className = 'year-summary';
+                yearSummary.textContent = String(year);
+                yearSummary.title = getRoundedTooltipText(totalYearMs);
+                yearDetails.appendChild(yearSummary);
+
+                archiveListEl.appendChild(yearDetails);
+                yearContainer = yearDetails;
+            }
+
+            const groupedData = new Map();
+            (archivesByYear.get(year) || []).forEach(arch => {
+                const d = arch.createdAt ? new Date(arch.createdAt) : new Date(arch.id);
+                const month = d.getMonth();
+                const week = getISOWeek(d);
+                const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+                const weekKey = `${year}-${String(week).padStart(2, '0')}`;
+                if (!groupedData.has(monthKey)) groupedData.set(monthKey, new Map());
+                const monthMap = groupedData.get(monthKey);
+                if (!monthMap.has(weekKey)) monthMap.set(weekKey, []);
+                monthMap.get(weekKey).push(arch);
+            });
+
+groupedData.forEach((monthMap, monthKey) => {
+            let monthContainer = yearContainer;
             if (showMonthHeader) {
                 const [y, m] = monthKey.split('-').map(Number);
                 const dateObj = new Date(y, m, 1);
@@ -3508,7 +4600,7 @@ startNewTask(pendingNewTaskName, projectNo);
                 monthSummary.textContent = capitalizedMonth;
                 monthSummary.title = getRoundedTooltipText(totalMonthMs); // Tooltip for month
                 monthDetails.appendChild(monthSummary);
-                archiveListEl.appendChild(monthDetails);
+                yearContainer.appendChild(monthDetails);
                 monthContainer = monthDetails; 
             }
             monthMap.forEach((archivesInWeek, weekKey) => {
@@ -3559,6 +4651,8 @@ startNewTask(pendingNewTaskName, projectNo);
                 monthContainer.appendChild(weekDetails);
             });
         });
+        });
+
     }
 
     function createArchiveElement(archive, isOpen) {
@@ -3575,7 +4669,10 @@ startNewTask(pendingNewTaskName, projectNo);
 
         const labelSpan = document.createElement("span");
         labelSpan.className = "archive-label";
-        labelSpan.textContent = archive.label;
+        // In week view, day label should be weekday only (no date)
+        const _d = archive.createdAt ? new Date(archive.createdAt) : new Date(archive.id);
+        const _weekday = _d.toLocaleDateString(undefined, { weekday: "long" });
+        labelSpan.textContent = _weekday ? (_weekday.charAt(0).toUpperCase() + _weekday.slice(1)) : (archive.label || "");
         const actions = document.createElement("span");
         actions.className = "archive-actions";
         const restoreBtn = document.createElement("button");
@@ -3804,6 +4901,7 @@ startNewTask(pendingNewTaskName, projectNo);
                 const li = document.createElement("li");
                 li.className = "task-list-item";
                 li.dataset.id = task.id;
+                if (isFavoriteForName(task.name)) li.classList.add("task-favorite");
                 if (task.isActive) li.classList.add("task-active");
                 if (task.id === selectedTaskId) li.classList.add("task-selected");
                 const left = document.createElement("span");
@@ -3894,6 +4992,7 @@ startNewTask(pendingNewTaskName, projectNo);
                 if (shouldShowComment) {
                     const commentRow = document.createElement("div");
                     commentRow.className = "task-comment-row";
+                    if (isFavoriteForName(task.name)) commentRow.classList.add("task-favorite");
                     const box = document.createElement("div");
                     box.className = "task-comment-box";
                     box.textContent = task.comment;
@@ -4142,6 +5241,10 @@ startNewTask(pendingNewTaskName, projectNo);
         saveProfiles();
         loadFromStorage();
         loadDayTimelineSettings();
+        applyStoredSuggestionsHeight();
+        applyStoredSuggestionsHeight();
+        applyStoredSuggestionsHeight();
+        applyStoredSuggestionsHeight();
         selectedTaskId = null;
         suggestionIndex = -1;
         filteredSuggestions = [];
@@ -4229,7 +5332,7 @@ startNewTask(pendingNewTaskName, projectNo);
         setTimeout(() => { executeDeleteProfile(); }, 1000);
     }
     function generateDemoData() {
-        if (!confirm("Dette vil opprette en stor testprofil (6 mnd, full historikk) og laste den ned som 'testprofil.json'. Vil du fortsette?")) return;
+        if (!confirm("Dette vil opprette en stor testprofil (3 år, full historikk) og laste den ned som 'testprofil.json'. Vil du fortsette?")) return;
 
         const demoProfileName = "Testprofil (Tung)";
         
@@ -4273,7 +5376,7 @@ startNewTask(pendingNewTaskName, projectNo);
 
         const now = new Date();
         const startDate = new Date();
-        startDate.setMonth(now.getMonth() - 6);
+        startDate.setFullYear(now.getFullYear() - 3);
         // Ensure we start at the beginning of that week to look nice if needed, but simple subtraction is fine.
         
         // Iterate from today back to startDate
@@ -4515,6 +5618,7 @@ startNewTask(pendingNewTaskName, projectNo);
                     saveProfiles(); 
                     loadFromStorage();
                     loadDayTimelineSettings();
+                    applyStoredSuggestionsHeight();
                     selectedTaskId = null;
                     disableCompactMode();
                     updateUI();
@@ -4535,7 +5639,7 @@ startNewTask(pendingNewTaskName, projectNo);
 
     let themeClickCount = 0;
     let themeResetTimer = null;
-    themeToggleButtonEl.addEventListener("click", () => {
+    themeToggleButtonEl.addEventListener("click", async () => {
         clearTimeout(themeResetTimer);
         themeClickCount++;
         themeResetTimer = setTimeout(() => { themeClickCount = 0; }, 500); 
@@ -4593,7 +5697,33 @@ startNewTask(pendingNewTaskName, projectNo);
     if (backupFileInputEl) backupFileInputEl.addEventListener("change", handleFileSelect);
     if (generateTestDataButtonEl) generateTestDataButtonEl.addEventListener("click", generateDemoData);
 
-    toggleAllCommentsButtonEl.addEventListener("click", () => {
+
+    // Delete task (X i forslaglisten) confirm popup
+    if (deleteTaskCancelBtnEl) deleteTaskCancelBtnEl.addEventListener("click", async () => { hideDeleteTaskPopup(); taskInputEl && taskInputEl.focus(); });
+    if (deleteTaskConfirmBtnEl) deleteTaskConfirmBtnEl.addEventListener("click", async () => {
+        if (pendingDeleteTaskName) {
+            removeTaskNameFromHistory(pendingDeleteTaskName);
+            renderSuggestions();
+            saveToStorage();
+        }
+        hideDeleteTaskPopup();
+        taskInputEl && taskInputEl.focus();
+    });
+    if (deleteTaskOverlayEl) deleteTaskOverlayEl.addEventListener("mousedown", (e) => {
+        if (e.target === deleteTaskOverlayEl) {
+            e.preventDefault();
+            hideDeleteTaskPopup();
+            taskInputEl && taskInputEl.focus();
+        }
+    });
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape" && e.key !== "Esc") return;
+        if (!deleteTaskOverlayEl || !deleteTaskOverlayEl.classList.contains("show")) return;
+        e.preventDefault();
+        hideDeleteTaskPopup();
+        taskInputEl && taskInputEl.focus();
+    });
+    toggleAllCommentsButtonEl.addEventListener("click", async () => {
         if (toggleAllCommentsButtonEl.disabled) return;
         showAllComments = !showAllComments;
         expandedCommentTaskId = null;
@@ -4602,7 +5732,7 @@ startNewTask(pendingNewTaskName, projectNo);
     });
 
     if (copyOneNoteButtonEl) {
-        copyOneNoteButtonEl.addEventListener("click", () => {
+        copyOneNoteButtonEl.addEventListener("click", async () => {
              let originalTasks = null;
              if (selectedArchiveForCopy) {
                  const archive = data.archives.find(a => a.id === selectedArchiveForCopy);
@@ -4639,15 +5769,11 @@ ${comment}
                 return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>${safeComment}<br>-</div>`;
             }).join("");
             try {
-                const clipboardItem = new ClipboardItem({
-                    "text/plain": new Blob([plainText], { type: "text/plain" }),
-                    "text/html": new Blob([htmlContent], { type: "text/html" })
-                });
-                navigator.clipboard.write([clipboardItem]).then(() => {
+                const ok = await copyToClipboard(htmlContent, plainText);
+                if (!ok) throw new Error('copy failed');
                     const originalText = copyOneNoteButtonEl.textContent;
                     copyOneNoteButtonEl.textContent = "Kopiert!";
                     setTimeout(() => { copyOneNoteButtonEl.textContent = originalText; }, 1500);
-                });
             } catch (e) {
                 navigator.clipboard.writeText(plainText);
                 alert("Kopierte som ren tekst (nettleseren støttet ikke rik formatering).");
@@ -4656,7 +5782,7 @@ ${comment}
     }
 
     if (toggleListHeightButtonEl) {
-        toggleListHeightButtonEl.addEventListener("click", () => {
+        toggleListHeightButtonEl.addEventListener("click", async () => {
             const isExpanded = taskListEl.classList.contains("expanded");
             if (!isExpanded) {
                 taskListEl.classList.add("expanded");
@@ -4670,7 +5796,7 @@ ${comment}
         });
     }
     if (toggleRoundingButtonEl) {
-        toggleRoundingButtonEl.addEventListener("click", () => {
+        toggleRoundingButtonEl.addEventListener("click", async () => {
             isRoundingEnabled = !isRoundingEnabled;
             if (isRoundingEnabled) {
                 toggleRoundingButtonEl.classList.add("btn-rounding-active");
@@ -4726,7 +5852,7 @@ ${comment}
         document.addEventListener('touchend', stopResize);
     }
 
-    startButtonEl.addEventListener("click", () => {
+    startButtonEl.addEventListener("click", async () => {
         if (selectedTaskId !== null) { resumeTask(selectedTaskId); } 
         else {
             const name = taskInputEl.value.trim();
@@ -4734,7 +5860,7 @@ ${comment}
             startOrResumeByName(name);
         }
     });
-    endButtonEl.addEventListener("click", () => {
+    endButtonEl.addEventListener("click", async () => {
         endDayPressedAtMs = Date.now();
         finalizeActiveTask();
         saveToStorage();
@@ -4749,28 +5875,28 @@ ${comment}
             downloadBackup();
         }
     });
-    transferTimeButtonEl.addEventListener("click", () => { if (!transferTimeButtonEl.disabled) showTransferPopup(); });
+    transferTimeButtonEl.addEventListener("click", async () => { if (!transferTimeButtonEl.disabled) showTransferPopup(); });
     transferCloseButtonEl.addEventListener("click", () => hideTransferPopup());
     transferCancelButtonEl.addEventListener("click", () => hideTransferPopup());
     transferConfirmButtonEl.addEventListener("click", () => transferTimeConfirm());
-    adjustStartButtonEl.addEventListener("click", () => { if (!adjustStartButtonEl.disabled) showAdjustStartPopup(); });
+    adjustStartButtonEl.addEventListener("click", async () => { if (!adjustStartButtonEl.disabled) showAdjustStartPopup(); });
     adjustStartCloseButtonEl.addEventListener("click", () => hideAdjustStartPopup());
     adjustStartCancelButtonEl.addEventListener("click", () => hideAdjustStartPopup());
     adjustStartConfirmButtonEl.addEventListener("click", () => adjustStartConfirm());
-    clearButtonEl.addEventListener("click", () => { if (!clearButtonEl.disabled) showClearTodayPopup(); });
+    clearButtonEl.addEventListener("click", async () => { if (!clearButtonEl.disabled) showClearTodayPopup(); });
     clearTodayCancelButtonEl.addEventListener("click", () => hideClearTodayPopup());
-    clearTodayConfirmButtonEl.addEventListener("click", () => { hideClearTodayPopup(); clearAndArchiveTasks(); });
+    clearTodayConfirmButtonEl.addEventListener("click", async () => { hideClearTodayPopup(); clearAndArchiveTasks(); });
     exportButtonEl.addEventListener("click", () => exportArchivesToCsv());
     clearArchivesButtonEl.addEventListener("click", () => showClearArchivesPopup());
-    clearArchivesDeleteButtonEl.addEventListener("click", () => { deleteAllArchives(); hideClearArchivesPopup(); });
-    clearArchivesExportDeleteButtonEl.addEventListener("click", () => {
+    clearArchivesDeleteButtonEl.addEventListener("click", async () => { deleteAllArchives(); hideClearArchivesPopup(); });
+    clearArchivesExportDeleteButtonEl.addEventListener("click", async () => {
         const ok = exportArchivesToCsv();
         if (ok) deleteAllArchives();
         hideClearArchivesPopup();
     });
     clearArchivesCloseButtonEl.addEventListener("click", () => hideClearArchivesPopup());
     clearArchivesCancelButtonEl.addEventListener("click", () => hideClearArchivesPopup());
-    overdueConfirmButtonEl.addEventListener("click", () => {
+    overdueConfirmButtonEl.addEventListener("click", async () => {
         const hour = parseInt(overdueHourEl.value, 10);
         const minute = parseInt(overdueMinuteEl.value, 10);
         const activeBefore = getActiveTask();
@@ -4787,9 +5913,27 @@ ${comment}
     projectCloseButtonEl.addEventListener("click", () => hideProjectPopup());
     projectCancelButtonEl.addEventListener("click", () => hideProjectPopup());
     projectConfirmButtonEl.addEventListener("click", () => confirmProjectPopup());
+
+// Live update: when toggling "Utgått" in the project edit popup, update list immediately in the background
+if (projectOutdatedCheckboxEl) {
+    projectOutdatedCheckboxEl.addEventListener("change", () => {
+        if (!pendingNewTaskName) return;
+        const name = (projectNameEditInputEl && projectPopupMode === "edit")
+            ? (projectNameEditInputEl.value || pendingNewTaskName).trim()
+            : (pendingNewTaskName || "").trim();
+        if (!name) return;
+
+        // Persist manual outdated flag and refresh list view behind the popup
+        setOutdatedForName(name, !!projectOutdatedCheckboxEl.checked, true);
+        saveToStorage();
+        // Re-render suggestions even if input isn't focused (allowed while overlay is open)
+        renderSuggestions();
+    });
+}
     projectNumberInputEl.addEventListener("keydown", (e) => {
         if (e.key === "Enter") { e.preventDefault(); confirmProjectPopup(); }
         if (e.key === "Escape") { e.preventDefault(); hideProjectPopup(); }
+            if (deleteTaskOverlayEl && deleteTaskOverlayEl.classList.contains("show")) { hideDeleteTaskPopup(); return; }
     });
     commentCloseButtonEl.addEventListener("click", () => hideCommentPopup());
     commentCancelButtonEl.addEventListener("click", () => hideCommentPopup());
@@ -4836,7 +5980,22 @@ suggestionIndex = -1;
         renderSuggestions();
     });
     taskInputEl.addEventListener("focus", () => { suggestionIndex = -1; renderSuggestions(); });
-    taskInputEl.addEventListener("blur", () => { setTimeout(() => clearSuggestions(), 150); });
+    taskInputEl.addEventListener("blur", () => { /* keep suggestions open; closed by outside click */ });
+
+
+    // Close task suggestions only when clicking outside (no blur/timer auto-close)
+    function isTaskSuggestionsOpen() {
+        return !!(taskSuggestionsEl && taskSuggestionsEl.style.display !== 'none' && taskSuggestionsEl.innerHTML && taskSuggestionsEl.innerHTML.trim() !== '');
+    }
+
+    document.addEventListener('pointerdown', (e) => {
+        if (!isTaskSuggestionsOpen()) return;
+        const t = e.target;
+        // If click is inside input, suggestions, or helper, keep open
+        if (t.closest('#taskInput') || t.closest('#taskSuggestions') || t.closest('#taskListHelper') || t.closest('#projectOverlay .modal')) return;
+        clearSuggestions();
+    }, true);
+
 
     let taskClickTimer = null;
     taskListEl.addEventListener("click", (e) => {
@@ -4930,6 +6089,9 @@ suggestionIndex = -1;
     loadProfiles();
     loadFromStorage();
     loadDayTimelineSettings();
+    applyStoredSuggestionsHeight();
+    initSuggestionsResizePersistence();
+    wireGroupEditModal();
     loadAutoSaveSetting();
     renderDayTimeline();
     updateUI();
@@ -5013,9 +6175,110 @@ if (archiveListEl && copyOneNoteButtonEl) {
     });
 }
 
+    // --- Group edit modal (dblclick on group)
+    let editingGroupId = null;
+
+    function openGroupEditModal(groupId){
+        ensureGroupData();
+        const g = getGroupById(groupId);
+        if (!g) return;
+        editingGroupId = g.id;
+
+        const backdrop = document.getElementById("groupEditBackdrop");
+        const nameEl = document.getElementById("groupEditName");
+        const colorEl = document.getElementById("groupEditColor");
+
+        if (!backdrop || !nameEl || !colorEl) return;
+
+        nameEl.value = g.name || "";
+        // default to current text color if missing
+        const color = (g.color && typeof g.color === "string") ? g.color : "";
+        colorEl.value = color ? color : "#111827";
+
+        backdrop.style.display = "flex";
+        setTimeout(() => { try { nameEl.focus(); nameEl.select(); } catch(e){} }, 0);
+    }
+
+    function closeGroupEditModal(){
+        const backdrop = document.getElementById("groupEditBackdrop");
+        if (backdrop) backdrop.style.display = "none";
+        editingGroupId = null;
+    }
+
+    function saveGroupEditModal(){
+        if (!editingGroupId) { closeGroupEditModal(); return; }
+        ensureGroupData();
+        const g = getGroupById(editingGroupId);
+        if (!g) { closeGroupEditModal(); return; }
+
+        const nameEl = document.getElementById("groupEditName");
+        const colorEl = document.getElementById("groupEditColor");
+
+        const newName = (nameEl ? nameEl.value.trim() : "");
+        g.name = newName ? newName : (g.name || makeNextGroupName());
+
+        // store explicit color, allow empty (cleared)
+        const rawColor = (colorEl ? colorEl.value : "");
+        g.color = (rawColor && rawColor !== "#111827") ? rawColor : (g.color || "");
+
+        saveToStorage();
+        closeGroupEditModal();
+        renderSuggestions();
+        taskInputEl && taskInputEl.focus();
+    }
+
+    function wireGroupEditModal(){
+        const backdrop = document.getElementById("groupEditBackdrop");
+        if (!backdrop) return;
+
+        const btnClose = document.getElementById("groupEditClose");
+        const btnCancel = document.getElementById("groupEditCancel");
+        const btnSave = document.getElementById("groupEditSave");
+        const btnClear = document.getElementById("groupEditColorClear");
+
+        const onClose = (e) => { e && e.preventDefault && e.preventDefault(); closeGroupEditModal(); };
+
+        btnClose && btnClose.addEventListener("click", onClose);
+        btnCancel && btnCancel.addEventListener("click", onClose);
+        btnSave && btnSave.addEventListener("click", (e) => { e.preventDefault(); saveGroupEditModal(); });
+
+        btnClear && btnClear.addEventListener("click", (e) => {
+            e.preventDefault();
+            const colorEl = document.getElementById("groupEditColor");
+            if (colorEl) colorEl.value = "#111827";
+            if (editingGroupId) {
+                const g = getGroupById(editingGroupId);
+                if (g) g.color = "";
+            }
+        });
+
+        // click outside modal closes
+        backdrop.addEventListener("mousedown", (e) => {
+            if (e.target === backdrop) closeGroupEditModal();
+        });
+
+        // Enter saves, ESC closes (only when modal open)
+        document.addEventListener("keydown", (e) => {
+            const isOpen = backdrop.style.display !== "none" && backdrop.style.display !== "";
+            if (!isOpen) return;
+            if (e.key === "Escape" || e.key === "Esc") {
+                e.preventDefault();
+                closeGroupEditModal();
+                return;
+            }
+            if (e.key === "Enter") {
+                // avoid saving when inside color input? still ok
+                e.preventDefault();
+                saveGroupEditModal();
+            }
+        }, true);
+    }
+
+
+
 // Dedicated OneNote copy for history (day-level)
 if (El && archiveListEl) {
-    El.addEventListener("click", () => {
+    El.addEventListener("click", async () => {
         const selectedDay = archiveListEl.querySelector(".archive-summary.selected");
         if (!selectedDay) return;
 
@@ -5052,15 +6315,141 @@ ${comment}
             return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>${safeComment}<br>-</div>`;
         }).join("");
 
-        const clipboardItem = new ClipboardItem({
-            "text/plain": new Blob([plainText], { type: "text/plain" }),
-            "text/html": new Blob([htmlContent], { type: "text/html" })
-        });
-
-        navigator.clipboard.write([clipboardItem]);
+        await copyToClipboard(htmlContent, plainText);
     });
 }
 </script>
+
+
+<!-- Group Edit Modal -->
+<div id="groupEditBackdrop" class="group-edit-backdrop" style="display:none;">
+  <div class="group-edit-modal" role="dialog" aria-modal="true" aria-labelledby="groupEditTitle">
+    <div class="group-edit-header">
+      <div id="groupEditTitle" class="group-edit-title">Rediger gruppe</div>
+      <button type="button" id="groupEditClose" class="group-edit-close" title="Lukk">×</button>
+    </div>
+    <div class="group-edit-body">
+      <label class="group-edit-label" for="groupEditName">Navn</label>
+      <input id="groupEditName" type="text" class="group-edit-input" placeholder="Gruppe-navn">
+
+      <label class="group-edit-label" for="groupEditColor">Tekstfarge</label>
+      <div class="group-edit-colorrow">
+        <input id="groupEditColor" type="color" class="group-edit-color">
+        <button type="button" id="groupEditColorClear" class="btn-secondary" style="padding:0.35rem 0.6rem;">Nullstill</button>
+      </div>
+
+      <div class="group-edit-actions">
+        <button type="button" id="groupEditSave" class="btn-primary">Lagre</button>
+        <button type="button" id="groupEditCancel" class="btn-secondary">Avbryt</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="appNotesOverlay" class="overlay">
+    <div class="modal">
+        <button class="modal-close" id="appNotesCloseButton">&times;</button>
+        <h2>Notater</h2>
+        <div class="modal-row" style="width:100%;">
+            <textarea id="appNotesTextarea" class="modal-textarea" placeholder="Skriv inn notater her ..."></textarea>
+        </div>
+        <div class="modal-footer">
+            <button id="appNotesSaveButton" class="modal-button-primary" type="button">Lagre</button>
+        </div>
+        <div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC eller klikk utenfor = lagre</div>
+    </div>
+</div>
+
+
+<script>
+(function(){
+    const btn = document.getElementById("appNotesButton");
+    const overlay = document.getElementById("appNotesOverlay");
+    const closeBtn = document.getElementById("appNotesCloseButton");
+    const saveBtn = document.getElementById("appNotesSaveButton");
+    const textarea = document.getElementById("appNotesTextarea");
+    const indicator = document.getElementById("appNotesIndicator");
+
+    function ensureNotesField(){
+        if(window.data && typeof window.data === "object"){
+            if(typeof window.data.appNotes !== "string"){
+                window.data.appNotes = "";
+            }
+        }
+    }
+
+    function updateIndicator(){
+        if(!indicator) return;
+        const val = (textarea?.value ?? window.data?.appNotes ?? "");
+        indicator.style.display = (String(val).trim().length > 0) ? "inline-block" : "none";
+    }
+
+
+    function loadNotes(){
+        if(window.data && typeof window.data === "object"){
+            ensureNotesField();
+            textarea.value = window.data.appNotes || "";
+            updateIndicator();
+        }
+    }
+
+    function saveNotes(){
+        if(window.data && typeof window.data === "object"){
+            ensureNotesField();
+            window.data.appNotes = textarea.value || "";
+            updateIndicator();
+            if(typeof saveData === "function"){
+                saveData();
+            }
+        }
+    }
+
+    function openOverlay(){
+        loadNotes();
+        overlay.classList.add("show");
+        textarea.focus();
+    }
+
+    function closeOverlay(save=true){
+        if(save){
+            saveNotes();
+        }
+        overlay.classList.remove("show");
+    }
+
+    btn?.addEventListener("click", openOverlay);
+    closeBtn?.addEventListener("click", () => closeOverlay(true));
+    saveBtn?.addEventListener("click", () => closeOverlay(true));
+    textarea?.addEventListener("input", updateIndicator);
+
+    overlay?.addEventListener("click", (e) => {
+        if(e.target === overlay){
+            closeOverlay(true);
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if(!overlay.classList.contains("show")) return;
+        if(e.key === "Escape"){
+            closeOverlay(true);
+        }
+    });
+
+    // Also reload notes when profile changes (if profile system triggers loadData)
+    document.addEventListener("profileLoaded", () => {
+        loadNotes();
+        updateIndicator();
+    });
+
+    // Attempt initial sync after page load
+    window.addEventListener("load", () => {
+        setTimeout(() => { loadNotes(); updateIndicator(); }, 50);
+    });
+
+})();
+</script>
+
 
 </body>
 
