@@ -186,7 +186,25 @@
             flex-wrap: wrap;
         }
 
-        @keyframes pulse-blue-card {
+        /* Historikk: klikkbar overskrift med pil (som år/mnd) */
+        .archive-header-toggle{
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .archive-header-toggle:focus{ outline: none; }
+        .archive-toggle-arrow{
+            width: 0.8em;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.85;
+            flex: none;
+            font-size: 1em;
+            line-height: 1;
+        }
+
+@keyframes pulse-blue-card {
             0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
             70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
             100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
@@ -394,8 +412,30 @@
     line-height: 1;
     font-size: 0.85rem;
     color: #9ca3af;
+    position: relative;
+    overflow: hidden;
 }
-        .suggestion-edit:hover{ color: var(--dot-green); }
+.suggestion-edit::before{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--dot-green);
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+    z-index: 0;
+}
+.suggestion-edit:hover::before{
+    opacity: 1;
+}
+.suggestion-edit:hover{
+    color: #ffffff;
+}
+.suggestion-edit .pencil-icon{
+    position: relative;
+    z-index: 2;
+    display: inline-block;
+    line-height: 1;
+}
 .suggestion-fav{
     width: 28px;
     height: 28px;
@@ -1846,18 +1886,24 @@ ${comment}
 
 <section class="card">
     <div class="card-header">
-        <span><strong>Historikk</strong></span>
+        <div class="card-header-left archive-header-toggle" id="archiveHeaderToggle" role="button" tabindex="0" aria-expanded="true">
+            <span class="archive-toggle-arrow" id="archiveToggleArrow" aria-hidden="true">▾</span>
+            <span><strong>Historikk</strong></span>
+        </div>
         <div class="card-header-buttons">
-            
+
             <button id="exportButton" class="btn-secondary" title="Last ned all historikk som CSV">Eksporter til Excel</button>
             <button id="clearArchivesButton" class="btn-secondary" title="Slett all historikk permanent">Slett historikk</button>
         </div>
     </div>
-    <p class="helper-text" id="archiveHelper">
-        Når du tømmer listen, blir prosjektene flyttet hit, gruppert på dag og måned.
-        Du kan gjenoppta et arkivert prosjekt kun dersom det er samme dato.
-    </p>
-    <div id="archiveList"></div>
+
+    <div id="archiveContentWrap">
+        <p class="helper-text" id="archiveHelper">
+            Når du tømmer listen, blir prosjektene flyttet hit, gruppert på dag, måned og år.
+            Du kan gjenoppta et arkivert prosjekt kun dersom det er samme dato.
+        </p>
+        <div id="archiveList"></div>
+    </div>
 </section>
 
 <!-- Settings Modal -->
@@ -2237,6 +2283,49 @@ const startButtonEl = document.getElementById("startButton");
     const emptyListTextEl = document.getElementById("emptyListText");
     const archiveListEl = document.getElementById("archiveList");
 
+
+    // --- Historikk: kollaps/utvid hele historikkseksjonen (per profil) ---
+    const archiveHeaderToggleEl = document.getElementById("archiveHeaderToggle");
+    const archiveContentWrapEl = document.getElementById("archiveContentWrap");
+    const archiveToggleArrowEl = document.getElementById("archiveToggleArrow");
+
+    let archiveCollapsed = false;
+
+    function getArchiveCollapsedKey(){
+        return "taskTimeTracker_archiveCollapsed_" + (currentProfile || "Standard");
+    }
+    function loadArchiveCollapsed(){
+        const v = localStorage.getItem(getArchiveCollapsedKey());
+        return v === "1";
+    }
+    function saveArchiveCollapsed(val){
+        localStorage.setItem(getArchiveCollapsedKey(), val ? "1" : "0");
+    }
+    function applyArchiveCollapsedUI(){
+        const collapsed = !!archiveCollapsed;
+        if (archiveContentWrapEl) archiveContentWrapEl.style.display = collapsed ? "none" : "";
+        if (archiveToggleArrowEl) archiveToggleArrowEl.textContent = collapsed ? "▸" : "▾";
+        if (archiveHeaderToggleEl) archiveHeaderToggleEl.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    }
+    function toggleArchiveCollapsed(){
+        archiveCollapsed = !archiveCollapsed;
+        saveArchiveCollapsed(archiveCollapsed);
+        applyArchiveCollapsedUI();
+    }
+
+    if (archiveHeaderToggleEl) {
+        archiveHeaderToggleEl.addEventListener("click", (e) => {
+            e.preventDefault();
+            toggleArchiveCollapsed();
+        });
+        archiveHeaderToggleEl.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleArchiveCollapsed();
+            }
+        });
+    }
+
     const toggleAllCommentsButtonEl = document.getElementById("toggleAllCommentsButton");
     const toggleListHeightButtonEl = document.getElementById("toggleListHeightButton");
     const toggleRoundingButtonEl = document.getElementById("toggleRoundingButton");
@@ -2577,7 +2666,10 @@ function initSuggestionsResizePersistence() {
                 }
             } catch (e) {}
         }
-    }
+    
+        archiveCollapsed = loadArchiveCollapsed();
+        applyArchiveCollapsedUI();
+}
 
     function saveToStorage() {
         const key = getStorageKey();
@@ -3667,7 +3759,7 @@ function initSuggestionsResizePersistence() {
 
             const editBtn = document.createElement("button");
             editBtn.className = "suggestion-edit";
-            editBtn.textContent = "✎";
+            editBtn.innerHTML = '<span class="pencil-icon" aria-hidden="true">✎</span>';
             editBtn.title = "Rediger prosjektnummer";
             editBtn.addEventListener("mousedown", (e) => {
                 e.preventDefault();
