@@ -282,6 +282,68 @@
             border-color: rgba(168,85,247,0.42);
             box-shadow: 0 0 0 1px rgba(168,85,247,0.12) inset;
         }
+        #personalFruitigerArchiveButton.active{
+            background: rgba(34,197,94,0.14);
+            border-color: rgba(34,197,94,0.42);
+            box-shadow: 0 0 0 1px rgba(34,197,94,0.12) inset;
+        }
+        .personal-bg-archive-panel{
+            display:none;
+            margin-top:0.55rem;
+            border:1px solid var(--border-soft);
+            border-radius:0.55rem;
+            background: var(--bg-soft);
+            padding:0.5rem;
+        }
+        .personal-bg-archive-panel.is-open{ display:block; }
+        .personal-bg-archive-status{
+            font-size:0.72rem;
+            color: var(--muted);
+            margin:0 0 0.4rem 0;
+        }
+        .personal-bg-archive-toolbar{
+            border:1px solid var(--border-soft);
+            border-radius:0.45rem;
+            padding:0.45rem;
+            margin:0 0 0.45rem 0;
+            background: color-mix(in srgb, var(--card) 92%, transparent);
+        }
+        .personal-bg-archive-toolbar .personal-bg-slider-row{
+            grid-template-columns: 58px 1fr 64px;
+            margin-bottom:0.35rem;
+        }
+        .personal-bg-archive-toolbar .personal-bg-slider-row label{
+            font-size:0.78rem;
+        }
+        .personal-bg-archive-toolbar-buttons{
+            display:flex;
+            gap:0.35rem;
+            flex-wrap:wrap;
+        }
+        .personal-bg-archive-toolbar-buttons button{
+            flex:1 1 170px;
+        }
+        .personal-bg-archive-list{
+            display:grid;
+            grid-template-columns:1fr;
+            gap:0.35rem;
+            max-height:220px;
+            overflow:auto;
+        }
+        .personal-bg-archive-item{
+            width:100%;
+            text-align:left;
+            padding:0.45rem 0.55rem;
+            border-radius:0.45rem;
+            border:1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            cursor:pointer;
+            font-size:0.82rem;
+            line-height:1.25;
+        }
+        .personal-bg-archive-item:hover{ background: var(--hover); }
+        .personal-bg-archive-item[disabled]{ opacity:0.65; cursor:wait; }
         @keyframes personalResetDangerBlink {
             0%, 100% { background: var(--btn-bg); border-color: var(--border); color: var(--text); }
             50% { background: rgba(220,38,38,0.16); border-color: rgba(220,38,38,0.75); color: var(--danger); }
@@ -467,6 +529,89 @@
             color: var(--muted);
             text-align: right;
             white-space: nowrap;
+        }
+
+        .frutiger-music-player-wrap{
+            display:none;
+            position: fixed;
+            top: 0.18rem;
+            left: 0;
+            right: 0;
+            z-index: 2100;
+            margin: 0;
+            pointer-events: none;
+        }
+        .frutiger-music-player-wrap.is-visible{
+            display:flex;
+            justify-content:center;
+        }
+        .frutiger-music-player{
+            pointer-events: auto;
+            width: min(300px, calc(100vw - 0.75rem));
+            border:1px solid var(--border);
+            border-radius: 0.7rem;
+            background: color-mix(in srgb, var(--card) 94%, transparent);
+            box-shadow: var(--shadow);
+            padding: 0.30rem 0.38rem;
+            display:flex;
+            flex-direction:column;
+            gap:0.16rem;
+            backdrop-filter: blur(10px) saturate(120%);
+            -webkit-backdrop-filter: blur(10px) saturate(120%);
+        }
+        .frutiger-music-row{
+            display:flex;
+            align-items:center;
+            gap:0.22rem;
+            min-width:0;
+        }
+        .frutiger-music-row-top{
+            justify-content:space-between;
+        }
+        #frutigerMusicPlayerTitle{
+            font-size:0.74rem;
+            line-height:1.15;
+            min-width:0;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+        }
+        .frutiger-music-status{
+            font-size:0.66rem;
+            color:var(--muted);
+            white-space:nowrap;
+        }
+        .frutiger-music-row-controls{
+            flex-wrap:wrap;
+        }
+        .frutiger-music-row-controls .btn-secondary{
+            padding: 0.12rem 0.28rem;
+            font-size:0.68rem;
+            line-height:1.15;
+        }
+        #toggleFrutigerMusicPlayerButton.active{
+            background: rgba(59,130,246,0.14);
+            border-color: rgba(59,130,246,0.42);
+            box-shadow: 0 0 0 1px rgba(59,130,246,0.12) inset;
+        }
+        .frutiger-music-track{
+            font-size:0.72rem;
+            color: var(--text);
+            border-top:1px solid var(--border-soft);
+            padding-top:0.22rem;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        body.glass-mode-active .frutiger-music-player{
+            background: rgba(var(--glass-surface-rgb), calc(var(--glass-ui-alpha) + 0.08));
+            border-color: rgba(var(--glass-border-rgb), calc(var(--glass-border-alpha) + 0.10));
+        }
+        @media (max-width: 700px){
+            .frutiger-music-player-wrap{ top:0.1rem; }
+            .frutiger-music-player{ width: calc(100vw - 0.35rem); padding: 0.30rem 0.34rem; }
+            #frutigerMusicPlayerTitle{ font-size:0.71rem; }
+            .frutiger-music-track{ font-size:0.68rem; }
         }
 
         .card {
@@ -1788,6 +1933,14 @@
             position: relative;
             z-index: 1;
         }
+        /* Sørg for at slett-prosjekt popup alltid ligger over andre overlays/modaler */
+        #deleteTaskOverlay{
+            z-index: 13050;
+        }
+        #deleteTaskOverlay .modal{
+            position: relative;
+            z-index: 1;
+        }
         .modal {
             position: relative;
             background: var(--card);
@@ -2516,6 +2669,23 @@ ${comment}
     </div>
 </header>
 
+<div id="frutigerMusicPlayerWrap" class="frutiger-music-player-wrap" aria-hidden="true">
+    <div class="frutiger-music-player">
+        <div class="frutiger-music-row frutiger-music-row-top">
+            <strong id="frutigerMusicPlayerTitle">Frutiger Aero Archive – Music</strong>
+            <span id="frutigerMusicStatus" class="frutiger-music-status">Av</span>
+        </div>
+        <div class="frutiger-music-row frutiger-music-row-controls">
+            <button id="frutigerMusicStartStopButton" class="btn-secondary" type="button">Start</button>
+            <button id="frutigerMusicPauseButton" class="btn-secondary" type="button">Pause</button>
+            <button id="frutigerMusicPrevButton" class="btn-secondary" type="button">Forrige</button>
+            <button id="frutigerMusicNextButton" class="btn-secondary" type="button">Neste</button>
+        </div>
+        <div id="frutigerMusicTrackName" class="frutiger-music-track">Ingen sang valgt</div>
+        <audio id="frutigerMusicAudio" preload="none"></audio>
+    </div>
+</div>
+
 <div id="adhdStripWrap" class="adhd-strip-wrap" title="Klikk for å legge inn eller endre oppgavelisten">
     <div id="adhdStrip" class="adhd-strip">
         <div class="adhd-strip-line" aria-hidden="true"></div>
@@ -2702,7 +2872,7 @@ ${comment}
         <button class="modal-close" id="personalCustomizeCloseButton">&times;</button>
         <h2>Personlig tilpasning</h2>
         <div class="helptext-container" data-helptext-container="true" style="margin-bottom:0.6rem;">
-            <div class="helper-text">Endre navn på overskrifter i programmet. Venstre side viser originalt navn, høyre side er ditt navn.</div>
+            <div class="helper-text">Her kan du tilpasse det visuelle slik du selv ønsker, NB! Tekst og menyer kan bli vanskelig å lese. hold nede CTRL tasten hvis du ikke klarer se eller lese tekst</div>
         </div>
         <div class="personal-customize-scroll-panel" style="border:1px solid var(--border); border-radius:0.65rem; padding:0.55rem; max-height:52vh; overflow:auto; background: color-mix(in srgb, var(--card) 94%, transparent);">
             <div style="font-weight:700; margin:0 0 0.5rem 0.15rem;">Fra og til</div>
@@ -2719,6 +2889,7 @@ ${comment}
                         <button id="personalBgMediaButton" type="button" class="btn-secondary">Last opp et bilde eller video</button>
                         <button id="personalBgGlassButton" type="button" class="btn-secondary" aria-pressed="false">Glassmodus</button>
                         <button id="personalBgTextColorButton" type="button" class="btn-secondary" aria-pressed="false">Overstyr tekstfarge</button>
+                        <button id="personalFruitigerArchiveButton" type="button" class="btn-secondary" aria-pressed="false">The Frutiger Aero Archive</button>
                         <input id="personalBgMediaInput" type="file" accept="image/*,video/*" style="position:fixed; left:-99999px; top:0; opacity:0; width:1px; height:1px; pointer-events:none;" />
                     </div>
                     <div id="personalBgGlassControls" class="personal-bg-glass-controls" aria-hidden="true">
@@ -2764,6 +2935,20 @@ ${comment}
                             <span id="personalTextLightValue">18%</span>
                         </div>
                         <div id="personalTextPreviewChip" class="personal-bg-preview-chip">Tekstfarge forhåndsvisning</div>
+                    </div>
+                    <div id="personalFruitigerArchivePanel" class="personal-bg-archive-panel" aria-hidden="true">
+                        <div class="personal-bg-archive-toolbar">
+                            <div class="personal-bg-slider-row">
+                                <label for="personalFruitigerArchiveIntervalRange">Intervall</label>
+                                <input id="personalFruitigerArchiveIntervalRange" type="range" min="0" max="600" step="5" value="45" />
+                                <span id="personalFruitigerArchiveIntervalValue">45s</span>
+                            </div>
+                            <div class="personal-bg-archive-toolbar-buttons">
+                                <button id="personalFruitigerArchiveModeToggle" type="button" class="btn-secondary" aria-pressed="false">Samme kategori</button>
+                            </div>
+                        </div>
+                        <div class="personal-bg-archive-status" id="personalFruitigerArchiveStatus">Trykk på knappen for å hente kategorier fra Frutiger Aero Archive.</div>
+                        <div id="personalFruitigerArchiveList" class="personal-bg-archive-list"></div>
                     </div>
                     <div id="personalBgMediaStatus" class="helper-text" style="margin-top:0.55rem;">Ingen bilde/video valgt</div>
                     <div id="personalBgMediaHistoryDropdown" class="personal-bg-media-history" aria-hidden="true"></div>
@@ -2885,7 +3070,7 @@ ${comment}
                     </div>
                 </div>
                 <div class="control-panel-under-dev" style="border-top: 1px solid var(--border-soft); margin: 0.35rem 0 0; padding: 0.45rem 0 0;">
-                    <h3 id="underDevelopmentSectionTitle">Utviklerverktøy</h3>
+                    <h3 id="underDevelopmentSectionTitle">Utviklerverktøy og betafunksjoner</h3>
                     <div class="helptext-container" data-helptext-container="true" style="margin: 0 0 0.45rem 0.15rem;">
                         <span class="helper-text">Funksjonene du finner her er under utvikling og kan plutselig bli endret eller slettet</span>
                     </div>
@@ -2916,10 +3101,13 @@ ${comment}
                             <label for="cpPersonalCustomizationToggle" style="cursor:pointer; font-size: 0.9rem;">Personlig tilpasning</label>
                         </div>
                         <div class="helptext-container" data-helptext-container="true" style="margin-left:auto;">
-                            <span class="helper-text control-panel-help">Her kan du endre navnet på overskriftene i programmet</span>
+                            <span class="helper-text control-panel-help">Her kan du tilpasse det visuelle slik du selv ønsker, NB! Tekst og menyer kan bli vanskelig å lese. hold nede CTRL tasten hvis du ikke klarer se eller lese tekst</span>
                         </div>
                         <div id="personalCustomizeActionWrap" style="display:none; margin-left:0.5rem;">
-                            <button id="openPersonalCustomizeButton" class="btn-secondary" type="button">Tilpass</button>
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; justify-content:flex-end;">
+                                <button id="openPersonalCustomizeButton" class="btn-secondary" type="button">Tilpass</button>
+                                <button id="toggleFrutigerMusicPlayerButton" class="btn-secondary" type="button" aria-pressed="false">The Frutiger Aero Archive, Music player</button>
+                            </div>
                         </div>
                     </div>
                     <div class="control-panel-row under-development">
@@ -3484,6 +3672,15 @@ const startButtonEl = document.getElementById("startButton");
     const cpPersonalCustomizationToggleEl = document.getElementById("cpPersonalCustomizationToggle");
     const personalCustomizeActionWrapEl = document.getElementById("personalCustomizeActionWrap");
     const openPersonalCustomizeButtonEl = document.getElementById("openPersonalCustomizeButton");
+    const toggleFrutigerMusicPlayerButtonEl = document.getElementById("toggleFrutigerMusicPlayerButton");
+    const frutigerMusicPlayerWrapEl = document.getElementById("frutigerMusicPlayerWrap");
+    const frutigerMusicStatusEl = document.getElementById("frutigerMusicStatus");
+    const frutigerMusicTrackNameEl = document.getElementById("frutigerMusicTrackName");
+    const frutigerMusicAudioEl = document.getElementById("frutigerMusicAudio");
+    const frutigerMusicStartStopButtonEl = document.getElementById("frutigerMusicStartStopButton");
+    const frutigerMusicPauseButtonEl = document.getElementById("frutigerMusicPauseButton");
+    const frutigerMusicPrevButtonEl = document.getElementById("frutigerMusicPrevButton");
+    const frutigerMusicNextButtonEl = document.getElementById("frutigerMusicNextButton");
     const personalCustomizeOverlayEl = document.getElementById("personalCustomizeOverlay");
     const personalCustomizeCloseButtonEl = document.getElementById("personalCustomizeCloseButton");
     const personalCustomizeRowsEl = document.getElementById("personalCustomizeRows");
@@ -3496,6 +3693,7 @@ const startButtonEl = document.getElementById("startButton");
     const personalBgMediaButtonEl = document.getElementById("personalBgMediaButton");
     const personalBgGlassButtonEl = document.getElementById("personalBgGlassButton");
     const personalBgTextColorButtonEl = document.getElementById("personalBgTextColorButton");
+    const personalFruitigerArchiveButtonEl = document.getElementById("personalFruitigerArchiveButton");
     const personalBgMediaInputEl = document.getElementById("personalBgMediaInput");
     const personalBgColorControlsEl = document.getElementById("personalBgColorControls");
     const personalBgTextColorControlsEl = document.getElementById("personalBgTextColorControls");
@@ -3517,6 +3715,12 @@ const startButtonEl = document.getElementById("startButton");
     const personalTextLightValueEl = document.getElementById("personalTextLightValue");
     const personalTextPreviewChipEl = document.getElementById("personalTextPreviewChip");
     const personalBgMediaStatusEl = document.getElementById("personalBgMediaStatus");
+    const personalFruitigerArchivePanelEl = document.getElementById("personalFruitigerArchivePanel");
+    const personalFruitigerArchiveStatusEl = document.getElementById("personalFruitigerArchiveStatus");
+    const personalFruitigerArchiveListEl = document.getElementById("personalFruitigerArchiveList");
+    const personalFruitigerArchiveIntervalRangeEl = document.getElementById("personalFruitigerArchiveIntervalRange");
+    const personalFruitigerArchiveIntervalValueEl = document.getElementById("personalFruitigerArchiveIntervalValue");
+    const personalFruitigerArchiveModeToggleEl = document.getElementById("personalFruitigerArchiveModeToggle");
     const personalBgMediaHistoryDropdownEl = document.getElementById("personalBgMediaHistoryDropdown");
     const customPageBackgroundLayerEl = document.getElementById("customPageBackgroundLayer");
     const customPageBgFillEl = document.getElementById("customPageBgFill");
@@ -3604,7 +3808,7 @@ const startButtonEl = document.getElementById("startButton");
         { key: 'settingsTitle', selector: '#settingsModalTitle', label: 'Profil og Innstillinger' },
         { key: 'settingsProfilesTitle', selector: '#settingsProfilesTitle', label: 'Profiler' },
         { key: 'settingsExtrasTitle', selector: '#settingsExtrasTitle', label: 'Tilleggsfunksjoner' },
-        { key: 'settingsUnderDevTitle', selector: '#underDevelopmentSectionTitle', label: 'Utviklerverktøy' },
+        { key: 'settingsUnderDevTitle', selector: '#underDevelopmentSectionTitle', label: 'Utviklerverktøy og betafunksjoner' },
         { key: 'notesModalTitle', selector: '#appNotesModalTitle', label: 'Notater' }
     ];
     let personalCustomizationValues = {};
@@ -3618,6 +3822,29 @@ const startButtonEl = document.getElementById("startButton");
     let personalBgMediaHistoryOpen = false;
     let personalBgMediaHoldTimer = null;
     let personalBgMediaHoldTriggered = false;
+    let personalFruitigerArchiveOpen = false;
+    let personalFruitigerArchiveLoading = false;
+    let personalFruitigerArchiveCategories = [];
+    let personalFruitigerArchiveDocsCache = new Map();
+    let personalFruitigerArchiveAutoTimer = null;
+    let personalFruitigerArchiveAutoRunning = false;
+    let personalFruitigerArchiveAutoBusy = false;
+    let personalFruitigerArchiveAutoIntervalSec = 45;
+    let personalFruitigerArchiveRandomCategoryMode = false;
+    let personalFruitigerArchiveSelectedCategoryHref = "";
+    let personalFruitigerArchiveLastImageUrl = "";
+
+    let frutigerMusicPlayerVisible = false;
+    let frutigerMusicLoading = false;
+    let frutigerMusicPlaylist = [];
+    let frutigerMusicCurrentIndex = -1;
+    let frutigerMusicPageCache = new Map();
+    let frutigerMusicLastError = '';
+    let frutigerMusicArchiveOrgMetaCache = new Map();
+    let frutigerMusicCurrentPlaybackCandidates = [];
+    let frutigerMusicCurrentPlaybackCandidateIndex = 0;
+    let personalCtrlLightHoldActive = false;
+    let personalCtrlLightRestoreThemeMode = null;
     const timelineWrapEl = document.getElementById("timelineWrap");
     const adhdTimelineHostEl = document.getElementById("adhdTimelineHost");
     const dayTimelineBarEl = document.getElementById("dayTimelineBar");
@@ -3700,6 +3927,10 @@ const startButtonEl = document.getElementById("startButton");
 
     function enforceAmoledThemeForMediaBackground(hasMediaBg){
         if (!hasMediaBg) return;
+        if (personalCtrlLightHoldActive) {
+            syncThemeButtonMediaPulse(true);
+            return;
+        }
         if (document.body.classList.contains("theme-dark") && !document.body.classList.contains("theme-black")) {
             syncThemeButtonMediaPulse(true);
             return;
@@ -4319,6 +4550,11 @@ function setPersonalCustomizationUiState(isOn){
         const on = !!isOn;
         if (cpPersonalCustomizationToggleEl) cpPersonalCustomizationToggleEl.checked = on;
         if (personalCustomizeActionWrapEl) personalCustomizeActionWrapEl.style.display = on ? '' : 'none';
+        if (!on && frutigerMusicPlayerVisible) setFrutigerMusicPlayerVisible(false);
+        if (toggleFrutigerMusicPlayerButtonEl) {
+            toggleFrutigerMusicPlayerButtonEl.classList.toggle('active', !!frutigerMusicPlayerVisible);
+            toggleFrutigerMusicPlayerButtonEl.setAttribute('aria-pressed', String(!!frutigerMusicPlayerVisible));
+        }
     }
 
     function loadPersonalCustomizationToggle(){
@@ -4375,6 +4611,30 @@ function setPersonalCustomizationUiState(isOn){
 
     function isPersonalCustomizationEnabled(){
         return !!(cpPersonalCustomizationToggleEl && cpPersonalCustomizationToggleEl.checked);
+    }
+
+    function refreshThemeDependentVisuals(){
+        try { drawTaskChart(); } catch(e){}
+        try { renderDayTimeline(); } catch(e){}
+        try { updateTimelineNowDot(); } catch(e){}
+    }
+
+    function activatePersonalCtrlLightHold(){
+        if (personalCtrlLightHoldActive) return;
+        if (!isPersonalCustomizationEnabled()) return;
+        personalCtrlLightRestoreThemeMode = getCurrentThemeMode();
+        personalCtrlLightHoldActive = true;
+        applyThemeMode('light', { persist: false });
+        refreshThemeDependentVisuals();
+    }
+
+    function releasePersonalCtrlLightHold(){
+        if (!personalCtrlLightHoldActive) return;
+        const restoreMode = personalCtrlLightRestoreThemeMode || 'light';
+        personalCtrlLightHoldActive = false;
+        personalCtrlLightRestoreThemeMode = null;
+        applyThemeMode(restoreMode, { persist: false });
+        refreshThemeDependentVisuals();
     }
 
     function getPersonalCustomizationDisplayText(def){
@@ -4637,6 +4897,7 @@ function setPersonalCustomizationUiState(isOn){
         if (personalBgCustomizeButtonEl) {
             personalBgCustomizeButtonEl.setAttribute('aria-pressed', String(personalBgControlsOpen));
         }
+        if (!personalBgControlsOpen) setPersonalFruitigerArchiveOpen(false);
     }
 
     function setPersonalBgColorControlsOpen(isOpen){
@@ -4795,6 +5056,30 @@ function setPersonalCustomizationUiState(isOn){
         });
     }
 
+    function renderPersonalTextUiFromDraftFast(){
+        const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues));
+        personalCustomizeBackgroundDraft = s;
+        if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.textHue));
+        if (personalTextSatRangeEl) personalTextSatRangeEl.value = String(Math.round(s.textSat));
+        if (personalTextLightRangeEl) personalTextLightRangeEl.value = String(Math.round(s.textLight));
+        if (personalTextHueValueEl) personalTextHueValueEl.textContent = String(Math.round(s.textHue));
+        if (personalTextSatValueEl) personalTextSatValueEl.textContent = `${Math.round(s.textSat)}%`;
+        if (personalTextLightValueEl) personalTextLightValueEl.textContent = `${Math.round(s.textLight)}%`;
+        if (personalTextPreviewChipEl) {
+            const tc = personalTextColorToCssColor(s);
+            personalTextPreviewChipEl.style.background = tc;
+            personalTextPreviewChipEl.style.color = (Math.round(s.textLight) > 55) ? '#111827' : '#f9fafb';
+            personalTextPreviewChipEl.textContent = s.textOverrideEnabled
+                ? `Tekstfarge (${Math.round(s.textHue)}° / ${Math.round(s.textSat)}% / ${Math.round(s.textLight)}%)`
+                : 'Tekstfarge overstyring er av';
+        }
+        if (personalBgTextColorButtonEl) {
+            personalBgTextColorButtonEl.classList.toggle('active', !!s.textOverrideEnabled);
+            personalBgTextColorButtonEl.setAttribute('aria-pressed', String(!!s.textOverrideEnabled));
+        }
+        setPersonalBgTextColorControlsOpen(!!s.textOverrideEnabled);
+    }
+
     function renderPersonalBackgroundUiFromDraft(){
         const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues));
         personalCustomizeBackgroundDraft = s;
@@ -4834,14 +5119,1327 @@ function setPersonalCustomizationUiState(isOn){
             personalBgTextColorButtonEl.classList.toggle('active', !!s.textOverrideEnabled);
             personalBgTextColorButtonEl.setAttribute('aria-pressed', String(!!s.textOverrideEnabled));
         }
+        if (personalFruitigerArchiveButtonEl) {
+            personalFruitigerArchiveButtonEl.classList.toggle('active', !!personalFruitigerArchiveOpen);
+            personalFruitigerArchiveButtonEl.setAttribute('aria-pressed', String(!!personalFruitigerArchiveOpen));
+        }
         if (personalBgColorButtonEl) {
             personalBgColorButtonEl.classList.toggle('active', !!personalBgColorControlsOpen);
             personalBgColorButtonEl.setAttribute('aria-pressed', String(!!personalBgColorControlsOpen));
         }
         setPersonalBgGlassControlsOpen(!!s.glassEnabled);
         setPersonalBgTextColorControlsOpen(!!s.textOverrideEnabled);
+        setPersonalFruitigerArchiveOpen(!!personalFruitigerArchiveOpen);
         renderPersonalBgMediaHistoryDropdown();
         updatePersonalBgPreviewChip();
+    }
+
+
+    function setPersonalFruitigerArchiveOpen(isOpen){
+        personalFruitigerArchiveOpen = !!isOpen;
+        if (personalFruitigerArchivePanelEl) {
+            personalFruitigerArchivePanelEl.classList.toggle('is-open', personalFruitigerArchiveOpen);
+            personalFruitigerArchivePanelEl.setAttribute('aria-hidden', String(!personalFruitigerArchiveOpen));
+        }
+        if (personalFruitigerArchiveButtonEl) {
+            personalFruitigerArchiveButtonEl.classList.toggle('active', personalFruitigerArchiveOpen);
+            personalFruitigerArchiveButtonEl.setAttribute('aria-pressed', String(personalFruitigerArchiveOpen));
+        }
+        if (personalFruitigerArchiveOpen) {
+            updatePersonalFruitigerArchiveIntervalUi();
+            setPersonalFruitigerArchiveModeToggle(personalFruitigerArchiveRandomCategoryMode);
+            if (personalFruitigerArchiveAutoRunning) schedulePersonalFruitigerArchiveAutoRotation();
+        }
+    }
+
+    function setPersonalFruitigerArchiveStatus(msg){
+        if (personalFruitigerArchiveStatusEl) personalFruitigerArchiveStatusEl.textContent = msg || '';
+    }
+
+    function updatePersonalFruitigerArchiveIntervalUi(){
+        const secRaw = Number(personalFruitigerArchiveAutoIntervalSec || 0);
+        const sec = Math.max(0, Math.min(600, Number.isFinite(secRaw) ? secRaw : 45));
+        if (personalFruitigerArchiveIntervalValueEl) {
+            let display = 'IR';
+            if (sec > 0) {
+                display = sec >= 60 ? `${(sec / 60).toFixed(sec % 60 === 0 ? 0 : 1)}m` : `${sec}s`;
+            }
+            personalFruitigerArchiveIntervalValueEl.textContent = display;
+        }
+        if (personalFruitigerArchiveIntervalRangeEl) {
+            personalFruitigerArchiveIntervalRangeEl.value = String(sec);
+        }
+    }
+
+    function setPersonalFruitigerArchiveModeToggle(randomMode){
+        personalFruitigerArchiveRandomCategoryMode = !!randomMode;
+        if (personalFruitigerArchiveModeToggleEl) {
+            personalFruitigerArchiveModeToggleEl.textContent = personalFruitigerArchiveRandomCategoryMode ? 'Tilfeldig kategori' : 'Samme kategori';
+            personalFruitigerArchiveModeToggleEl.setAttribute('aria-pressed', String(personalFruitigerArchiveRandomCategoryMode));
+            personalFruitigerArchiveModeToggleEl.classList.toggle('active', personalFruitigerArchiveRandomCategoryMode);
+        }
+    }
+
+    function clearPersonalFruitigerArchiveAutoTimer(){
+        if (personalFruitigerArchiveAutoTimer) {
+            clearTimeout(personalFruitigerArchiveAutoTimer);
+            personalFruitigerArchiveAutoTimer = null;
+        }
+    }
+
+    function getPersonalFruitigerArchiveSelectedCategory(){
+        if (!personalFruitigerArchiveSelectedCategoryHref || !Array.isArray(personalFruitigerArchiveCategories)) return null;
+        return personalFruitigerArchiveCategories.find(c => c && c.href === personalFruitigerArchiveSelectedCategoryHref) || null;
+    }
+
+    function getRandomFruitigerArchiveCategory(){
+        const list = Array.isArray(personalFruitigerArchiveCategories) ? personalFruitigerArchiveCategories.filter(Boolean) : [];
+        if (!list.length) return null;
+        return list[Math.floor(Math.random() * list.length)] || null;
+    }
+
+    function stopPersonalFruitigerArchiveAutoRotation(opts = {}){
+        clearPersonalFruitigerArchiveAutoTimer();
+        personalFruitigerArchiveAutoRunning = false;
+        personalFruitigerArchiveAutoBusy = false;
+        if (opts && opts.clearSelection) personalFruitigerArchiveSelectedCategoryHref = '';
+    }
+
+    function schedulePersonalFruitigerArchiveAutoRotation(){
+        clearPersonalFruitigerArchiveAutoTimer();
+        if (!personalFruitigerArchiveAutoRunning) return;
+        const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+        if (sec <= 0) return;
+        const delay = sec * 1000;
+        personalFruitigerArchiveAutoTimer = setTimeout(async () => {
+            if (!personalFruitigerArchiveAutoRunning || personalFruitigerArchiveAutoBusy) return;
+            personalFruitigerArchiveAutoBusy = true;
+            try {
+                let cat = null;
+                if (personalFruitigerArchiveRandomCategoryMode) {
+                    cat = getRandomFruitigerArchiveCategory();
+                } else {
+                    cat = getPersonalFruitigerArchiveSelectedCategory() || getRandomFruitigerArchiveCategory();
+                }
+                if (cat) {
+                    await applyRandomFruitigerArchiveImage(cat, { fromAuto: true });
+                }
+            } catch(e) {
+            } finally {
+                personalFruitigerArchiveAutoBusy = false;
+                if (personalFruitigerArchiveAutoRunning) schedulePersonalFruitigerArchiveAutoRotation();
+            }
+        }, delay);
+    }
+
+    function startPersonalFruitigerArchiveAutoRotation(selectedCategory){
+        if (selectedCategory && selectedCategory.href) personalFruitigerArchiveSelectedCategoryHref = selectedCategory.href;
+        if (!personalFruitigerArchiveSelectedCategoryHref && !personalFruitigerArchiveRandomCategoryMode) return;
+        const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+        if (sec <= 0) {
+            stopPersonalFruitigerArchiveAutoRotation();
+            return;
+        }
+        personalFruitigerArchiveAutoRunning = true;
+        schedulePersonalFruitigerArchiveAutoRotation();
+    }
+
+    function renderPersonalFruitigerArchiveList(){
+        if (!personalFruitigerArchiveListEl) return;
+        personalFruitigerArchiveListEl.innerHTML = '';
+        if (!Array.isArray(personalFruitigerArchiveCategories) || !personalFruitigerArchiveCategories.length) {
+            const empty = document.createElement('div');
+            empty.className = 'personal-bg-media-history-empty';
+            empty.textContent = personalFruitigerArchiveLoading ? 'Laster kategorier…' : 'Ingen kategorier funnet ennå.';
+            personalFruitigerArchiveListEl.appendChild(empty);
+            return;
+        }
+        personalFruitigerArchiveCategories.forEach((cat, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'personal-bg-archive-item';
+            btn.textContent = cat && cat.label ? cat.label : `Kategori ${idx + 1}`;
+            btn.dataset.archiveIndex = String(idx);
+            btn.addEventListener('click', async () => {
+                const selected = personalFruitigerArchiveCategories[idx];
+                if (!selected) return;
+                const allBtns = personalFruitigerArchiveListEl.querySelectorAll('button.personal-bg-archive-item');
+                allBtns.forEach(b => b.disabled = true);
+                try {
+                    await applyRandomFruitigerArchiveImage(selected);
+                    startPersonalFruitigerArchiveAutoRotation(selected);
+                } finally {
+                    allBtns.forEach(b => b.disabled = false);
+                }
+            });
+            personalFruitigerArchiveListEl.appendChild(btn);
+        });
+    }
+
+    async function fetchTextWithFallbacks(targetUrl){
+        const cleanUrl = String(targetUrl || '').trim();
+        if (!cleanUrl) throw new Error('Mangler URL');
+        const attempts = [
+            cleanUrl,
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(cleanUrl)}`,
+            `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(cleanUrl)}`,
+            `https://r.jina.ai/http://${cleanUrl.replace(/^https?:\/\//i, '')}`
+        ];
+        let lastErr = null;
+        for (const candidate of attempts) {
+            try {
+                const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+                const t = ctrl ? setTimeout(() => ctrl.abort(), 12000) : null;
+                const res = await fetch(candidate, { mode: 'cors', cache: 'no-store', signal: ctrl ? ctrl.signal : undefined });
+                if (t) clearTimeout(t);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const txt = await res.text();
+                if (!txt || !txt.trim()) throw new Error('Tom respons');
+                return { text: txt, via: candidate };
+            } catch (err) {
+                lastErr = err;
+            }
+        }
+        throw lastErr || new Error('Kunne ikke hente innhold');
+    }
+
+    function parseHtmlDocumentFromText(rawText){
+        const parser = new DOMParser();
+        return parser.parseFromString(String(rawText || ''), 'text/html');
+    }
+
+    function collectAnchorsFromMarkdownLikeText(rawText, baseUrl){
+        const text = String(rawText || '');
+        const out = [];
+        const seen = new Set();
+        const push = (label, href) => {
+            try {
+                const abs = new URL(href, baseUrl).toString();
+                const key = abs;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    out.push({ label: (label || '').trim(), href: abs, originalHref: href });
+                }
+            } catch(e){}
+        };
+        const mdRe = /\[([^\]]{1,160})\]\((https?:\/\/[^)\s]+|\/[^)\s]+|#[^)\s]+)\)/g;
+        let m;
+        while ((m = mdRe.exec(text))) push(m[1], m[2]);
+        const urlRe = /https?:\/\/[^\s"'<>)]{5,}/g;
+        while ((m = urlRe.exec(text))) push('', m[0]);
+        return out;
+    }
+
+    function normalizeFruitigerCategoryLabel(raw, href){
+        let label = (raw || '').replace(/\s+/g, ' ').trim();
+        if (!label) {
+            try {
+                const u = new URL(href);
+                label = decodeURIComponent((u.hash || '').replace(/^#/, '') || u.pathname.split('/').filter(Boolean).pop() || 'Kategori');
+            } catch(e){ label = 'Kategori'; }
+        }
+        label = label.replace(/^\d+[.)\-\s]+/, '').trim();
+        if (label.length > 80) label = label.slice(0, 80).trim() + '…';
+        return label || 'Kategori';
+    }
+
+    function extractFruitigerCategoriesFromText(rawText, baseUrl){
+        const doc = parseHtmlDocumentFromText(rawText);
+        const links = [];
+        const seen = new Set();
+        const pushLink = (a) => {
+            if (!a) return;
+            const hrefRaw = (a.getAttribute && a.getAttribute('href')) ? a.getAttribute('href').trim() : '';
+            if (!hrefRaw || hrefRaw.startsWith('mailto:') || hrefRaw.startsWith('javascript:')) return;
+            let abs = '';
+            try { abs = new URL(hrefRaw, baseUrl).toString(); } catch(e){ return; }
+            const sameSite = /^https?:\/\/frutigeraeroarchive\.org\//i.test(abs);
+            const isWall = /\/wallpapers(\/|$|#|\?)/i.test(abs);
+            if (!sameSite || !isWall) return;
+            const textLabel = (a.textContent || (a.getAttribute && a.getAttribute('title')) || '').trim();
+            const key = abs;
+            if (seen.has(key)) return;
+            seen.add(key);
+            links.push({ label: normalizeFruitigerCategoryLabel(textLabel, abs), href: abs });
+        };
+
+        let tocRoot = doc.querySelector('#table-of-contents, .table-of-contents, nav[aria-label*="Table" i], nav[aria-label*="Contents" i], [id*="toc" i], [class*="toc" i]');
+        if (!tocRoot) {
+            const headings = Array.from(doc.querySelectorAll('h1,h2,h3,h4,strong'));
+            const tocHeading = headings.find(h => /table\s+of\s+contents/i.test((h.textContent || '').trim()));
+            if (tocHeading) tocRoot = tocHeading.parentElement || tocHeading;
+        }
+        if (tocRoot) tocRoot.querySelectorAll('a[href]').forEach(pushLink);
+        if (!links.length) doc.querySelectorAll('a[href]').forEach(pushLink);
+        if (!links.length) {
+            const mdAnchors = collectAnchorsFromMarkdownLikeText(rawText, baseUrl);
+            mdAnchors.forEach(item => {
+                const pseudoAnchor = {
+                    getAttribute: (k) => (k === 'href' ? (item.originalHref || item.href) : ''),
+                    textContent: item.label || ''
+                };
+                pushLink(pseudoAnchor);
+            });
+        }
+        const filtered = links.filter(item => {
+            try {
+                const u = new URL(item.href);
+                const path = u.pathname.replace(/\/+$/,'');
+                if (path === '/wallpapers' && !u.hash) return false;
+                return true;
+            } catch(e){ return false; }
+        });
+        return (filtered.length ? filtered : links).slice(0, 120);
+    }
+
+    function estimateUrlResolutionHint(urlStr){
+        const s = String(urlStr || '');
+        let score = 0;
+        const sizeMatch = s.match(/(?:^|[\/_-])(\d{2,5})x(\d{2,5})(?=\.(?:jpe?g|png|webp|gif|bmp|avif)(?:[?#]|$))/i);
+        if (sizeMatch) {
+            const w = Number(sizeMatch[1]) || 0;
+            const h = Number(sizeMatch[2]) || 0;
+            score += Math.min((w * h) / 50, 120000);
+        }
+        try {
+            const u = new URL(s);
+            const keys = ['w', 'width', 'mw', 'maxwidth', 'h', 'height'];
+            keys.forEach(k => {
+                const v = Number(u.searchParams.get(k) || 0);
+                if (v > 0) score += Math.min(v * 5, 25000);
+            });
+            const q = Number(u.searchParams.get('q') || u.searchParams.get('quality') || 0);
+            if (q > 0) score += Math.min(q * 10, 1000);
+        } catch(e){}
+        return score;
+    }
+
+
+    function parseExplicitResolutionFromUrl(urlStr){
+        const s = String(urlStr || '');
+        const out = { w: 0, h: 0 };
+        const m = s.match(/(?:^|[\/_-])(\d{2,5})x(\d{2,5})(?=\.(?:jpe?g|png|webp|gif|bmp|avif)(?:[?#]|$))/i);
+        if (m) {
+            out.w = Number(m[1]) || 0;
+            out.h = Number(m[2]) || 0;
+            return out;
+        }
+        try {
+            const u = new URL(s, window.location.href);
+            out.w = Number(u.searchParams.get('w') || u.searchParams.get('width') || 0) || 0;
+            out.h = Number(u.searchParams.get('h') || u.searchParams.get('height') || 0) || 0;
+        } catch(e){}
+        return out;
+    }
+
+    function isLowQualityFruitigerCandidateUrl(urlStr){
+        const s = String(urlStr || '').toLowerCase();
+        if (!s) return true;
+        if (/thumb(?:nail)?/.test(s)) return true;
+        if (/\bpreview\b/.test(s)) return true;
+        const dim = parseExplicitResolutionFromUrl(s);
+        if (dim.w && dim.h) {
+            const area = dim.w * dim.h;
+            if (dim.w < 1000 || dim.h < 560 || area < 700000) return true;
+        }
+        return false;
+    }
+
+    function filterPreferredFruitigerCandidates(list){
+        const arr = Array.isArray(list) ? list.slice() : [];
+        if (!arr.length) return [];
+        const withoutThumbs = arr.filter(c => !/thumb(?:nail)?/i.test(String(c && c.url || '')));
+        const base = withoutThumbs.length ? withoutThumbs : arr;
+        const hi = base.filter(c => !isLowQualityFruitigerCandidateUrl(String(c && c.url || '')));
+        return hi.length ? hi : base;
+    }
+
+    function buildHiResUrlVariants(urlCandidate){
+        const raw = String(urlCandidate || '').trim();
+        if (!raw) return [];
+        const out = [];
+        const seen = new Set();
+        const add = (u) => {
+            const v = String(u || '').trim();
+            if (!v || seen.has(v)) return;
+            seen.add(v);
+            out.push(v);
+        };
+        add(raw);
+
+        try {
+            const u = new URL(raw, window.location.href);
+            // Variant without common resize/compression query parameters.
+            const resizedKeys = ['w','width','h','height','q','quality','fit','crop','dpr','auto'];
+            let changed = false;
+            resizedKeys.forEach(k => {
+                if (u.searchParams.has(k)) { u.searchParams.delete(k); changed = true; }
+            });
+            if (changed) add(u.toString());
+
+            // WordPress-style sized filename: image-768x432.jpg -> image.jpg
+            const noSize = u.pathname.replace(/-\d{2,5}x\d{2,5}(?=\.(?:jpe?g|png|webp|gif|bmp|avif)$)/i, '');
+            if (noSize !== u.pathname) {
+                const u2 = new URL(u.toString());
+                u2.pathname = noSize;
+                add(u2.toString());
+            }
+        } catch(e) {
+            const noSize = raw.replace(/-\d{2,5}x\d{2,5}(?=\.(?:jpe?g|png|webp|gif|bmp|avif)(?:[?#]|$))/i, '');
+            add(noSize);
+        }
+
+        return out;
+    }
+
+    function getBestSrcFromImg(imgEl){
+        if (!imgEl) return '';
+        const preferredAttrs = [
+            'data-orig-file','data-full-url','data-full','data-image-full','data-original','data-orig-src',
+            'data-large-file','data-src','data-lazy-src','data-lazyload','data-src-large','data-bg','src'
+        ];
+        let best = '';
+        let bestScore = -1;
+        const consider = (candidateUrl, scoreBase = 0) => {
+            if (!candidateUrl) return;
+            buildHiResUrlVariants(candidateUrl).forEach((variant, idx) => {
+                const score = Number(scoreBase || 0) + estimateUrlResolutionHint(variant) + (idx === 0 ? 0 : 2500);
+                if (score >= bestScore) {
+                    bestScore = score;
+                    best = variant;
+                }
+            });
+        };
+
+        preferredAttrs.forEach((attr, idx) => {
+            const v = imgEl.getAttribute && imgEl.getAttribute(attr);
+            if (v) consider(v, 1000 - idx);
+        });
+
+        const srcset = (imgEl.getAttribute && (imgEl.getAttribute('srcset') || imgEl.getAttribute('data-srcset'))) || '';
+        if (srcset) {
+            srcset.split(',').forEach(part => {
+                const t = part.trim();
+                if (!t) return;
+                const pieces = t.split(/\s+/);
+                const u = pieces[0] || '';
+                const descriptor = pieces[1] || '';
+                let score = 1;
+                const mw = descriptor.match(/(\d+)w/i);
+                const mx = descriptor.match(/(\d+(?:\.\d+)?)x/i);
+                if (mw) score += (Number(mw[1]) || 1) * 20;
+                else if (mx) score += (Number(mx[1]) || 1) * 20000;
+                consider(u, score);
+            });
+        }
+
+        return best || '';
+    }
+
+    function collectImageCandidatesFromDocument(doc, baseUrl, opts = {}){
+        if (!doc) return [];
+        const scopeRoot = opts.scopeRoot || doc;
+        const candidatesMap = new Map();
+
+        const push = (urlCandidate, meta = {}) => {
+            if (!urlCandidate) return;
+            const scoreBase = Number(meta.score || 0);
+            buildHiResUrlVariants(urlCandidate).forEach((variant, idx) => {
+                let abs = '';
+                try { abs = new URL(variant, baseUrl).toString(); } catch(e){ return; }
+                if (!/\.(jpe?g|png|webp|gif|bmp|avif)(\?|#|$)/i.test(abs)) return;
+                if (/favicon|logo|avatar|icon/i.test(abs)) return;
+                let score = scoreBase + estimateUrlResolutionHint(abs);
+                if (/wallpaper/i.test(abs)) score += 5000;
+                if (/thumb|thumbnail/i.test(abs)) return;
+                if (/\bpreview\b/i.test(abs)) score -= 4000;
+                if (/small/i.test(abs)) score -= 2000;
+                if (idx > 0) score += 3000; // upgraded/original variants
+                const prev = candidatesMap.get(abs);
+                if (!prev || score > prev.score) candidatesMap.set(abs, { url: abs, score });
+            });
+        };
+
+        scopeRoot.querySelectorAll('img').forEach(img => {
+            let score = 0;
+            const w = Number(img.getAttribute('width') || 0);
+            const h = Number(img.getAttribute('height') || 0);
+            if (w && h) score += Math.min(w, 6000) + Math.min(h, 6000);
+            const cls = ((img.getAttribute('class') || '') + ' ' + (img.getAttribute('sizes') || '')).toLowerCase();
+            if (/thumb|thumbnail/.test(cls)) score -= 1500;
+            if (/full|hero|featured/.test(cls)) score += 2500;
+
+            // Prefer direct full-size URL if provided in image attributes or srcset.
+            const src = getBestSrcFromImg(img);
+            push(src, { score });
+
+            // Harvest multiple useful attributes, not just one source.
+            [
+                'src','data-src','data-lazy-src','data-srcset','srcset','data-orig-file','data-full-url',
+                'data-large-file','data-image-full','data-original','data-orig-src'
+            ].forEach(attr => {
+                const val = img.getAttribute && img.getAttribute(attr);
+                if (!val) return;
+                if (/srcset/i.test(attr)) {
+                    String(val).split(',').forEach(part => {
+                        const t = part.trim();
+                        if (!t) return;
+                        const pieces = t.split(/\s+/);
+                        const u = pieces[0] || '';
+                        const descriptor = pieces[1] || '';
+                        let bonus = 0;
+                        const mw = descriptor.match(/(\d+)w/i);
+                        const mx = descriptor.match(/(\d+(?:\.\d+)?)x/i);
+                        if (mw) bonus += (Number(mw[1]) || 0) * 20;
+                        if (mx) bonus += (Number(mx[1]) || 0) * 20000;
+                        push(u, { score: score + bonus });
+                    });
+                } else {
+                    push(val, { score });
+                }
+            });
+
+            // If the image is wrapped in a link, inspect the href too.
+            const parentAnchor = img.closest && img.closest('a[href]');
+            if (parentAnchor) {
+                const href = parentAnchor.getAttribute('href') || '';
+                let hrefScore = score + 3500;
+                const text = (parentAnchor.textContent || '').trim();
+                if (/full|original|download/i.test(text)) hrefScore += 2500;
+                push(href, { score: hrefScore });
+            }
+        });
+
+        scopeRoot.querySelectorAll('a[href]').forEach(a => {
+            const href = a.getAttribute('href') || '';
+            let score = 0;
+            if (/\.(jpe?g|png|webp|gif|bmp|avif)(\?|#|$)/i.test(href)) score += 4000;
+            if (/wallpaper/i.test(href)) score += 2000;
+            const txt = (a.textContent || '').trim();
+            if (/full|original|download/i.test(txt)) score += 3000;
+            push(href, { score });
+        });
+
+        const candidates = Array.from(candidatesMap.values());
+        candidates.sort((a, b) => b.score - a.score);
+        return candidates;
+    }
+
+    function findScopedRootForHash(doc, hashValue){
+        const hashId = String(hashValue || '').replace(/^#/, '').trim();
+        if (!doc || !hashId) return null;
+        let target = null;
+        try {
+            target = doc.getElementById(hashId) || doc.querySelector(`[name="${(typeof CSS !== 'undefined' && CSS.escape) ? CSS.escape(hashId) : hashId}"]`);
+        } catch(e) {
+            target = doc.getElementById(hashId);
+        }
+        if (!target) return null;
+        const sectionRoot = target.closest && target.closest('section, article');
+        if (sectionRoot) return sectionRoot;
+        const wrap = target.closest && target.closest('div');
+        if (wrap) return wrap;
+        return target.parentElement || target;
+    }
+
+    async function getCachedFruitigerDocument(pageUrl){
+        const key = String(pageUrl || '');
+        if (personalFruitigerArchiveDocsCache.has(key)) return personalFruitigerArchiveDocsCache.get(key);
+        const payload = await fetchTextWithFallbacks(key);
+        const doc = parseHtmlDocumentFromText(payload.text);
+        const cached = { doc, rawText: payload.text, via: payload.via };
+        personalFruitigerArchiveDocsCache.set(key, cached);
+        return cached;
+    }
+
+    async function loadFruitigerArchiveCategories(forceReload = false){
+        const baseUrl = 'https://frutigeraeroarchive.org/wallpapers';
+        if (!forceReload && Array.isArray(personalFruitigerArchiveCategories) && personalFruitigerArchiveCategories.length) {
+            renderPersonalFruitigerArchiveList();
+            return personalFruitigerArchiveCategories;
+        }
+        personalFruitigerArchiveLoading = true;
+        setPersonalFruitigerArchiveStatus('Henter kategorier fra Frutiger Aero Archive…');
+        renderPersonalFruitigerArchiveList();
+        try {
+            if (forceReload) personalFruitigerArchiveDocsCache.delete(baseUrl);
+            const cached = await getCachedFruitigerDocument(baseUrl);
+            let categories = extractFruitigerCategoriesFromText(cached.rawText, baseUrl);
+            categories = categories.map(c => ({
+                label: c.label,
+                href: c.href,
+                hash: (() => { try { return new URL(c.href).hash || ''; } catch(e){ return ''; } })()
+            }));
+            personalFruitigerArchiveCategories = categories;
+            setPersonalFruitigerArchiveStatus(categories.length
+                ? 'Velg en kategori. Etter første valg starter automatisk bytte av bilde (hvis intervall ikke står på IR).'
+                : 'Fant ingen kategorier. Nettstedet kan ha endret struktur eller blokkert henting.');
+            renderPersonalFruitigerArchiveList();
+            return categories;
+        } catch (err) {
+            console.warn('Frutiger archive category load failed', err);
+            personalFruitigerArchiveCategories = [];
+            renderPersonalFruitigerArchiveList();
+            setPersonalFruitigerArchiveStatus('Kunne ikke hente kategorier automatisk (mulig CORS/blokkering).');
+            throw err;
+        } finally {
+            personalFruitigerArchiveLoading = false;
+        }
+    }
+
+    function setFrutigerMusicPlayerVisible(isVisible){
+        frutigerMusicPlayerVisible = !!isVisible;
+        if (frutigerMusicPlayerWrapEl) {
+            frutigerMusicPlayerWrapEl.classList.toggle('is-visible', frutigerMusicPlayerVisible);
+            frutigerMusicPlayerWrapEl.setAttribute('aria-hidden', String(!frutigerMusicPlayerVisible));
+        }
+        if (toggleFrutigerMusicPlayerButtonEl) {
+            toggleFrutigerMusicPlayerButtonEl.classList.toggle('active', frutigerMusicPlayerVisible);
+            toggleFrutigerMusicPlayerButtonEl.setAttribute('aria-pressed', String(frutigerMusicPlayerVisible));
+        }
+        if (!frutigerMusicPlayerVisible && frutigerMusicAudioEl) {
+            try { frutigerMusicAudioEl.pause(); } catch(e){}
+            try { frutigerMusicAudioEl.currentTime = 0; } catch(e){}
+        }
+        updateFrutigerMusicPlayerUi();
+    }
+
+    function setFrutigerMusicStatus(msg){
+        frutigerMusicLastError = '';
+        if (frutigerMusicStatusEl) frutigerMusicStatusEl.textContent = msg || '';
+    }
+
+    function normalizeFrutigerMusicTrackTitle(rawLabel, href){
+        let label = String(rawLabel || '').replace(/\s+/g, ' ').trim();
+        if (label) {
+            label = label.replace(/^[▶►•·\-\s]+/, '').trim();
+            label = label.replace(/\s*\((?:mp3|ogg|wav|m4a|aac|opus|flac)\)$/i, '').trim();
+        }
+        if (!label) {
+            try {
+                const u = new URL(String(href || ''), window.location.href);
+                const name = decodeURIComponent((u.pathname.split('/').filter(Boolean).pop() || '').replace(/\.[a-z0-9]{2,5}$/i, ''));
+                label = name.replace(/[_-]+/g, ' ').trim();
+            } catch(e) {
+                label = 'Ukjent spor';
+            }
+        }
+        if (label.length > 120) label = label.slice(0, 120).trim() + '…';
+        return label || 'Ukjent spor';
+    }
+
+    function extractDirectAudioTracksFromDocument(doc, baseUrl){
+        if (!doc) return [];
+        const out = [];
+        const seen = new Set();
+        const audioExtRe = /\.(mp3|ogg|wav|m4a|aac|opus|flac)(\?|#|$)/i;
+        const pushTrack = (hrefRaw, labelRaw, sourcePage) => {
+            if (!hrefRaw) return;
+            let abs = '';
+            try { abs = new URL(String(hrefRaw).trim(), baseUrl).toString(); } catch(e){ return; }
+            if (!audioExtRe.test(abs)) return;
+            if (seen.has(abs)) return;
+            seen.add(abs);
+            out.push({
+                title: normalizeFrutigerMusicTrackTitle(labelRaw, abs),
+                url: abs,
+                sourcePage: sourcePage || String(baseUrl || '')
+            });
+        };
+
+        doc.querySelectorAll('audio').forEach(audio => {
+            const lbl = (audio.getAttribute('title') || audio.getAttribute('aria-label') || '').trim();
+            const audioSrc = (audio.getAttribute('src') || '').trim();
+            if (audioSrc) pushTrack(audioSrc, lbl, baseUrl);
+            audio.querySelectorAll('source[src]').forEach(srcEl => {
+                pushTrack(srcEl.getAttribute('src') || '', lbl || (srcEl.getAttribute('title') || ''), baseUrl);
+            });
+        });
+
+        doc.querySelectorAll('a[href]').forEach(a => {
+            const href = (a.getAttribute('href') || '').trim();
+            const label = (a.textContent || a.getAttribute('title') || a.getAttribute('aria-label') || '').trim();
+            pushTrack(href, label, baseUrl);
+        });
+
+        return out;
+    }
+
+
+    function extractDirectAudioTracksFromRawText(rawText, baseUrl){
+        const text = String(rawText || '');
+        if (!text) return [];
+        const out = [];
+        const seen = new Set();
+        const audioExtRe = /\.(mp3|ogg|wav|m4a|aac|opus|flac)(\?|#|$)/i;
+
+        const pushTrack = (hrefRaw, labelRaw, sourcePage) => {
+            if (!hrefRaw) return;
+            let abs = '';
+            try { abs = new URL(String(hrefRaw).replace(/\\\//g, '/').trim(), baseUrl).toString(); } catch(e){ return; }
+            if (!audioExtRe.test(abs)) return;
+            if (seen.has(abs)) return;
+            seen.add(abs);
+            out.push({
+                title: normalizeFrutigerMusicTrackTitle(labelRaw, abs),
+                url: abs,
+                sourcePage: sourcePage || String(baseUrl || '')
+            });
+        };
+
+        try {
+            collectAnchorsFromMarkdownLikeText(text, baseUrl).forEach(item => {
+                pushTrack((item && (item.href || item.originalHref)) || '', (item && item.label) || '', baseUrl);
+            });
+        } catch(e){}
+
+        const textUnescaped = text.replace(/\\\//g, '/');
+
+        const absoluteAudioRe = /https?:\/\/[^\s"'<>\\)]+?\.(?:mp3|ogg|wav|m4a|aac|opus|flac)(?:\?[^\\s"'<>]*)?/gi;
+        let m;
+        while ((m = absoluteAudioRe.exec(textUnescaped))) {
+            pushTrack(m[0], '', baseUrl);
+        }
+
+        const quotedAudioRe = /["']([^"']+?\.(?:mp3|ogg|wav|m4a|aac|opus|flac)(?:\?[^"']*)?)["']/gi;
+        while ((m = quotedAudioRe.exec(textUnescaped))) {
+            pushTrack(m[1], '', baseUrl);
+        }
+
+        const attrAudioRe = /\b(?:src|href|file|audio|mp3)\b\s*[:=]\s*["']([^"']+)["']/gi;
+        while ((m = attrAudioRe.exec(textUnescaped))) {
+            pushTrack(m[1], '', baseUrl);
+        }
+
+        return out;
+    }
+
+    function extractMusicSubpagesFromRawText(rawText, baseUrl){
+        const text = String(rawText || '');
+        if (!text) return [];
+        const out = [];
+        const seen = new Set();
+
+        const push = (hrefRaw) => {
+            if (!hrefRaw) return;
+            let abs = '';
+            try { abs = new URL(String(hrefRaw).replace(/\\\//g, '/').trim(), baseUrl).toString(); } catch(e){ return; }
+            if (!/^https?:\/\/frutigeraeroarchive\.org\//i.test(abs)) return;
+            let u;
+            try { u = new URL(abs); } catch(e){ return; }
+            const path = u.pathname.replace(/\/+$/,'');
+            if (!/\/music(\/|$)/i.test(path)) return;
+            u.hash = '';
+            const clean = u.toString();
+            const baseClean = (() => { try { const bu = new URL(baseUrl); bu.hash=''; return bu.toString(); } catch(e){ return String(baseUrl || ''); } })();
+            if (clean === baseClean) return;
+            if (seen.has(clean)) return;
+            seen.add(clean);
+            out.push(clean);
+        };
+
+        try {
+            collectAnchorsFromMarkdownLikeText(text, baseUrl).forEach(item => {
+                push((item && (item.href || item.originalHref)) || '');
+            });
+        } catch(e){}
+
+        const textUnescaped = text.replace(/\\\//g, '/');
+        let m;
+        const absUrlRe = /https?:\/\/[^\s"'<>\\)]+/gi;
+        while ((m = absUrlRe.exec(textUnescaped))) push(m[0]);
+        const relUrlRe = /["'](\/music\/[^"']+)["']/gi;
+        while ((m = relUrlRe.exec(textUnescaped))) push(m[1]);
+
+        return out;
+    }
+
+    function isLikelyFrutigerMusicContentPageUrl(absUrl){
+        const s = String(absUrl || '').trim();
+        if (!/^https?:\/\/frutigeraeroarchive\.org\//i.test(s)) return false;
+        let u;
+        try { u = new URL(s); } catch(e){ return false; }
+        const path = (u.pathname || '/').replace(/\/+/g, '/');
+        if (!path) return false;
+        // Skip obvious assets and binary/media files (HTML pages only).
+        if (/\.(?:jpg|jpeg|png|webp|gif|bmp|avif|svg|ico|css|js|mjs|map|xml|json|txt|pdf|zip|rar|7z|mp4|webm|mov|avi|m4v|mkv|mp3|m4a|ogg|wav|flac|opus)(?:$|[?#])/i.test(path)) return false;
+        if (/^\/(?:wp-admin|wp-content\/uploads|wp-content\/themes|wp-content\/plugins|wp-includes)(?:\/|$)/i.test(path)) return false;
+        if (/\/(?:feed|comments)\/?$/i.test(path)) return false;
+        return true;
+    }
+
+    function extractBroaderSameSiteContentPagesFromDocument(doc, baseUrl){
+        if (!doc) return [];
+        const out = [];
+        const seen = new Set();
+        const push = (hrefRaw, labelRaw) => {
+            if (!hrefRaw) return;
+            let abs = '';
+            try { abs = new URL(String(hrefRaw).trim(), baseUrl).toString(); } catch(e){ return; }
+            if (!isLikelyFrutigerMusicContentPageUrl(abs)) return;
+            let u;
+            try { u = new URL(abs); } catch(e){ return; }
+            u.hash = '';
+            const clean = u.toString();
+            if (seen.has(clean)) return;
+            const label = String(labelRaw || '').trim();
+            // Keep broad links, but slightly prefer likely song/post pages.
+            if (label && /^(home|about|contact|login)$/i.test(label)) return;
+            seen.add(clean);
+            out.push(clean);
+        };
+        doc.querySelectorAll('a[href]').forEach(a => {
+            push(a.getAttribute('href') || '', (a.textContent || a.getAttribute('title') || a.getAttribute('aria-label') || ''));
+        });
+        return out;
+    }
+
+    function extractBroaderSameSiteContentPagesFromRawText(rawText, baseUrl){
+        const text = String(rawText || '');
+        if (!text) return [];
+        const out = [];
+        const seen = new Set();
+        const push = (hrefRaw) => {
+            if (!hrefRaw) return;
+            let abs = '';
+            try { abs = new URL(String(hrefRaw).replace(/\\\//g, '/').trim(), baseUrl).toString(); } catch(e){ return; }
+            if (!isLikelyFrutigerMusicContentPageUrl(abs)) return;
+            let u;
+            try { u = new URL(abs); } catch(e){ return; }
+            u.hash = '';
+            const clean = u.toString();
+            if (seen.has(clean)) return;
+            seen.add(clean);
+            out.push(clean);
+        };
+        try {
+            collectAnchorsFromMarkdownLikeText(text, baseUrl).forEach(item => push((item && (item.href || item.originalHref)) || ''));
+        } catch(e){}
+        let m;
+        const absUrlRe = /https?:\/\/frutigeraeroarchive\.org\/[^\s"'<>\\)]+/gi;
+        while ((m = absUrlRe.exec(text.replace(/\\\//g, '/')))) push(m[0]);
+        const relPageRe = /["'](\/(?!wp-content\/uploads\/)[^"']+)["']/gi;
+        while ((m = relPageRe.exec(text))) push(m[1]);
+        return out;
+    }
+
+    function extractMusicSubpagesFromDocument(doc, baseUrl){
+        if (!doc) return [];
+        const out = [];
+        const seen = new Set();
+        doc.querySelectorAll('a[href]').forEach(a => {
+            const hrefRaw = (a.getAttribute('href') || '').trim();
+            if (!hrefRaw || hrefRaw.startsWith('#') || /^mailto:|^javascript:/i.test(hrefRaw)) return;
+            let abs = '';
+            try { abs = new URL(hrefRaw, baseUrl).toString(); } catch(e){ return; }
+            if (!/^https?:\/\/frutigeraeroarchive\.org\//i.test(abs)) return;
+            let u;
+            try { u = new URL(abs); } catch(e){ return; }
+            const path = u.pathname.replace(/\/+$/,'');
+            if (!/\/music(\/|$)/i.test(path)) return;
+            u.hash = '';
+            const clean = u.toString();
+            const baseClean = (() => { try { const bu = new URL(baseUrl); bu.hash=''; return bu.toString(); } catch(e){ return String(baseUrl || ''); } })();
+            if (clean === baseClean) return;
+            if (seen.has(clean)) return;
+            seen.add(clean);
+            out.push(clean);
+        });
+        return out;
+    }
+
+    async function getCachedFrutigerMusicDocument(pageUrl){
+        const key = String(pageUrl || '');
+        if (!key) throw new Error('Mangler URL');
+        if (frutigerMusicPageCache.has(key)) return frutigerMusicPageCache.get(key);
+        const payload = await fetchTextWithFallbacks(key);
+        const doc = parseHtmlDocumentFromText(payload.text);
+        const cached = { doc, rawText: payload.text, via: payload.via, pageUrl: key };
+        frutigerMusicPageCache.set(key, cached);
+        return cached;
+    }
+
+    function buildFrutigerMusicPlaybackCandidates(audioUrl){
+        const raw = String(audioUrl || '').trim();
+        if (!raw) return [];
+        const out = [];
+        const seen = new Set();
+        const push = (u) => {
+            const clean = String(u || '').trim();
+            if (!clean || seen.has(clean)) return;
+            seen.add(clean);
+            out.push(clean);
+        };
+        push(raw);
+        push(`https://api.allorigins.win/raw?url=${encodeURIComponent(raw)}`);
+        push(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(raw)}`);
+        push(`https://corsproxy.io/?${encodeURIComponent(raw)}`);
+        try {
+            const abs = new URL(raw).toString();
+            push(`https://r.jina.ai/http://${abs.replace(/^https?:\/\//i, '')}`);
+        } catch(e){}
+        return out;
+    }
+
+    function extractArchiveOrgEmbedUrlsFromRawText(rawText, baseUrl){
+        const text = String(rawText || '');
+        if (!text) return [];
+        const out = [];
+        const seen = new Set();
+        const push = (hrefRaw) => {
+            if (!hrefRaw) return;
+            let abs = '';
+            try { abs = new URL(String(hrefRaw).replace(/\\\//g, '/').trim(), baseUrl).toString(); } catch(e){ return; }
+            if (!/^https?:\/\/(?:www\.)?archive\.org\/(?:embed|details)\//i.test(abs)) return;
+            abs = abs.replace(/#.*$/, '');
+            if (seen.has(abs)) return;
+            seen.add(abs);
+            out.push(abs);
+        };
+        let m;
+        const re = /https?:\/\/(?:www\.)?archive\.org\/(?:embed|details)\/[^\s"'<>\\)]+/gi;
+        while ((m = re.exec(text.replace(/\\\//g, '/')))) push(m[0]);
+        const quotedRe = /["']((?:https?:\/\/)?(?:www\.)?archive\.org\/(?:embed|details)\/[^"']+)["']/gi;
+        while ((m = quotedRe.exec(text))) push(m[1]);
+        return out;
+    }
+
+    function extractArchiveOrgEmbedUrlsFromDocument(doc, baseUrl){
+        if (!doc) return [];
+        const out = [];
+        const seen = new Set();
+        doc.querySelectorAll('iframe[src], a[href]').forEach(el => {
+            const raw = (el.getAttribute('src') || el.getAttribute('href') || '').trim();
+            if (!raw) return;
+            let abs = '';
+            try { abs = new URL(raw, baseUrl).toString(); } catch(e){ return; }
+            if (!/^https?:\/\/(?:www\.)?archive\.org\/(?:embed|details)\//i.test(abs)) return;
+            abs = abs.replace(/#.*$/, '');
+            if (seen.has(abs)) return;
+            seen.add(abs);
+            out.push(abs);
+        });
+        return out;
+    }
+
+    async function extractArchiveOrgTracksFromEmbedUrl(embedUrl){
+        const key = String(embedUrl || '').trim();
+        if (!key) return [];
+        if (frutigerMusicArchiveOrgMetaCache.has(key)) return frutigerMusicArchiveOrgMetaCache.get(key) || [];
+        let identifier = '';
+        try {
+            const u = new URL(key);
+            const parts = u.pathname.split('/').filter(Boolean);
+            if (parts.length >= 2 && /^(embed|details)$/i.test(parts[0])) identifier = decodeURIComponent(parts[1]);
+        } catch(e){}
+        if (!identifier) {
+            frutigerMusicArchiveOrgMetaCache.set(key, []);
+            return [];
+        }
+        const metadataUrl = `https://archive.org/metadata/${encodeURIComponent(identifier)}`;
+        try {
+            const payload = await fetchTextWithFallbacks(metadataUrl);
+            let json = null;
+            try { json = JSON.parse(payload.text); } catch(e){ json = null; }
+            const files = Array.isArray(json && json.files) ? json.files : [];
+            const audioExtRe = /\.(mp3|ogg|wav|m4a|aac|opus|flac)$/i;
+            const tracks = [];
+            const seen = new Set();
+            files.forEach(f => {
+                const name = String((f && f.name) || '').trim();
+                if (!name || !audioExtRe.test(name)) return;
+                const abs = `https://archive.org/download/${encodeURIComponent(identifier)}/${name.split('/').map(encodeURIComponent).join('/')}`;
+                if (seen.has(abs)) return;
+                seen.add(abs);
+                tracks.push({
+                    title: normalizeFrutigerMusicTrackTitle((f && (f.title || f.name)) || identifier, abs),
+                    url: abs,
+                    sourcePage: key
+                });
+            });
+            frutigerMusicArchiveOrgMetaCache.set(key, tracks);
+            return tracks;
+        } catch(e){
+            frutigerMusicArchiveOrgMetaCache.set(key, []);
+            return [];
+        }
+    }
+
+    function updateFrutigerMusicPlayerUi(){
+        const audio = frutigerMusicAudioEl;
+        const hasTracks = Array.isArray(frutigerMusicPlaylist) && frutigerMusicPlaylist.length > 0;
+        const idx = (frutigerMusicCurrentIndex >= 0 && frutigerMusicCurrentIndex < (frutigerMusicPlaylist || []).length) ? frutigerMusicCurrentIndex : -1;
+        const track = idx >= 0 ? frutigerMusicPlaylist[idx] : null;
+        const isPlaying = !!(audio && !audio.paused && !audio.ended && audio.currentSrc);
+        const isPausedWithTrack = !!(audio && audio.currentSrc && audio.paused && !audio.ended);
+
+        if (frutigerMusicTrackNameEl) {
+            if (track) {
+                frutigerMusicTrackNameEl.textContent = `Spiller: ${track.title} (${idx + 1}/${frutigerMusicPlaylist.length})`;
+            } else if (frutigerMusicLoading) {
+                frutigerMusicTrackNameEl.textContent = 'Laster spilleliste fra Frutiger Aero Archive…';
+            } else if (hasTracks) {
+                frutigerMusicTrackNameEl.textContent = `Spilleliste klar (${frutigerMusicPlaylist.length} spor). Trykk Start.` + (frutigerMusicPlaylist.length <= 1 ? ' (Prøver utvidet skanning ved neste oppdatering)' : '');
+            } else {
+                frutigerMusicTrackNameEl.textContent = 'Ingen sang valgt';
+            }
+        }
+
+        if (frutigerMusicStatusEl) {
+            if (!frutigerMusicPlayerVisible) frutigerMusicStatusEl.textContent = 'Av';
+            else if (frutigerMusicLoading) frutigerMusicStatusEl.textContent = 'Laster…';
+            else if (isPlaying) frutigerMusicStatusEl.textContent = 'Spiller';
+            else if (isPausedWithTrack) frutigerMusicStatusEl.textContent = 'Pauset';
+            else if (hasTracks) frutigerMusicStatusEl.textContent = 'Klar';
+            else if (frutigerMusicLastError) frutigerMusicStatusEl.textContent = 'Feil';
+            else frutigerMusicStatusEl.textContent = 'Venter';
+        }
+
+        if (frutigerMusicStartStopButtonEl) {
+            frutigerMusicStartStopButtonEl.textContent = isPlaying ? 'Stopp' : 'Start';
+        }
+
+        [frutigerMusicPauseButtonEl, frutigerMusicPrevButtonEl, frutigerMusicNextButtonEl].forEach(btn => {
+            if (!btn) return;
+            btn.disabled = !frutigerMusicPlayerVisible || (!hasTracks && !frutigerMusicLoading);
+        });
+        if (frutigerMusicPauseButtonEl) {
+            frutigerMusicPauseButtonEl.disabled = !frutigerMusicPlayerVisible || !audio || !audio.currentSrc;
+        }
+    }
+
+    async function loadFrutigerMusicPlaylist(forceReload = false){
+        const siteRoot = 'https://frutigeraeroarchive.org';
+        const baseUrl = 'https://frutigeraeroarchive.org/music';
+        if (!forceReload && Array.isArray(frutigerMusicPlaylist) && frutigerMusicPlaylist.length) return frutigerMusicPlaylist;
+        frutigerMusicLoading = true;
+        updateFrutigerMusicPlayerUi();
+        setFrutigerMusicStatus('Laster…');
+        try {
+            if (forceReload) {
+                frutigerMusicPageCache.clear();
+                frutigerMusicArchiveOrgMetaCache.clear();
+            }
+
+            const all = [];
+            const seenTracks = new Set();
+            const visitedPages = new Set();
+            const queuedPages = new Set();
+            const queue = [];
+
+            const pushTracks = (tracks) => {
+                (Array.isArray(tracks) ? tracks : []).forEach(t => {
+                    if (!t || !t.url) return;
+                    const k = String(t.url);
+                    if (!k || seenTracks.has(k)) return;
+                    seenTracks.add(k);
+                    all.push(t);
+                });
+            };
+
+            const pushPage = (hrefRaw, opts = {}) => {
+                if (!hrefRaw) return;
+                let abs = '';
+                try { abs = new URL(String(hrefRaw).replace(/\\\//g, '/').trim(), baseUrl).toString(); } catch(e){ return; }
+                if (!/^https?:\/\/frutigeraeroarchive\.org\//i.test(abs)) return;
+                let u;
+                try { u = new URL(abs); } catch(e){ return; }
+                const path = (u.pathname || '/').replace(/\/+/g,'/').replace(/\/+$/,'') || '/';
+                const isMusicPath = /(?:^|\/)music(?:\/|$)/i.test(path);
+                const isWpJson = /^\/wp-json(?:\/|$)/i.test(path);
+                const isSitemap = /(?:^|\/)sitemap(?:[-_a-z0-9]*)?\.xml$/i.test(path) || /^\/wp-sitemap(?:[-_a-z0-9]*)?\.xml$/i.test(path);
+                const allowBroad = !!(opts && opts.allowBroad);
+                const looksHtmlPage = isLikelyFrutigerMusicContentPageUrl(abs);
+                if (!(isMusicPath || isWpJson || isSitemap || (allowBroad && looksHtmlPage))) return;
+                u.hash = '';
+                const clean = u.toString();
+                if (visitedPages.has(clean) || queuedPages.has(clean)) return;
+                queuedPages.add(clean);
+                queue.push(clean);
+            };
+
+            [
+                baseUrl,
+                `${siteRoot}/music/`,
+                `${siteRoot}/wp-sitemap.xml`,
+                `${siteRoot}/sitemap.xml`,
+                `${siteRoot}/sitemap_index.xml`,
+                `${siteRoot}/wp-json/`,
+                `${siteRoot}/wp-json/wp/v2/pages?search=music&per_page=100&_fields=id,link,slug,title,content,parent`,
+                `${siteRoot}/wp-json/wp/v2/posts?search=music&per_page=100&_fields=id,link,slug,title,content`,
+                `${siteRoot}/wp-json/wp/v2/media?search=mp3&per_page=100&_fields=id,source_url,title,caption,description`,
+                `${siteRoot}/wp-json/wp/v2/media?search=m4a&per_page=100&_fields=id,source_url,title,caption,description`,
+                `${siteRoot}/wp-json/wp/v2/media?search=ogg&per_page=100&_fields=id,source_url,title,caption,description`,
+                `${siteRoot}/wp-json/wp/v2/categories?search=music&per_page=100&_fields=id,name,slug,link,count`,
+                `${siteRoot}/wp-json/wp/v2/tags?search=music&per_page=100&_fields=id,name,slug,link,count`
+            ].forEach(pushPage);
+
+            const maxPages = 420;
+            while (queue.length && visitedPages.size < maxPages) {
+                const page = queue.shift();
+                if (!page || visitedPages.has(page)) continue;
+                queuedPages.delete(page);
+                visitedPages.add(page);
+
+                let payload = null;
+                try {
+                    payload = await getCachedFrutigerMusicDocument(page);
+                } catch (e) {
+                    continue;
+                }
+                if (!payload) continue;
+
+                try { pushTracks(extractDirectAudioTracksFromDocument(payload.doc, page)); } catch(e){}
+                try { pushTracks(extractDirectAudioTracksFromRawText(payload.rawText, page)); } catch(e){}
+
+                try { extractMusicSubpagesFromDocument(payload.doc, page).forEach(pushPage); } catch(e){}
+                try { extractMusicSubpagesFromRawText(payload.rawText, page).forEach(pushPage); } catch(e){}
+
+                // Some song posts may live outside /music while being linked from the /music index.
+                try {
+                    const uPage = new URL(page);
+                    const pagePath = (uPage.pathname || '/').replace(/\/+/g, '/');
+                    const shouldBroadScan = /(?:^|\/)music(?:\/|$)/i.test(pagePath) || /\/wp-json\//i.test(pagePath);
+                    if (shouldBroadScan) {
+                        try { extractBroaderSameSiteContentPagesFromDocument(payload.doc, page).forEach((u) => pushPage(u, { allowBroad: true })); } catch(e){}
+                        try { extractBroaderSameSiteContentPagesFromRawText(payload.rawText, page).forEach((u) => pushPage(u, { allowBroad: true })); } catch(e){}
+                    }
+                } catch(e){}
+
+                // Broader same-site discovery from JSON/XML/inline script content
+                try {
+                    const textUnescaped = String(payload.rawText || '').replace(/\\\//g, '/');
+                    let m;
+                    const sameSiteUrlRe = /https?:\/\/frutigeraeroarchive\.org\/[^\s"'<>\\)]+/gi;
+                    while ((m = sameSiteUrlRe.exec(textUnescaped))) {
+                        const candidate = m[0];
+                        pushPage(candidate);
+                        try { if (isLikelyFrutigerMusicContentPageUrl(candidate)) pushPage(candidate, { allowBroad: true }); } catch(e){}
+                    }
+                    const relMusicishRe = /["']((?:\/wp-json\/[^"']+|\/wp-sitemap[^"']+\.xml|\/sitemap[^"']*\.xml|\/music\/[^"']*))["']/gi;
+                    while ((m = relMusicishRe.exec(textUnescaped))) pushPage(m[1]);
+                } catch(e){}
+
+                // Archive.org embeds often hide many tracks behind iframes; resolve metadata when possible
+                try {
+                    const archiveUrls = [];
+                    const seenArchive = new Set();
+                    const collect = (u) => {
+                        const k = String(u || '').trim();
+                        if (!k || seenArchive.has(k)) return;
+                        seenArchive.add(k);
+                        archiveUrls.push(k);
+                    };
+                    try { extractArchiveOrgEmbedUrlsFromDocument(payload.doc, page).forEach(collect); } catch(e){}
+                    try { extractArchiveOrgEmbedUrlsFromRawText(payload.rawText, page).forEach(collect); } catch(e){}
+                    for (let i = 0; i < archiveUrls.length && i < 40; i++) {
+                        try { pushTracks(await extractArchiveOrgTracksFromEmbedUrl(archiveUrls[i])); } catch(e){}
+                    }
+                } catch(e){}
+
+                try {
+                    payload.doc && payload.doc.querySelectorAll && payload.doc.querySelectorAll('iframe[src], source[src], audio[src]').forEach(el => {
+                        const src = (el.getAttribute && el.getAttribute('src')) ? el.getAttribute('src') : '';
+                        if (!src) return;
+                        if (/\.(mp3|ogg|wav|m4a|aac|opus|flac)(\?|#|$)/i.test(src)) {
+                            try {
+                                const abs = new URL(src, page).toString();
+                                pushTracks([{ title: normalizeFrutigerMusicTrackTitle('', abs), url: abs, sourcePage: page }]);
+                            } catch(e){}
+                            return;
+                        }
+                        if (/^https?:\/\/(?:www\.)?archive\.org\/(?:embed|details)\//i.test(src)) return;
+                        if (/(?:^|\/)music(?:\/|$)/i.test(src) || /\/wp-json\//i.test(src) || /sitemap/i.test(src)) pushPage(src);
+                    });
+                } catch(e){}
+            }
+
+            // Final quality pass: favor direct source URLs before proxied duplicates
+            all.sort((a, b) => {
+                const ap = /^https?:\/\/(?:api\.allorigins\.win|api\.codetabs\.com|corsproxy\.io)\//i.test(String(a && a.url || '')) ? 1 : 0;
+                const bp = /^https?:\/\/(?:api\.allorigins\.win|api\.codetabs\.com|corsproxy\.io)\//i.test(String(b && b.url || '')) ? 1 : 0;
+                if (ap !== bp) return ap - bp;
+                return String(a && a.title || '').localeCompare(String(b && b.title || ''), 'nb');
+            });
+
+            frutigerMusicPlaylist = all;
+            if (!all.length) {
+                frutigerMusicLastError = 'Ingen lydfiler funnet';
+                setFrutigerMusicStatus('Fant ingen lydfiler');
+                throw new Error('Fant ingen lydfiler på /music');
+            }
+            frutigerMusicLastError = '';
+            setFrutigerMusicStatus(`Klar (${all.length} spor)`);
+            return all;
+        } catch (err) {
+            frutigerMusicLastError = (err && err.message) ? String(err.message) : 'Kunne ikke hente spilleliste';
+            console.warn('Frutiger music load failed', err);
+            setFrutigerMusicStatus('Kunne ikke hente');
+            throw err;
+        } finally {
+            frutigerMusicLoading = false;
+            updateFrutigerMusicPlayerUi();
+        }
+    }
+
+
+    async function playFrutigerMusicTrackByIndex(index, opts = {}){
+        const autoplay = opts.autoplay !== false;
+        const tryNextSource = opts.nextSource === true;
+        if (!frutigerMusicAudioEl) return false;
+        if (!Array.isArray(frutigerMusicPlaylist) || !frutigerMusicPlaylist.length) {
+            await loadFrutigerMusicPlaylist(false);
+        }
+        if (!frutigerMusicPlaylist.length) return false;
+        const len = frutigerMusicPlaylist.length;
+        let idx = Number(index);
+        if (!Number.isFinite(idx)) idx = 0;
+        idx = ((Math.trunc(idx) % len) + len) % len;
+        const track = frutigerMusicPlaylist[idx];
+        if (!track || !track.url) return false;
+
+        const candidates = buildFrutigerMusicPlaybackCandidates(track.url);
+        if (!candidates.length) return false;
+
+        let startCandidateIndex = 0;
+        const currentTrack = (frutigerMusicCurrentIndex >= 0 && frutigerMusicCurrentIndex < frutigerMusicPlaylist.length)
+            ? frutigerMusicPlaylist[frutigerMusicCurrentIndex]
+            : null;
+        if (tryNextSource && currentTrack && currentTrack.url === track.url && Array.isArray(frutigerMusicCurrentPlaybackCandidates) && frutigerMusicCurrentPlaybackCandidates.length) {
+            startCandidateIndex = Math.max(0, Number(frutigerMusicCurrentPlaybackCandidateIndex || 0) + 1);
+        }
+
+        frutigerMusicCurrentIndex = idx;
+        frutigerMusicCurrentPlaybackCandidates = candidates.slice();
+
+        let lastErr = null;
+        for (let ci = startCandidateIndex; ci < candidates.length; ci++) {
+            const srcToUse = candidates[ci];
+            frutigerMusicCurrentPlaybackCandidateIndex = ci;
+            const currentSrc = frutigerMusicAudioEl.getAttribute('src') || '';
+            if (currentSrc !== srcToUse) {
+                frutigerMusicAudioEl.src = srcToUse;
+                try { frutigerMusicAudioEl.load(); } catch(e){}
+            }
+            updateFrutigerMusicPlayerUi();
+
+            if (!autoplay) {
+                setFrutigerMusicStatus('Klar');
+                updateFrutigerMusicPlayerUi();
+                return true;
+            }
+
+            try {
+                const p = frutigerMusicAudioEl.play();
+                if (p && typeof p.catch === 'function') await p.catch((e) => { throw e; });
+                frutigerMusicLastError = '';
+                setFrutigerMusicStatus('Spiller');
+                updateFrutigerMusicPlayerUi();
+                return true;
+            } catch (err) {
+                lastErr = err;
+                frutigerMusicLastError = (err && err.message) ? String(err.message) : 'Avspilling blokkert';
+                if (ci < candidates.length - 1) {
+                    setFrutigerMusicStatus('Prøver alternativ kilde…');
+                    continue;
+                }
+            }
+        }
+
+        setFrutigerMusicStatus('Trykk Start igjen');
+        updateFrutigerMusicPlayerUi();
+        if (lastErr) console.warn('Frutiger music play failed', lastErr);
+        return false;
+    }
+
+
+    async function playNextFrutigerMusic(delta = 1){
+        if (!Array.isArray(frutigerMusicPlaylist) || !frutigerMusicPlaylist.length) {
+            await loadFrutigerMusicPlaylist(false);
+        }
+        if (!frutigerMusicPlaylist.length) return;
+        const base = frutigerMusicCurrentIndex >= 0 ? frutigerMusicCurrentIndex : 0;
+        await playFrutigerMusicTrackByIndex(base + Number(delta || 1), { autoplay: true });
+    }
+
+    async function handleFrutigerMusicStartStop(){
+        if (!frutigerMusicPlayerVisible) return;
+        if (!frutigerMusicAudioEl) return;
+        const isPlaying = !frutigerMusicAudioEl.paused && !frutigerMusicAudioEl.ended && !!frutigerMusicAudioEl.currentSrc;
+        if (isPlaying) {
+            try { frutigerMusicAudioEl.pause(); } catch(e){}
+            try { frutigerMusicAudioEl.currentTime = 0; } catch(e){}
+            setFrutigerMusicStatus('Stoppet');
+            updateFrutigerMusicPlayerUi();
+            return;
+        }
+        if (!Array.isArray(frutigerMusicPlaylist) || !frutigerMusicPlaylist.length) {
+            try { await loadFrutigerMusicPlaylist(false); } catch(e) { updateFrutigerMusicPlayerUi(); return; }
+        }
+        if (!frutigerMusicPlaylist.length) { updateFrutigerMusicPlayerUi(); return; }
+        const idx = frutigerMusicCurrentIndex >= 0 ? frutigerMusicCurrentIndex : 0;
+        await playFrutigerMusicTrackByIndex(idx, { autoplay: true });
+    }
+
+    function handleFrutigerMusicPause(){
+        if (!frutigerMusicAudioEl) return;
+        try { frutigerMusicAudioEl.pause(); } catch(e){}
+        setFrutigerMusicStatus('Pauset');
+        updateFrutigerMusicPlayerUi();
+    }
+
+    function applyFruitigerArchiveImageUrl(imageUrl, categoryLabel){
+        const cleanUrl = String(imageUrl || '').trim();
+        if (!cleanUrl) return;
+        let s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
+        s.type = 'image';
+        s.mediaKind = 'image';
+        s.mediaDataUrl = cleanUrl;
+        s.glassEnabled = true;
+        s.glassOpacity = 70;
+        personalCustomizeBackgroundDraft = s;
+        s = upsertMediaHistoryInDraft('image', cleanUrl, categoryLabel ? `FEA – ${categoryLabel}` : 'FEA bilde');
+        try { applyThemeMode('dark'); } catch(e){}
+        setPersonalBgControlsOpen(true);
+        setPersonalBgMediaHistoryOpen(false);
+        renderPersonalBackgroundUiFromDraft();
+        applyPersonalBackgroundState(s, { preview: true, forceOn: true });
+    }
+
+    async function applyRandomFruitigerArchiveImage(category, opts = {}){
+        if (!category || !category.href) return;
+        const categoryUrl = String(category.href);
+        const categoryLabel = category.label || 'Kategori';
+        const fromAuto = !!(opts && opts.fromAuto);
+        setPersonalFruitigerArchiveStatus(fromAuto ? `Auto: henter nytt bilde (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `«${categoryLabel}»`})…` : `Henter tilfeldig bilde fra «${categoryLabel}»…`);
+        try {
+            const targetNoHash = (() => { try { const u = new URL(categoryUrl); u.hash = ''; return u.toString(); } catch(e){ return categoryUrl; } })();
+            const cached = await getCachedFruitigerDocument(targetNoHash);
+            let scopedCandidates = [];
+            if (category.hash) {
+                const scopedRoot = findScopedRootForHash(cached.doc, category.hash);
+                if (scopedRoot) scopedCandidates = collectImageCandidatesFromDocument(cached.doc, targetNoHash, { scopeRoot: scopedRoot });
+            }
+            const allCandidates = collectImageCandidatesFromDocument(cached.doc, targetNoHash);
+            const candidatesRaw = (scopedCandidates && scopedCandidates.length) ? scopedCandidates : allCandidates;
+            const candidates = filterPreferredFruitigerCandidates(candidatesRaw);
+            if (!candidates.length) throw new Error('Ingen bilder funnet');
+            let pool = candidates;
+            if (personalFruitigerArchiveLastImageUrl && candidates.length > 1) {
+                const filteredPool = candidates.filter(c => String(c && c.url || '') !== personalFruitigerArchiveLastImageUrl);
+                if (filteredPool.length) pool = filteredPool;
+            }
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+            personalFruitigerArchiveLastImageUrl = String(pick && pick.url || '');
+            applyFruitigerArchiveImageUrl(pick.url, categoryLabel);
+            const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+            const secLabel = sec <= 0 ? 'IR' : `${sec}s`;
+            setPersonalFruitigerArchiveStatus(`Bakgrunn satt fra «${categoryLabel}». Auto-bytte: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori'}). Trykk igjen for nytt bilde nå.`);
+            if (personalBgMediaStatusEl) personalBgMediaStatusEl.textContent = `FEA: «${categoryLabel}» valgt og klart for lagring`;
+        } catch (err) {
+            console.warn('Frutiger archive image apply failed', err);
+            setPersonalFruitigerArchiveStatus(`Kunne ikke hente bilde fra «${categoryLabel}». Nettstedet kan blokkere henting.`);
+        }
     }
 
     function applyPersonalBackgroundState(state, opts = {}){
@@ -4855,21 +6453,26 @@ function setPersonalCustomizationUiState(isOn){
         const shouldEnable = shouldUseCustom && (s.type === 'color' || hasMediaBg);
         syncThemeButtonMediaPulse(hasMediaBg);
 
-        if (customPageBgImageEl) {
-            customPageBgImageEl.style.display = 'none';
-            customPageBgImageEl.removeAttribute('src');
-        }
-        if (customPageBgVideoEl) {
+        const hideImage = (clearSrc = false) => {
+            if (!customPageBgImageEl) return;
+            if (customPageBgImageEl.style.display !== 'none') customPageBgImageEl.style.display = 'none';
+            if (clearSrc && customPageBgImageEl.getAttribute('src')) customPageBgImageEl.removeAttribute('src');
+        };
+        const hideVideo = (clearSrc = false) => {
+            if (!customPageBgVideoEl) return;
             try { customPageBgVideoEl.pause(); } catch(e){}
-            customPageBgVideoEl.style.display = 'none';
-            customPageBgVideoEl.removeAttribute('src');
-            try { customPageBgVideoEl.load(); } catch(e){}
-        }
-        if (customPageBgFillEl) {
-            customPageBgFillEl.style.background = 'var(--bg)';
-        }
+            if (customPageBgVideoEl.style.display !== 'none') customPageBgVideoEl.style.display = 'none';
+            const hadSrc = !!customPageBgVideoEl.getAttribute('src');
+            if (clearSrc && hadSrc) {
+                customPageBgVideoEl.removeAttribute('src');
+                try { customPageBgVideoEl.load(); } catch(e){}
+            }
+        };
 
         if (!shouldEnable) {
+            hideImage(true);
+            hideVideo(true);
+            if (customPageBgFillEl) customPageBgFillEl.style.background = 'var(--bg)';
             document.body.classList.remove('custom-page-bg-active');
             return;
         }
@@ -4882,12 +6485,24 @@ function setPersonalCustomizationUiState(isOn){
         if (customPageBgFillEl) {
             customPageBgFillEl.style.background = (s.type === 'color') ? personalBackgroundToCssColor(s) : 'var(--bg)';
         }
+
         if (s.type === 'image' && customPageBgImageEl && s.mediaDataUrl) {
-            customPageBgImageEl.src = s.mediaDataUrl;
-            customPageBgImageEl.style.display = 'block';
-        } else if (s.type === 'video' && customPageBgVideoEl && s.mediaDataUrl) {
-            customPageBgVideoEl.src = s.mediaDataUrl;
-            customPageBgVideoEl.style.display = 'block';
+            hideVideo(true);
+            const currentImgSrc = customPageBgImageEl.getAttribute('src') || '';
+            if (currentImgSrc !== s.mediaDataUrl) {
+                customPageBgImageEl.src = s.mediaDataUrl;
+            }
+            if (customPageBgImageEl.style.display !== 'block') customPageBgImageEl.style.display = 'block';
+            return;
+        }
+
+        if (s.type === 'video' && customPageBgVideoEl && s.mediaDataUrl) {
+            hideImage(true);
+            const currentVideoSrc = customPageBgVideoEl.getAttribute('src') || '';
+            if (currentVideoSrc !== s.mediaDataUrl) {
+                customPageBgVideoEl.src = s.mediaDataUrl;
+            }
+            if (customPageBgVideoEl.style.display !== 'block') customPageBgVideoEl.style.display = 'block';
             const personalModalOpen = !!(personalCustomizeOverlayEl && personalCustomizeOverlayEl.classList.contains('show'));
             if (personalModalOpen) {
                 try { customPageBgVideoEl.pause(); } catch(e){}
@@ -4895,7 +6510,11 @@ function setPersonalCustomizationUiState(isOn){
                 const p = customPageBgVideoEl.play();
                 if (p && typeof p.catch === 'function') p.catch(() => {});
             }
+            return;
         }
+
+        hideImage(true);
+        hideVideo(true);
     }
 
     function applyPersonalCustomizationBackground(){
@@ -4937,6 +6556,7 @@ function setPersonalCustomizationUiState(isOn){
             try { applyThemeMode('dark'); } catch(e){}
             setPersonalBgControlsOpen(true);
             setPersonalBgMediaHistoryOpen(false);
+            setPersonalFruitigerArchiveOpen(false);
             renderPersonalBackgroundUiFromDraft();
             applyPersonalBackgroundState(s, { preview: true, forceOn: true });
         };
@@ -4954,11 +6574,18 @@ function setPersonalCustomizationUiState(isOn){
         personalBgGlassControlsOpen = false;
         personalBgTextColorControlsOpen = false;
         personalBgMediaHistoryOpen = false;
+        personalFruitigerArchiveOpen = false;
+        // Behold auto-bytte aktivt i bakgrunnen selv om popupen åpnes/lukkes.
+        updatePersonalFruitigerArchiveIntervalUi();
+        setPersonalFruitigerArchiveModeToggle(personalFruitigerArchiveRandomCategoryMode);
         setPersonalBgControlsOpen(false);
         setPersonalBgColorControlsOpen(false);
         setPersonalBgGlassControlsOpen(false);
         setPersonalBgTextColorControlsOpen(false);
         setPersonalBgMediaHistoryOpen(false);
+        setPersonalFruitigerArchiveOpen(false);
+        if (personalFruitigerArchiveStatusEl) personalFruitigerArchiveStatusEl.textContent = 'Trykk på knappen for å hente kategorier fra Frutiger Aero Archive.';
+        renderPersonalFruitigerArchiveList();
         renderPersonalBackgroundUiFromDraft();
     }
 
@@ -9431,6 +11058,9 @@ suggestionIndex = -1;
     if (cpPersonalCustomizationToggleEl) {
         cpPersonalCustomizationToggleEl.addEventListener('change', (e) => {
             const on = !!e.target.checked;
+            if (!on && personalCtrlLightHoldActive) releasePersonalCtrlLightHold();
+            if (!on) stopPersonalFruitigerArchiveAutoRotation({ clearSelection: false });
+            if (!on) setFrutigerMusicPlayerVisible(false);
             setPersonalCustomizationUiState(on);
             savePersonalCustomizationToggle(on);
             applyPersonalCustomizationHeadings();
@@ -9443,6 +11073,62 @@ suggestionIndex = -1;
             requestAnimationFrame(() => openPersonalCustomizeModal());
         });
     }
+    if (toggleFrutigerMusicPlayerButtonEl) {
+        toggleFrutigerMusicPlayerButtonEl.addEventListener('click', async () => {
+            const nextVisible = !frutigerMusicPlayerVisible;
+            setFrutigerMusicPlayerVisible(nextVisible);
+            if (nextVisible) {
+                try {
+                    if (!Array.isArray(frutigerMusicPlaylist) || frutigerMusicPlaylist.length <= 1) {
+                        await loadFrutigerMusicPlaylist(true);
+                    } else {
+                        await loadFrutigerMusicPlaylist(false);
+                    }
+                } catch(e) {}
+            }
+            updateFrutigerMusicPlayerUi();
+        });
+    }
+    if (frutigerMusicStartStopButtonEl) {
+        frutigerMusicStartStopButtonEl.addEventListener('click', () => { handleFrutigerMusicStartStop(); });
+    }
+    if (frutigerMusicPauseButtonEl) {
+        frutigerMusicPauseButtonEl.addEventListener('click', () => { handleFrutigerMusicPause(); });
+    }
+    if (frutigerMusicPrevButtonEl) {
+        frutigerMusicPrevButtonEl.addEventListener('click', async () => {
+            try { await playNextFrutigerMusic(-1); } catch(e) {}
+        });
+    }
+    if (frutigerMusicNextButtonEl) {
+        frutigerMusicNextButtonEl.addEventListener('click', async () => {
+            try { await playNextFrutigerMusic(1); } catch(e) {}
+        });
+    }
+    if (frutigerMusicAudioEl) {
+        try { frutigerMusicAudioEl.preload = 'metadata'; } catch(e){}
+        try { frutigerMusicAudioEl.crossOrigin = 'anonymous'; } catch(e){}
+        try { frutigerMusicAudioEl.referrerPolicy = 'no-referrer'; } catch(e){}
+        frutigerMusicAudioEl.addEventListener('play', () => { setFrutigerMusicStatus('Spiller'); updateFrutigerMusicPlayerUi(); });
+        frutigerMusicAudioEl.addEventListener('pause', () => { updateFrutigerMusicPlayerUi(); });
+        frutigerMusicAudioEl.addEventListener('ended', async () => {
+            try { await playNextFrutigerMusic(1); } catch(e) { updateFrutigerMusicPlayerUi(); }
+        });
+        frutigerMusicAudioEl.addEventListener('error', async () => {
+            frutigerMusicLastError = 'Feil ved avspilling';
+            setFrutigerMusicStatus('Feil – prøver alternativ…');
+            updateFrutigerMusicPlayerUi();
+            try {
+                const retried = await playFrutigerMusicTrackByIndex(frutigerMusicCurrentIndex, { autoplay: true, nextSource: true });
+                if (retried) return;
+            } catch(e) {}
+            setFrutigerMusicStatus('Feil – hopper over');
+            updateFrutigerMusicPlayerUi();
+            try { await playNextFrutigerMusic(1); } catch(e) {}
+        });
+    }
+    updateFrutigerMusicPlayerUi();
+
     if (personalCustomizeCloseButtonEl) {
         personalCustomizeCloseButtonEl.addEventListener('click', () => closePersonalCustomizeModal());
     }
@@ -9506,6 +11192,7 @@ suggestionIndex = -1;
             s.type = 'color';
             personalCustomizeBackgroundDraft = s;
             setPersonalBgMediaHistoryOpen(false);
+            setPersonalFruitigerArchiveOpen(false);
             renderPersonalBackgroundUiFromDraft();
             applyPersonalBackgroundState(s, { preview: true, forceOn: true });
         });
@@ -9517,6 +11204,7 @@ suggestionIndex = -1;
         const triggerMediaHistoryByHold = () => {
             setPersonalBgControlsOpen(true);
             renderPersonalBgMediaHistoryDropdown();
+            setPersonalFruitigerArchiveOpen(false);
             setPersonalBgMediaHistoryOpen(!personalBgMediaHistoryOpen);
         };
         personalBgMediaButtonEl.addEventListener('pointerdown', (e) => {
@@ -9540,6 +11228,7 @@ suggestionIndex = -1;
                 return;
             }
             setPersonalBgMediaHistoryOpen(false);
+            setPersonalFruitigerArchiveOpen(false);
             if (!personalBgMediaInputEl) return;
             try {
                 if (typeof personalBgMediaInputEl.showPicker === 'function') personalBgMediaInputEl.showPicker();
@@ -9567,10 +11256,63 @@ suggestionIndex = -1;
             s.textOverrideEnabled = !s.textOverrideEnabled;
             personalCustomizeBackgroundDraft = s;
             setPersonalBgMediaHistoryOpen(false);
+            setPersonalFruitigerArchiveOpen(false);
             renderPersonalBackgroundUiFromDraft();
             applyPersonalBackgroundState(s, { preview: true, forceOn: true });
         });
     }
+    if (personalFruitigerArchiveButtonEl) {
+        personalFruitigerArchiveButtonEl.addEventListener('click', async () => {
+            const willOpen = !personalFruitigerArchiveOpen;
+            setPersonalBgControlsOpen(true);
+            setPersonalBgMediaHistoryOpen(false);
+            setPersonalFruitigerArchiveOpen(willOpen);
+            if (willOpen) {
+                try { await loadFruitigerArchiveCategories(false); } catch(e){}
+            }
+        });
+    }
+    if (personalFruitigerArchiveIntervalRangeEl) {
+        const onArchiveIntervalInput = () => {
+            const raw = Number(personalFruitigerArchiveIntervalRangeEl.value || 0);
+            personalFruitigerArchiveAutoIntervalSec = Math.max(0, Math.min(600, Number.isFinite(raw) ? raw : 45));
+            updatePersonalFruitigerArchiveIntervalUi();
+        };
+        personalFruitigerArchiveIntervalRangeEl.addEventListener('input', onArchiveIntervalInput);
+        personalFruitigerArchiveIntervalRangeEl.addEventListener('change', () => {
+            onArchiveIntervalInput();
+            const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+            const selected = getPersonalFruitigerArchiveSelectedCategory();
+            if (sec <= 0) {
+                stopPersonalFruitigerArchiveAutoRotation();
+                setPersonalFruitigerArchiveStatus(selected
+                    ? `Auto-bytte er deaktivert (IR): «${selected.label || 'Kategori'}».`
+                    : 'Auto-bytte er deaktivert (IR). Velg en kategori for manuelt bytte.');
+                return;
+            }
+            if (selected || personalFruitigerArchiveRandomCategoryMode) {
+                personalFruitigerArchiveAutoRunning = true;
+                schedulePersonalFruitigerArchiveAutoRotation();
+                setPersonalFruitigerArchiveStatus(selected
+                    ? `Auto-bytte er aktivt: ${sec}s (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `samme kategori: «${selected.label || 'Kategori'}»`}).`
+                    : `Auto-bytte er aktivt: ${sec}s (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori'}).`);
+            }
+        });
+    }
+    if (personalFruitigerArchiveModeToggleEl) {
+        personalFruitigerArchiveModeToggleEl.addEventListener('click', () => {
+            setPersonalFruitigerArchiveModeToggle(!personalFruitigerArchiveRandomCategoryMode);
+            if (personalFruitigerArchiveAutoRunning) schedulePersonalFruitigerArchiveAutoRotation();
+            const selected = getPersonalFruitigerArchiveSelectedCategory();
+            const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+            setPersonalFruitigerArchiveStatus(selected
+                ? `Auto-bytte er ${sec <= 0 ? 'deaktivert (IR)' : 'aktivt'}: ${sec <= 0 ? 'IR' : `${sec}s`} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `samme kategori: «${selected.label || 'Kategori'}»`}).`
+                : `Velg en kategori. Auto-bytte bruker ${sec <= 0 ? 'IR' : `${sec}s`} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori'}).`);
+        });
+    }
+    updatePersonalFruitigerArchiveIntervalUi();
+    setPersonalFruitigerArchiveModeToggle(personalFruitigerArchiveRandomCategoryMode);
+
     if (personalBgMediaInputEl) {
         personalBgMediaInputEl.addEventListener('change', (e) => {
             const file = e.target && e.target.files ? e.target.files[0] : null;
@@ -9591,8 +11333,9 @@ suggestionIndex = -1;
         el.addEventListener('input', handler);
         el.addEventListener('change', handler);
     });
-    function syncPersonalTextDraftFromSliderInputs(source){
+    function syncPersonalTextDraftFromSliderInputs(source, opts = {}){
         const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
+        const fastPreview = !!opts.fastPreview;
         if (source === personalTextHueRangeEl && personalTextLightRangeEl) {
             personalTextLightRangeEl.value = '60';
         }
@@ -9601,26 +11344,58 @@ suggestionIndex = -1;
         if (personalTextLightRangeEl) s.textLight = Number(personalTextLightRangeEl.value || s.textLight);
         s.textOverrideEnabled = true;
         personalCustomizeBackgroundDraft = s;
+
+        if (fastPreview) {
+            if (customPageBgVideoEl) {
+                try { customPageBgVideoEl.pause(); } catch(e){}
+            }
+            renderPersonalTextUiFromDraftFast();
+            applyPersonalTextOverrideState(s, { preview: true, forceOn: true });
+            return;
+        }
+
         renderPersonalBackgroundUiFromDraft();
         applyPersonalBackgroundState(s, { preview: true, forceOn: true });
     }
 
     [personalTextHueRangeEl, personalTextSatRangeEl, personalTextLightRangeEl].forEach(el => {
         if (!el) return;
-        const handler = () => syncPersonalTextDraftFromSliderInputs(el);
-        el.addEventListener('input', handler);
-        el.addEventListener('change', handler);
+        const onInputFastPreview = () => syncPersonalTextDraftFromSliderInputs(el, { fastPreview: true });
+        const onCommit = () => syncPersonalTextDraftFromSliderInputs(el, { fastPreview: false });
+        el.addEventListener('input', onInputFastPreview);
+        el.addEventListener('change', onCommit);
+        el.addEventListener('pointerup', onCommit);
+        el.addEventListener('keyup', (e) => {
+            if (!e || !e.key) return;
+            if (e.key.startsWith('Arrow') || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown') {
+                onCommit();
+            }
+        });
     });
     if (personalBgGlassOpacityRangeEl) {
-        const onGlassOpacityInput = () => {
+        const updateGlassOpacityDraftValue = () => {
             const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
             s.glassOpacity = Number(personalBgGlassOpacityRangeEl.value || s.glassOpacity);
             personalCustomizeBackgroundDraft = s;
-            renderPersonalBackgroundUiFromDraft();
+            if (personalBgGlassOpacityValueEl) personalBgGlassOpacityValueEl.textContent = `${Math.round(s.glassOpacity)}%`;
+            return s;
+        };
+        const onGlassOpacityInputPreviewOnly = () => {
+            updateGlassOpacityDraftValue();
+        };
+        const onGlassOpacityCommit = () => {
+            const s = updateGlassOpacityDraftValue();
             applyPersonalBackgroundState(s, { preview: true, forceOn: true });
         };
-        personalBgGlassOpacityRangeEl.addEventListener('input', onGlassOpacityInput);
-        personalBgGlassOpacityRangeEl.addEventListener('change', onGlassOpacityInput);
+        personalBgGlassOpacityRangeEl.addEventListener('input', onGlassOpacityInputPreviewOnly);
+        personalBgGlassOpacityRangeEl.addEventListener('change', onGlassOpacityCommit);
+        personalBgGlassOpacityRangeEl.addEventListener('pointerup', onGlassOpacityCommit);
+        personalBgGlassOpacityRangeEl.addEventListener('keyup', (e) => {
+            if (!e || !e.key) return;
+            if (e.key.startsWith('Arrow') || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown') {
+                onGlassOpacityCommit();
+            }
+        });
     }
 
     if (personalCustomizeOverlayEl) {
@@ -9628,6 +11403,9 @@ suggestionIndex = -1;
             const clickedInsideHistory = !!(e.target && e.target.closest && e.target.closest('#personalBgMediaHistoryDropdown'));
             const clickedMediaButton = !!(e.target && e.target.closest && e.target.closest('#personalBgMediaButton'));
             if (personalBgMediaHistoryOpen && !clickedInsideHistory && !clickedMediaButton) setPersonalBgMediaHistoryOpen(false);
+            const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest('#personalFruitigerArchivePanel'));
+            const clickedArchiveButton = !!(e.target && e.target.closest && e.target.closest('#personalFruitigerArchiveButton'));
+            if (personalFruitigerArchiveOpen && !clickedInsideArchive && !clickedArchiveButton) setPersonalFruitigerArchiveOpen(false);
             if (e.target === personalCustomizeOverlayEl) closePersonalCustomizeModal();
         });
     }
@@ -9651,6 +11429,19 @@ suggestionIndex = -1;
                 closePersonalCustomizeModal({ revertBackgroundPreview: false });
             }
         }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (!e) return;
+        if (e.key === 'Control') activatePersonalCtrlLightHold();
+    });
+    document.addEventListener('keyup', (e) => {
+        if (!e) return;
+        if (e.key === 'Control') releasePersonalCtrlLightHold();
+    });
+    window.addEventListener('blur', () => releasePersonalCtrlLightHold());
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) releasePersonalCtrlLightHold();
     });
 
     const adhdStripLineHintEl = document.querySelector('#adhdStrip .adhd-strip-line');
@@ -10173,6 +11964,38 @@ ${comment}
 </script>
 
 
+
+
+<style id="frutigerMusicPlayerDisablePatch">
+#frutigerMusicPlayerWrap{ display:none !important; }
+</style>
+<script id="frutigerMusicPlayerOpenTabPatch">
+(function(){
+  const MUSIC_URL = 'https://frutigeraeroarchive.org/music';
+  function bindFrutigerMusicOpenTabButton(){
+    const btn = document.getElementById('toggleFrutigerMusicPlayerButton');
+    if (!btn) return false;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.classList.remove('active');
+    btn.addEventListener('click', function(e){
+      try{
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation();
+      }catch(_){}
+      try { window.open(MUSIC_URL, '_blank', 'noopener,noreferrer'); }
+      catch(_) { try { window.open(MUSIC_URL, '_blank'); } catch(__){} }
+      return false;
+    }, true); // capture phase: blocks existing player logic
+    return true;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindFrutigerMusicOpenTabButton, { once:true });
+  } else {
+    bindFrutigerMusicOpenTabButton();
+  }
+})();
+</script>
 
 </body>
 
