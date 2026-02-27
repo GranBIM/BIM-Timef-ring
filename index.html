@@ -49,6 +49,7 @@
             --glass-border-rgb: 255,255,255;
             --glass-ui-alpha: 0.28;
             --glass-border-alpha: 0.36;
+            --glass-ui-blur: 1px;
 }
 
         body.theme-dark{
@@ -81,6 +82,7 @@
             --glass-border-rgb: 255,255,255;
             --glass-ui-alpha: 0.22;
             --glass-border-alpha: 0.26;
+            --glass-ui-blur: 1px;
 }
 
         body.theme-black{
@@ -111,6 +113,7 @@
             --glass-border-rgb: 255,255,255;
             --glass-ui-alpha: 0.20;
             --glass-border-alpha: 0.22;
+            --glass-ui-blur: 1px;
 }
         
         body.theme-black .card, 
@@ -168,8 +171,8 @@
         body.glass-mode-active textarea{
             background: rgba(var(--glass-surface-rgb), var(--glass-ui-alpha)) !important;
             border-color: rgba(var(--glass-border-rgb), var(--glass-border-alpha)) !important;
-            backdrop-filter: blur(12px) saturate(130%);
-            -webkit-backdrop-filter: blur(12px) saturate(130%);
+            backdrop-filter: blur(var(--glass-ui-blur, 12px)) saturate(130%);
+            -webkit-backdrop-filter: blur(var(--glass-ui-blur, 12px)) saturate(130%);
         }
         body.glass-mode-active .card,
         body.glass-mode-active .modal{
@@ -184,8 +187,8 @@
         body.glass-mode-active #taskSuggestions{
             background: rgba(var(--glass-surface-rgb), calc(var(--glass-ui-alpha) + 0.06)) !important;
             border-color: rgba(var(--glass-border-rgb), calc(var(--glass-border-alpha) + 0.06)) !important;
-            backdrop-filter: blur(12px) saturate(130%);
-            -webkit-backdrop-filter: blur(12px) saturate(130%);
+            backdrop-filter: blur(var(--glass-ui-blur, 12px)) saturate(130%);
+            -webkit-backdrop-filter: blur(var(--glass-ui-blur, 12px)) saturate(130%);
         }
         body.glass-mode-active #taskSuggestions{
             /* Forslaglisten skal være helt uten gjennomsiktighet for bedre lesbarhet */
@@ -202,10 +205,10 @@
             z-index: 2150;
         }
         body.glass-mode-active #personalBgGlassButton.active{
-            background: rgba(249,115,22,0.18) !important;
-            border-color: rgba(249,115,22,0.9) !important;
+            background: rgba(34,197,94,0.18) !important;
+            border-color: rgba(34,197,94,0.9) !important;
             color: var(--text) !important;
-            box-shadow: 0 0 0 1px rgba(249,115,22,0.22) inset;
+            box-shadow: 0 0 0 1px rgba(34,197,94,0.22) inset;
         }
         .personal-bg-glass-controls{
             display:none;
@@ -230,11 +233,51 @@
             display: none;
         }
         .personal-bg-controls.is-open{ display:block; }
+        .personal-bg-top-buttons{
+            display:flex;
+            flex-wrap:wrap;
+            gap:0.5rem;
+            align-items:center;
+        }
+        .personal-bg-top-buttons > button{
+            flex: 0 1 auto;
+        }
+        .personal-rename-controls{
+            display:none;
+            margin-top:0.6rem;
+            border:1px solid var(--border-soft);
+            border-radius:0.55rem;
+            padding:0.55rem;
+            background: var(--bg-soft);
+        }
+        .personal-rename-controls.is-open{ display:block; }
         .personal-bg-action-buttons{
             display:flex;
             flex-wrap:wrap;
             gap:0.5rem;
+            align-items:flex-start;
             margin-bottom:0.65rem;
+        }
+
+        .personal-bg-action-stack{
+            display:flex;
+            flex-direction:column;
+            gap:0.5rem;
+        }
+        .personal-bg-action-stack > button{
+            width:100%;
+        }
+        .ctrl-hint-orange{
+            color: var(--dot-orange) !important;
+        }
+
+        /* Profil-knapp: alltid lesbar i lysmodus (og ved tekst-overstyring) */
+        body:not(.theme-dark):not(.theme-black) #profileButton{
+            color: #000000 !important;
+        }
+        body:not(.theme-dark):not(.theme-black) #profileButton.active,
+        body:not(.theme-dark):not(.theme-black) #profileButton.btn-profile-active{
+            color: #ffffff !important;
         }
         .personal-bg-color-controls{
             display:none;
@@ -287,6 +330,31 @@
             border-color: rgba(34,197,94,0.42);
             box-shadow: 0 0 0 1px rgba(34,197,94,0.12) inset;
         }
+        .personal-bg-blur-presets{
+            display:flex;
+            gap:0.4rem;
+            flex-wrap:wrap;
+            margin-top:0.5rem;
+        }
+        .personal-bg-blur-presets .btn-secondary{
+            min-width: 84px;
+        }
+        #personalBgCustomizeButton.active,
+        #personalBgCustomizeButton[aria-pressed="true"],
+        #personalRenameControlsToggleButton.active,
+        #personalRenameControlsToggleButton[aria-pressed="true"],
+        #personalBgColorButton.active,
+        #personalBgTextColorButton.active,
+        #personalBgGlassButton.active,
+        #personalBgBlurFastButton.active,
+        #personalBgBlurPrettyButton.active,
+        #personalBgBlurHeavyButton.active{
+            background: rgba(34,197,94,0.14) !important;
+            border-color: rgba(34,197,94,0.42) !important;
+            box-shadow: 0 0 0 1px rgba(34,197,94,0.12) inset !important;
+            color: var(--text) !important;
+        }
+
         .personal-bg-archive-panel{
             display:none;
             margin-top:0.55rem;
@@ -301,6 +369,16 @@
             color: var(--muted);
             margin:0 0 0.4rem 0;
         }
+
+        .personal-bg-archive-status.is-loading{
+            color: var(--dot-orange);
+            font-weight: 700;
+        }
+        .personal-bg-archive-status .status-category{
+            color: var(--dot-green);
+            font-weight: 800;
+        }
+
         .personal-bg-archive-toolbar{
             border:1px solid var(--border-soft);
             border-radius:0.45rem;
@@ -351,7 +429,15 @@
         #personalCustomizeResetButton.danger-hold-pending{
             animation: personalResetDangerBlink 0.7s linear infinite;
         }
-        .personal-bg-media-history{
+        
+        @keyframes newProfileGreenBlink {
+            0%, 49% { background: var(--input-bg, var(--bg-soft)); border-color: var(--border); }
+            50%, 100% { background: rgba(16,185,129,0.22); border-color: rgba(16,185,129,0.75); }
+        }
+        #newProfileName.new-profile-attention{
+            animation: newProfileGreenBlink 2s linear infinite;
+        }
+.personal-bg-media-history{
             display:none;
             margin-top:0.55rem;
             border:1px solid var(--border-soft);
@@ -361,6 +447,25 @@
             max-height: 210px;
             overflow:auto;
         }
+
+        .personal-bg-media-history-grid{
+            display:grid;
+            grid-template-columns: 1fr 1px 1fr;
+            gap:0.6rem;
+            align-items:start;
+        }
+        .personal-bg-media-history-divider{
+            width:1px;
+            background: var(--border-soft);
+            align-self: stretch;
+        }
+        .personal-bg-media-history-col-title{
+            font-size:0.72rem;
+            font-weight: 800;
+            margin:0 0 0.35rem 0.1rem;
+            opacity: 0.9;
+        }
+
         .personal-bg-media-history.is-open{ display:block; }
         .personal-bg-media-history-item{
             display:flex;
@@ -424,7 +529,34 @@
             color: var(--muted);
             padding:0.35rem 0.2rem;
         }
-        .personal-bg-preview-chip{
+        
+        /* Historikk-visning: skjul øvrige verktøy/hjelpetekster når historikk er åpen */
+        #personalCustomizeOverlay.history-only .personal-bg-top-buttons,
+        #personalCustomizeOverlay.history-only #personalRenameControlsWrap,
+        #personalCustomizeOverlay.history-only #personalBgColorControls,
+        #personalCustomizeOverlay.history-only #personalBgTextColorControls,
+        #personalCustomizeOverlay.history-only #personalBgGlassControls,
+        #personalCustomizeOverlay.history-only #personalFruitigerArchivePanel,
+        #personalCustomizeOverlay.history-only #personalBgMediaStatus{
+            display:none !important;
+        }
+        #personalCustomizeOverlay.history-only #personalBgControlsWrap .personal-bg-action-buttons > :not(#personalBgMediaHistoryButton){
+            display:none !important;
+        }
+        #personalCustomizeOverlay.history-only #personalBgControlsWrap .helptext-container,
+        #personalCustomizeOverlay.history-only #personalBgControlsWrap .helper-text{
+            display:none !important;
+        }
+        .personal-bg-media-history-item.thumb-only{
+            justify-content:flex-start;
+            gap:0;
+            padding:0.35rem;
+        }
+        .personal-bg-media-history-item.thumb-only .personal-bg-media-history-thumb{
+            width:64px;
+            height:44px;
+        }
+.personal-bg-preview-chip{
             width:100%;
             min-height:42px;
             border-radius:0.5rem;
@@ -517,8 +649,10 @@
             font-size: 1.5rem;
         }
         .time-now {
-            font-size: 0.95rem;
-            color: var(--muted);
+            font-size: 1.02rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.01em;
         }
         .header-right {
             display: flex;
@@ -1656,7 +1790,7 @@
 
 
 
-        /* ADHD modus (oppgavelinje) */
+        /* Sekvensmodus (oppgavelinje) */
         .adhd-strip-wrap{
             display:none;
             justify-content:center;
@@ -1666,7 +1800,7 @@
             display:flex;
         }
 
-        /* ADHD modus erstatter tidslinje i samme ramme */
+        /* Sekvensmodus erstatter tidslinje i samme ramme */
         #adhdTimelineHost{ display:none; }
         body.adhd-mode-active #timelineWrap{ display:none; }
         body.adhd-mode-active #adhdTimelineHost{ display:block; }
@@ -1926,6 +2060,16 @@
             z-index: 2000;
         }
         .overlay.show { display: flex; }
+        
+        /* Kraftig blur i popup-vinduene (ikke bakgrunnen) – kun når Personlig tilpasning er aktiv OG glassmodus er aktivert */
+        body.personal-strong-overlay-blur #settingsOverlay.overlay.show .modal,
+        body.personal-strong-overlay-blur #personalCustomizeOverlay.overlay.show .modal{
+            background: rgba(var(--glass-surface-rgb), calc(var(--glass-ui-alpha) + 0.08)) !important;
+            border-color: rgba(var(--glass-border-rgb), 0.70) !important;
+            backdrop-filter: blur(24px) saturate(140%) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+        }
+
         #projectOverlay{
             z-index: 12000;
         }
@@ -2323,6 +2467,38 @@
             background-color: var(--dot-blue) !important;
         }
 
+/* Midlertidig deaktivering ved «Gjenoppta dagen»: vis orange fyllfarge */
+#cpToggle2.temp-restore-off + .slider {
+    background-color: #f59e0b !important;
+}
+#cpToggle2.temp-restore-off ~ label[for="cpToggle2"],
+.control-panel-row.guard-temp-disabled label[for="cpToggle2"] {
+    color: #f59e0b !important;
+    font-weight: 600;
+}
+
+@keyframes profileTempGuardBlinkOrange {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(245,158,11,0);
+        transform: translateZ(0);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(245,158,11,0.22);
+        transform: translateZ(0);
+    }
+}
+#profileButton.profile-temp-guard-indicator {
+    background-color: #f59e0b !important;
+    border-color: rgba(245,158,11,0.55) !important;
+    color: #111827 !important;
+}
+body.theme-dark #profileButton.profile-temp-guard-indicator {
+    color: #111827 !important;
+}
+#profileButton.profile-temp-guard-blink {
+    animation: profileTempGuardBlinkOrange 0.5s ease-in-out 6;
+}
+
     
 
         /* Standardfunksjon: Lagre profil automatisk ved «Avslutt arbeid» = blå */
@@ -2330,7 +2506,7 @@
             background-color: var(--dot-blue) !important;
         }
 
-        /* Under utvikling: ADHD modus = orange */
+        /* Under utvikling: Sekvensmodus = orange */
         #cpToggle3:checked + .slider {
             background-color: #f59e0b !important;
         }
@@ -2519,6 +2695,27 @@ button:not([disabled]):hover {
             margin:0;
             line-height:1.2;
         }
+        #personalCustomizationRow{
+            align-items:flex-start;
+            flex-wrap:wrap;
+        }
+        #personalCustomizationRow > .helptext-container{
+            order:2;
+            flex:1 1 100%;
+            width:100%;
+            margin-left:2.1rem !important;
+        }
+        #personalCustomizationRow > #personalCustomizeActionWrap{
+            order:3;
+            flex:1 1 100%;
+            width:100%;
+            margin-left:2.1rem !important;
+            margin-top:0.25rem;
+        }
+        #personalCustomizationRow > #personalCustomizeActionWrap > div{
+            justify-content:flex-start !important;
+        }
+
         #underDevelopmentItems{
             display:none;
             margin-top: 0;
@@ -2664,8 +2861,8 @@ ${comment}
     </div>
     <div class="header-right">
         <button id="themeToggleButton" class="btn-secondary" type="button" title="Bytt mellom lys, mørk og svart modus">Mørkmodus</button>
-        <button id="profileButton" class="btn-secondary" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Brukerprofil</button>
-        <div style="margin-top:0.25rem;">Utviklet av:<br>Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 22.02.2026</div>
+        <button id="profileButton" class="btn-secondary" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Profil og innstillinger</button>
+        <div style="margin-top:0.25rem;">Utviklet av:<br>Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 27.02.2026</div>
     </div>
 </header>
 
@@ -2732,10 +2929,10 @@ ${comment}
             </div>
 
             <div class="timeline-curtain-row">
-                <label for="dayTimelineFrom">Fra:</label>
+                <label id="dayTimelineFromLabel" for="dayTimelineFrom">Fra:</label>
                 <select id="dayTimelineFrom" class="modal-select"></select>
 
-                <label for="dayTimelineTo">Til:</label>
+                <label id="dayTimelineToLabel" for="dayTimelineTo">Til:</label>
                 <select id="dayTimelineTo" class="modal-select"></select>
 
                 <span class="helper-text" id="dayTimelineCurtainHint"></span>
@@ -2841,7 +3038,7 @@ ${comment}
 <div id="adhdTasksOverlay" class="overlay">
     <div class="modal">
         <button class="modal-close" id="adhdTasksCloseButton">&times;</button>
-        <h2>ADHD modus – oppgaveliste</h2>
+        <h2>Sekvensmodus – oppgaveliste</h2>
         <p class="helper-text">Legg inn én oppgave per linje. Rekkefølgen brukes i visningen øverst på nettsiden.</p>
         <div class="adhd-modal-grid">
             <div id="adhdLineNumbers" class="adhd-line-numbers">1</div>
@@ -2857,8 +3054,8 @@ ${comment}
 
 <div id="adhdDiscardOverlay" class="overlay">
     <div class="modal">
-        <h2>Deaktiver ADHD modus</h2>
-        <p id="adhdDiscardMessage">Dette vil deaktivere ADHD modus. Fortsette?</p>
+        <h2>Deaktiver Sekvensmodus</h2>
+        <p id="adhdDiscardMessage">Dette vil deaktivere Sekvensmodus. Fortsette?</p>
         <div class="modal-footer" style="justify-content: space-between;">
             <button id="adhdDiscardCancelButton" class="btn-secondary" type="button">Avbryt</button>
             <button id="adhdDiscardConfirmButton" class="modal-button-primary" type="button" style="background: var(--danger);">Deaktiver</button>
@@ -2872,23 +3069,42 @@ ${comment}
         <button class="modal-close" id="personalCustomizeCloseButton">&times;</button>
         <h2>Personlig tilpasning</h2>
         <div class="helptext-container" data-helptext-container="true" style="margin-bottom:0.6rem;">
-            <div class="helper-text">Her kan du tilpasse det visuelle slik du selv ønsker, NB! Tekst og menyer kan bli vanskelig å lese. hold nede CTRL tasten hvis du ikke klarer se eller lese tekst</div>
+            <div class="helper-text">Her kan du tilpasse det visuelle slik du selv ønsker, NB! Tekst og menyer kan bli vanskelig å lese. <span class="ctrl-hint-orange">Hold nede CTRL tasten hvis du ikke klarer se ellr lese tekst</span></div>
         </div>
         <div class="personal-customize-scroll-panel" style="border:1px solid var(--border); border-radius:0.65rem; padding:0.55rem; max-height:52vh; overflow:auto; background: color-mix(in srgb, var(--card) 94%, transparent);">
-            <div style="font-weight:700; margin:0 0 0.5rem 0.15rem;">Fra og til</div>
-            <div id="personalCustomizeRows"></div>
             <div class="personal-bg-panel">
-                <div style="font-weight:700; margin:0 0 0.35rem 0.05rem;">Bakgrunn</div>
+                <div style="font-weight:700; margin:0 0 0.35rem 0.05rem;">Tilpass bimføring</div>
                 <div class="helptext-container" data-helptext-container="true" style="margin:0 0 0.45rem 0.05rem;">
-                    <div class="helper-text">Lagre en egendefinert bakgrunn med farge, bilde eller video.</div>
+                    <div class="helper-text">Her kan du tilpasse det visuelle slik du selv ønsker</div>
                 </div>
-                <button id="personalBgCustomizeButton" type="button" class="btn-secondary">Tilpass bakgrunnen</button>
+                <div class="personal-bg-top-buttons">
+                    <button id="personalBgCustomizeButton" type="button" class="btn-secondary" aria-pressed="false">Tilpass bakgrunnen</button>
+                    <button id="personalRenameControlsToggleButton" type="button" class="btn-secondary" aria-pressed="false">Tilpass overskrifter</button>
+                </div>
+
+                <div id="personalBgAutoSwapWrap" class="personal-bg-archive-toolbar" aria-hidden="true" style="margin-top:0.55rem; display:none;">
+                    <div class="personal-bg-slider-row">
+                        <label for="personalFruitigerArchiveIntervalRange">Intervall</label>
+                        <input id="personalFruitigerArchiveIntervalRange" type="range" min="0" max="600" step="5" value="45" />
+                        <span id="personalFruitigerArchiveIntervalValue">45s</span>
+                    </div>
+                    <div class="personal-bg-archive-toolbar-buttons">
+                        <button id="personalFruitigerArchiveModeToggle" type="button" class="btn-secondary" aria-pressed="false">Samme kategori</button>
+                    </div>
+                </div>
+<div id="personalRenameControlsWrap" class="personal-rename-controls" aria-hidden="true">
+                    <div style="font-weight:700; margin:0 0 0.5rem 0.15rem;">Tilpass overskrifter</div>
+                    <div id="personalCustomizeRows"></div>
+                </div>
                 <div id="personalBgControlsWrap" class="personal-bg-controls" aria-hidden="true">
                     <div class="personal-bg-action-buttons">
-                        <button id="personalBgColorButton" type="button" class="btn-secondary">Bestem farge</button>
+                        <div class="personal-bg-action-stack">
+                            <button id="personalBgColorButton" type="button" class="btn-secondary">Tilpass bakgrunnsfarge</button>
+                            <button id="personalBgTextColorButton" type="button" class="btn-secondary" aria-pressed="false">Overstyr tekstfarge</button>
+                        </div>
                         <button id="personalBgMediaButton" type="button" class="btn-secondary">Last opp et bilde eller video</button>
+                        <button id="personalBgMediaHistoryButton" type="button" class="btn-secondary">Historikk bilder / video</button>
                         <button id="personalBgGlassButton" type="button" class="btn-secondary" aria-pressed="false">Glassmodus</button>
-                        <button id="personalBgTextColorButton" type="button" class="btn-secondary" aria-pressed="false">Overstyr tekstfarge</button>
                         <button id="personalFruitigerArchiveButton" type="button" class="btn-secondary" aria-pressed="false">The Frutiger Aero Archive</button>
                         <input id="personalBgMediaInput" type="file" accept="image/*,video/*" style="position:fixed; left:-99999px; top:0; opacity:0; width:1px; height:1px; pointer-events:none;" />
                     </div>
@@ -2898,7 +3114,15 @@ ${comment}
                             <input id="personalBgGlassOpacityRange" type="range" min="0" max="100" step="1" value="28" />
                             <span id="personalBgGlassOpacityValue">28%</span>
                         </div>
-                        <div class="helper-text" style="margin-top:0.45rem;">0% = solid bakgrunn, 100% = mest gjennomsiktig (glass)</div>
+                        <div class="personal-bg-blur-presets" role="group" aria-label="Blurvalg">
+                            <button id="personalBgBlurOffButton" type="button" class="btn-secondary" aria-pressed="false">AV</button>
+                            <button id="personalBgBlurFastButton" type="button" class="btn-secondary" aria-pressed="false">Klar</button>
+                            <button id="personalBgBlurPrettyButton" type="button" class="btn-secondary" aria-pressed="false">Uskarp</button>
+                            <button id="personalBgBlurHeavyButton" type="button" class="btn-secondary" aria-pressed="false">Tåkete</button>
+                        </div>
+                        <div class="helper-text" style="margin-top:0.45rem;">Blur: Klar = 1px, Uskarp = 12px, Tåkete = 24px</div>
+                        <div class="helper-text" style="margin-top:0.2rem;">Mer blur = tyngere for maskinen</div>
+                        <div class="helper-text" style="margin-top:0.2rem;">0% = solid bakgrunn, 100% = mest gjennomsiktig (glass)</div>
                     </div>
                     <div id="personalBgColorControls" class="personal-bg-color-controls">
                         <div class="personal-bg-slider-row">
@@ -2937,16 +3161,6 @@ ${comment}
                         <div id="personalTextPreviewChip" class="personal-bg-preview-chip">Tekstfarge forhåndsvisning</div>
                     </div>
                     <div id="personalFruitigerArchivePanel" class="personal-bg-archive-panel" aria-hidden="true">
-                        <div class="personal-bg-archive-toolbar">
-                            <div class="personal-bg-slider-row">
-                                <label for="personalFruitigerArchiveIntervalRange">Intervall</label>
-                                <input id="personalFruitigerArchiveIntervalRange" type="range" min="0" max="600" step="5" value="45" />
-                                <span id="personalFruitigerArchiveIntervalValue">45s</span>
-                            </div>
-                            <div class="personal-bg-archive-toolbar-buttons">
-                                <button id="personalFruitigerArchiveModeToggle" type="button" class="btn-secondary" aria-pressed="false">Samme kategori</button>
-                            </div>
-                        </div>
                         <div class="personal-bg-archive-status" id="personalFruitigerArchiveStatus">Trykk på knappen for å hente kategorier fra Frutiger Aero Archive.</div>
                         <div id="personalFruitigerArchiveList" class="personal-bg-archive-list"></div>
                     </div>
@@ -2975,20 +3189,22 @@ ${comment}
         
         <div class="settings-section">
             <h3 id="settingsProfilesTitle">Profiler</h3>
-            <p class="helper-text">Bytt mellom ulike profiler for å holde data separert (f.eks. Jobb, Privat, Prosjekt X).</p>
+            <p class="helper-text">Brukerprofiler kan lages for å holde data separert</p>
+            
+            <div class="modal-row" style="margin-top:0.5rem; border-top: 1px solid var(--border-soft); padding-top: 1rem;">
+                <label for="newProfileName" style="min-width: 80px;">Ny profil:</label>
+                <input type="text" id="newProfileName" class="modal-input" placeholder="Skriv inn et ønsket profilnavn her" style="flex:1;">
+                <button id="createProfileButton" class="btn-secondary">Opprett</button>
+            </div>
+            
+            
+            
             
             <div class="modal-row">
                 <label for="profileSelect" style="min-width: 80px;">Aktiv profil:</label>
                 <select id="profileSelect" class="modal-select" style="flex:1; margin-right: 0.5rem;"></select>
                 <button id="deleteProfileButton" type="button" class="btn-secondary" style="color: var(--danger);">Slett valgt</button>
             </div>
-            
-            <div class="modal-row" style="margin-top:0.5rem; border-top: 1px solid var(--border-soft); padding-top: 1rem;">
-                <label for="newProfileName" style="min-width: 80px;">Ny profil:</label>
-                <input type="text" id="newProfileName" class="modal-input" placeholder="Navn på ny profil..." style="flex:1;">
-                <button id="createProfileButton" class="btn-secondary">Opprett</button>
-            </div>
-            
             <p class="helper-text" id="profileHelperText"></p>
         </div>
 
@@ -3069,7 +3285,10 @@ ${comment}
                         <span class="helper-text control-panel-help">For å deaktivere denne modusen må du slette profilen</span>
                     </div>
                 </div>
-                <div class="control-panel-under-dev" style="border-top: 1px solid var(--border-soft); margin: 0.35rem 0 0; padding: 0.45rem 0 0;">
+                
+
+                </div>
+<div class="control-panel-under-dev" style="border-top: 1px solid var(--border-soft); margin: 0.35rem 0 0; padding: 0.45rem 0 0;">
                     <h3 id="underDevelopmentSectionTitle">Utviklerverktøy og betafunksjoner</h3>
                     <div class="helptext-container" data-helptext-container="true" style="margin: 0 0 0.45rem 0.15rem;">
                         <span class="helper-text">Funksjonene du finner her er under utvikling og kan plutselig bli endret eller slettet</span>
@@ -3083,13 +3302,13 @@ ${comment}
                     <div class="control-panel-row under-development">
                         <div class="control-panel-left">
                             <label class="switch">
-                                <input type="checkbox" id="cpToggle1">
+                                <input type="checkbox" id="cpOneNoteReminderToggle">
                                 <span class="slider"></span>
                             </label>
-                            <label for="cpToggle1" style="cursor:pointer; font-size: 0.9rem;">Ingen hjelpetekst</label>
+                            <label for="cpOneNoteReminderToggle" style="cursor:pointer; font-size: 0.9rem;">Onenote påminnelse</label>
                         </div>
                         <div class="helptext-container" data-helptext-container="true">
-                            <span class="helper-text control-panel-help">Skjuler all hjelpetekst og tooltips</span>
+                            <span class="helper-text control-panel-help">Krever «Kopier for Onenote» før «Tøm og arkiver» kan brukes</span>
                         </div>
                     </div>
                     <div class="control-panel-row under-development" id="personalCustomizationRow">
@@ -3101,7 +3320,7 @@ ${comment}
                             <label for="cpPersonalCustomizationToggle" style="cursor:pointer; font-size: 0.9rem;">Personlig tilpasning</label>
                         </div>
                         <div class="helptext-container" data-helptext-container="true" style="margin-left:auto;">
-                            <span class="helper-text control-panel-help">Her kan du tilpasse det visuelle slik du selv ønsker, NB! Tekst og menyer kan bli vanskelig å lese. hold nede CTRL tasten hvis du ikke klarer se eller lese tekst</span>
+                            <span class="helper-text control-panel-help">Her kan du tilpasse det visuelle slik du selv ønsker, NB! Tekst og menyer kan bli vanskelig å lese. <span class="ctrl-hint-orange">Hold nede CTRL tasten hvis du ikke klarer se ellr lese tekst</span></span>
                         </div>
                         <div id="personalCustomizeActionWrap" style="display:none; margin-left:0.5rem;">
                             <div style="display:flex; gap:0.4rem; flex-wrap:wrap; justify-content:flex-end;">
@@ -3116,16 +3335,15 @@ ${comment}
                                 <input type="checkbox" id="cpToggle3">
                                 <span class="slider"></span>
                             </label>
-                            <label id="cpToggle3Label" class="adhd-mode-toggle-label" for="cpToggle3" style="cursor:pointer; font-size: 0.9rem;">ADHD modus</label>
+                            <label id="cpToggle3Label" class="adhd-mode-toggle-label" for="cpToggle3" style="cursor:pointer; font-size: 0.9rem;">Sekvensmodus</label>
                         </div>
                         <div class="helptext-container" data-helptext-container="true">
-                            <span class="helper-text control-panel-help">Aktiverer ADHD-modus som funksjon. Når denne er aktiv, kan du trykke og holde på kakediagrammet for å starte eller avslutte ADHD-modus og oppgavelisten. For å kunne aktivere denne modusen må du først starte timeføring på et prosjekt.</span>
+                            <span class="helper-text control-panel-help">Aktiverer Sekvensmodus som funksjon. Når denne er aktiv, kan du trykke og holde på kakediagrammet for å starte eller avslutte Sekvensmodus og oppgavelisten. For å kunne aktivere denne modusen må du først starte timeføring på et prosjekt.</span>
                         </div>
                     </div>
                     </div>
                 </div>
 
-                </div>
 </div>
         </div>
 
@@ -3241,6 +3459,18 @@ ${comment}
     </div>
 </div>
 
+<div id="oneNoteReminderOverlay" class="overlay">
+    <div class="modal">
+        <button class="modal-close" id="oneNoteReminderCloseButton">&times;</button>
+        <h2>Onenote påminnelse</h2>
+        <p>Husk å oppdatere loggen for timeføring!</p>
+        <p class="helper-text">Trykk «Kopier for Onenote» før du bruker «Tøm og arkiver».</p>
+        <div class="modal-footer">
+            <button id="oneNoteReminderOkButton" class="modal-button-primary" type="button">OK</button>
+        </div>
+    </div>
+</div>
+
 <div id="commentOverlay" class="overlay">
     <div class="modal">
         <button class="modal-close" id="commentCloseButton">&times;</button>
@@ -3344,7 +3574,7 @@ ${comment}
 <div id="adhdCommentOverlay" class="overlay">
     <div class="modal" style="max-width:700px;">
         <button class="modal-close" id="adhdCommentCloseButton">&times;</button>
-        <h2>ADHD modus – kommentar</h2>
+        <h2>Sekvensmodus – kommentar</h2>
         <p id="adhdCommentTaskLabel" style="font-weight:600; margin-bottom:0.5rem;"></p>
         <textarea id="adhdCommentTextarea" class="modal-textarea" placeholder="Erfaringer, kommentarer, observasjoner ..."></textarea>
         <div class="modal-footer" style="margin-top:0.75rem;">
@@ -3357,7 +3587,7 @@ ${comment}
 <div id="adhdBreakdownOverlay" class="overlay">
     <div class="modal" style="max-width:820px;">
         <button class="modal-close" id="adhdBreakdownCloseButton">&times;</button>
-        <h2>ADHD modus – Breakdown</h2>
+        <h2>Sekvensmodus – Breakdown</h2>
         <div id="adhdBreakdownSummary" class="inline-note" style="margin-bottom:0.65rem;"></div>
         <div id="adhdBreakdownContent" style="max-height:55vh; overflow:auto; border:1px solid var(--border); border-radius:0.6rem; padding:0.5rem 0.65rem;"></div>
         <div class="modal-footer" style="margin-top:0.75rem;">
@@ -3375,6 +3605,7 @@ ${comment}
     const AUTO_SAVE_KEY = "taskTimeTracker_autoSave_v1";
     const NO_HELP_TEXT_KEY = "taskTimeTracker_noHelpText_v1";
     const MIDNIGHT_DOUBLE_COUNT_GUARD_KEY = "taskTimeTracker_midnightDoubleCountGuard_v1";
+    const ONENOTE_REMINDER_KEY = "taskTimeTracker_onenoteReminder_v1";
     const CONTROL_PANEL_OPEN_KEY = "taskTimeTracker_controlPanelOpen_v1";
     const UNDER_DEVELOPMENT_EXPANDED_KEY = "taskTimeTracker_underDevelopmentExpanded_v1";
     const SUGGESTIONS_HEIGHT_KEY_PREFIX = "taskTimeTracker_suggestions_height_";
@@ -3386,6 +3617,8 @@ ${comment}
     let profiles = ["Standard"];
     let currentProfile = "Standard";
     let autoSaveOnEndDay = false;
+    let oneNoteReminderEnabled = false;
+    let oneNoteReminderCurrentTasksCopySignature = "";
 
     let data = {
         tasks: [],
@@ -3404,6 +3637,12 @@ ${comment}
     let endDayPressedAtMs = null;
     let midnightDoubleCountGuardEnabled = false;
     let overduePopupMode = "overdue10h";
+
+let midnightGuardTempResumeSuspended = false;
+let midnightGuardTempResumePrevEnabled = null;
+let profileTempGuardBlinkTimer = null;
+let profileTempGuardIndicatorActive = false;
+
 
 
     let adjustPopupMode = "normal";
@@ -3574,6 +3813,9 @@ const startButtonEl = document.getElementById("startButton");
     const clearTodayOverlayEl = document.getElementById("clearTodayOverlay");
     const clearTodayCancelButtonEl = document.getElementById("clearTodayCancelButton");
     const clearTodayConfirmButtonEl = document.getElementById("clearTodayConfirmButton");
+    const oneNoteReminderOverlayEl = document.getElementById("oneNoteReminderOverlay");
+    const oneNoteReminderCloseButtonEl = document.getElementById("oneNoteReminderCloseButton");
+    const oneNoteReminderOkButtonEl = document.getElementById("oneNoteReminderOkButton");
 
     const commentOverlayEl = document.getElementById("commentOverlay");
     const commentCloseButtonEl = document.getElementById("commentCloseButton");
@@ -3688,9 +3930,12 @@ const startButtonEl = document.getElementById("startButton");
     const personalCustomizeResetButtonEl = document.getElementById("personalCustomizeResetButton");
     const personalCustomizeOkButtonEl = document.getElementById("personalCustomizeOkButton");
     const personalBgCustomizeButtonEl = document.getElementById("personalBgCustomizeButton");
+    const personalRenameControlsToggleButtonEl = document.getElementById("personalRenameControlsToggleButton");
+    const personalRenameControlsWrapEl = document.getElementById("personalRenameControlsWrap");
     const personalBgControlsWrapEl = document.getElementById("personalBgControlsWrap");
     const personalBgColorButtonEl = document.getElementById("personalBgColorButton");
     const personalBgMediaButtonEl = document.getElementById("personalBgMediaButton");
+    const personalBgMediaHistoryButtonEl = document.getElementById("personalBgMediaHistoryButton");
     const personalBgGlassButtonEl = document.getElementById("personalBgGlassButton");
     const personalBgTextColorButtonEl = document.getElementById("personalBgTextColorButton");
     const personalFruitigerArchiveButtonEl = document.getElementById("personalFruitigerArchiveButton");
@@ -3706,6 +3951,10 @@ const startButtonEl = document.getElementById("startButton");
     const personalBgLightValueEl = document.getElementById("personalBgLightValue");
     const personalBgGlassOpacityRangeEl = document.getElementById("personalBgGlassOpacityRange");
     const personalBgGlassOpacityValueEl = document.getElementById("personalBgGlassOpacityValue");
+    const personalBgBlurOffButtonEl = document.getElementById("personalBgBlurOffButton");
+    const personalBgBlurFastButtonEl = document.getElementById("personalBgBlurFastButton");
+    const personalBgBlurPrettyButtonEl = document.getElementById("personalBgBlurPrettyButton");
+    const personalBgBlurHeavyButtonEl = document.getElementById("personalBgBlurHeavyButton");
     const personalBgPreviewChipEl = document.getElementById("personalBgPreviewChip");
     const personalTextHueRangeEl = document.getElementById("personalTextHueRange");
     const personalTextSatRangeEl = document.getElementById("personalTextSatRange");
@@ -3715,6 +3964,7 @@ const startButtonEl = document.getElementById("startButton");
     const personalTextLightValueEl = document.getElementById("personalTextLightValue");
     const personalTextPreviewChipEl = document.getElementById("personalTextPreviewChip");
     const personalBgMediaStatusEl = document.getElementById("personalBgMediaStatus");
+    const personalBgAutoSwapWrapEl = document.getElementById("personalBgAutoSwapWrap");
     const personalFruitigerArchivePanelEl = document.getElementById("personalFruitigerArchivePanel");
     const personalFruitigerArchiveStatusEl = document.getElementById("personalFruitigerArchiveStatus");
     const personalFruitigerArchiveListEl = document.getElementById("personalFruitigerArchiveList");
@@ -3744,6 +3994,16 @@ const startButtonEl = document.getElementById("startButton");
     const settingsDoneButtonEl = document.getElementById("settingsDoneButton");
     const controlPanelToggleEl = document.getElementById("controlPanelToggle");
     const controlPanelButtonsEl = document.getElementById("controlPanelButtons");
+
+    function moveUnderDevelopmentOutOfControlPanelButtons(){
+        const cpButtons = controlPanelButtonsEl;
+        if (!cpButtons || !cpButtons.parentNode) return;
+        const underDev = cpButtons.querySelector('.control-panel-under-dev');
+        if (!underDev) return;
+        // Flytt seksjonen ut slik at den ikke skjules når "Tilleggsfunksjoner" er lukket
+        cpButtons.parentNode.insertBefore(underDev, cpButtons.nextSibling);
+    }
+
     const controlPanelToggleLabelEl = document.getElementById("controlPanelToggleLabel") || document.querySelector('label[for="controlPanelToggle"]');
 
     const profileSelectEl = document.getElementById("profileSelect");
@@ -3757,6 +4017,7 @@ const startButtonEl = document.getElementById("startButton");
     const newProfileNameEl = document.getElementById("newProfileName");
     const cpGenerateTestDataEl = document.getElementById("cpGenerateTestData");
     const cpNoHelpTextEl = document.getElementById("cpToggle1");
+    const cpOneNoteReminderToggleEl = document.getElementById("cpOneNoteReminderToggle");
     const PERSONAL_CUSTOMIZATION_TOGGLE_KEY = "taskTimeTracker_personalCustomizationToggle";
     const PERSONAL_CUSTOMIZATION_VALUES_KEY = "taskTimeTracker_personalCustomizationValues_v1";
     const cpMidnightGuardEl = document.getElementById("cpToggle2");
@@ -3816,8 +4077,10 @@ const startButtonEl = document.getElementById("startButton");
     let personalCustomizeBackgroundDraft = null;
     let personalCustomizeBackgroundSavedSnapshot = null;
     let personalBgControlsOpen = false;
+    let personalRenameControlsOpen = false;
     let personalBgColorControlsOpen = false;
     let personalBgGlassControlsOpen = false;
+    let personalBgGlassControlsOpenInitialized = false;
     let personalBgTextColorControlsOpen = false;
     let personalBgMediaHistoryOpen = false;
     let personalBgMediaHoldTimer = null;
@@ -3831,6 +4094,9 @@ const startButtonEl = document.getElementById("startButton");
     let personalFruitigerArchiveAutoBusy = false;
     let personalFruitigerArchiveAutoIntervalSec = 45;
     let personalFruitigerArchiveRandomCategoryMode = false;
+    let personalFruitigerArchiveHistoryMode = false;
+    let personalBgHistoryAutoIndex = 0;
+    let personalBgHistoryAutoLastDataUrl = '';
     let personalFruitigerArchiveSelectedCategoryHref = "";
     let personalFruitigerArchiveLastImageUrl = "";
 
@@ -3872,6 +4138,8 @@ const startButtonEl = document.getElementById("startButton");
         });
     }
 
+    const dayTimelineFromLabelEl = document.getElementById("dayTimelineFromLabel");
+    const dayTimelineToLabelEl = document.getElementById("dayTimelineToLabel");
     const dayTimelineFromEl = document.getElementById("dayTimelineFrom");
     const dayTimelineToEl = document.getElementById("dayTimelineTo");
     const dayTimelineCurtainHintEl = document.getElementById("dayTimelineCurtainHint");
@@ -3887,6 +4155,7 @@ const startButtonEl = document.getElementById("startButton");
 
     let dayTimelineEditing = null; 
     let dayTimelineBlockChange = false;
+    let dayTimelineLunchAwaitingFromSelection = false;
     let isTaskListExpanded = false;
     let isRoundingEnabled = false;
     let selectedArchiveForCopy = null;
@@ -4044,12 +4313,13 @@ function enforceStandardProfileDefaultPanelSettings(){
     // Ønskede standardvalg når Standard-profilen er aktiv (eller etter sletting av profil):
     // - Hindre dobbeltelling: PÅ
     // - Lagre profil automatisk: PÅ
-    // - ADHD modus: AV
+    // - Sekvensmodus: AV
     // - Personlig tilpasning: AV
     if ((currentProfile || 'Standard') !== 'Standard') return;
 
     try { localStorage.setItem(getProfileScopedSettingKeyForProfile(AUTO_SAVE_KEY, 'Standard'), 'true'); } catch(e){}
     try { localStorage.setItem(getProfileScopedSettingKeyForProfile(MIDNIGHT_DOUBLE_COUNT_GUARD_KEY, 'Standard'), 'true'); } catch(e){}
+    try { localStorage.setItem(getProfileScopedSettingKeyForProfile(ONENOTE_REMINDER_KEY, 'Standard'), 'false'); } catch(e){}
     try { localStorage.setItem(getProfileScopedSettingKeyForProfile(PERSONAL_CUSTOMIZATION_TOGGLE_KEY, 'Standard'), 'false'); } catch(e){}
 
     // Nullstill ADHD arm/aktiv per prosjekt for Standard-profilen (beholder evt. oppgavelister, men slår av modusen).
@@ -4071,6 +4341,7 @@ function collectProfileSettingsForExport(profileName = currentProfile) {
         autoSave: getProfileScopedSettingForProfile(AUTO_SAVE_KEY, pid),
         noHelpText: getProfileScopedSettingForProfile(NO_HELP_TEXT_KEY, pid),
         midnightDoubleCountGuard: getProfileScopedSettingForProfile(MIDNIGHT_DOUBLE_COUNT_GUARD_KEY, pid),
+        oneNoteReminder: getProfileScopedSettingForProfile(ONENOTE_REMINDER_KEY, pid),
         controlPanelOpen: getProfileScopedSettingForProfile(CONTROL_PANEL_OPEN_KEY, pid, { fallbackToGlobal: false }),
         underDevelopmentExpanded: getProfileScopedSettingForProfile(UNDER_DEVELOPMENT_EXPANDED_KEY, pid, { fallbackToGlobal: false }),
         personalCustomizationToggle: getProfileScopedSettingForProfile(PERSONAL_CUSTOMIZATION_TOGGLE_KEY, pid),
@@ -4093,6 +4364,7 @@ function applyImportedProfileSettings(profileName, settings) {
         ['autoSave', AUTO_SAVE_KEY],
         ['noHelpText', NO_HELP_TEXT_KEY],
         ['midnightDoubleCountGuard', MIDNIGHT_DOUBLE_COUNT_GUARD_KEY],
+        ['oneNoteReminder', ONENOTE_REMINDER_KEY],
         ['controlPanelOpen', CONTROL_PANEL_OPEN_KEY],
         ['underDevelopmentExpanded', UNDER_DEVELOPMENT_EXPANDED_KEY],
         ['personalCustomizationToggle', PERSONAL_CUSTOMIZATION_TOGGLE_KEY]
@@ -4180,12 +4452,14 @@ function initSuggestionsResizePersistence() {
         profileButtonEl.style.borderColor = "";
 
         if (currentProfile === "Standard") {
-            profileButtonEl.textContent = "Brukerprofil";
+            profileButtonEl.textContent = "Profil og innstillinger";
             profileButtonEl.classList.remove("btn-profile-active");
         } else {
             profileButtonEl.textContent = currentProfile;
             profileButtonEl.classList.add("btn-profile-active");
         }
+
+        applyMidnightGuardTemporaryVisualState();
     }
 
     function loadFromStorage() {
@@ -4281,6 +4555,80 @@ function initSuggestionsResizePersistence() {
         midnightDoubleCountGuardEnabled = (val === null) ? true : (val === "true");
         if (cpMidnightGuardEl) cpMidnightGuardEl.checked = midnightDoubleCountGuardEnabled;
     }
+
+    function loadOneNoteReminderSetting() {
+        const val = getProfileScopedSetting(ONENOTE_REMINDER_KEY);
+        oneNoteReminderEnabled = (val === null) ? false : (val === "true");
+        if (cpOneNoteReminderToggleEl) cpOneNoteReminderToggleEl.checked = oneNoteReminderEnabled;
+    }
+
+
+function applyMidnightGuardTemporaryVisualState() {
+    if (cpMidnightGuardEl) {
+        cpMidnightGuardEl.classList.toggle("temp-restore-off", !!midnightGuardTempResumeSuspended);
+        cpMidnightGuardEl.disabled = !!midnightGuardTempResumeSuspended;
+        cpMidnightGuardEl.setAttribute("aria-disabled", String(!!midnightGuardTempResumeSuspended));
+    }
+    const guardRowEl = cpMidnightGuardEl ? cpMidnightGuardEl.closest(".control-panel-row") : null;
+    if (guardRowEl) guardRowEl.classList.toggle("guard-temp-disabled", !!midnightGuardTempResumeSuspended);
+
+    const guardHelpEl = guardRowEl ? guardRowEl.querySelector(".control-panel-help") : null;
+    if (guardHelpEl) {
+        if (!guardHelpEl.dataset.defaultText) guardHelpEl.dataset.defaultText = guardHelpEl.textContent || "";
+        guardHelpEl.textContent = midnightGuardTempResumeSuspended
+            ? "Midlertidig deaktivert"
+            : (guardHelpEl.dataset.defaultText || guardHelpEl.textContent || "");
+    }
+
+    if (profileButtonEl) {
+        profileButtonEl.classList.toggle("profile-temp-guard-indicator", !!profileTempGuardIndicatorActive);
+        if (!profileTempGuardIndicatorActive) profileButtonEl.classList.remove("profile-temp-guard-blink");
+    }
+}
+
+function triggerMidnightGuardRestoreVisualCue() {
+    profileTempGuardIndicatorActive = true;
+    applyMidnightGuardTemporaryVisualState();
+    if (!profileButtonEl) return;
+    profileButtonEl.classList.remove("profile-temp-guard-blink");
+    void profileButtonEl.offsetWidth;
+    profileButtonEl.classList.add("profile-temp-guard-blink");
+    if (profileTempGuardBlinkTimer) clearTimeout(profileTempGuardBlinkTimer);
+    profileTempGuardBlinkTimer = setTimeout(() => {
+        if (!profileButtonEl) return;
+        profileButtonEl.classList.remove("profile-temp-guard-blink");
+        profileTempGuardIndicatorActive = false;
+        applyMidnightGuardTemporaryVisualState();
+    }, 3000);
+}
+
+function activateTemporaryMidnightGuardSuspendForRestore() {
+    if (midnightGuardTempResumeSuspended) {
+        midnightDoubleCountGuardEnabled = false;
+        if (cpMidnightGuardEl) cpMidnightGuardEl.checked = false;
+        applyMidnightGuardTemporaryVisualState();
+        return;
+    }
+    midnightGuardTempResumePrevEnabled = !!midnightDoubleCountGuardEnabled;
+    midnightGuardTempResumeSuspended = true;
+    midnightDoubleCountGuardEnabled = false;
+    if (cpMidnightGuardEl) cpMidnightGuardEl.checked = false;
+    applyMidnightGuardTemporaryVisualState();
+    triggerMidnightGuardRestoreVisualCue();
+}
+
+function finalizeTemporaryMidnightGuardSuspend() {
+    if (!midnightGuardTempResumeSuspended) return;
+    const restoreEnabled = (midnightGuardTempResumePrevEnabled === null)
+        ? true
+        : !!midnightGuardTempResumePrevEnabled;
+    midnightGuardTempResumeSuspended = false;
+    midnightGuardTempResumePrevEnabled = null;
+    profileTempGuardIndicatorActive = false;
+    midnightDoubleCountGuardEnabled = restoreEnabled;
+    if (cpMidnightGuardEl) cpMidnightGuardEl.checked = restoreEnabled;
+    applyMidnightGuardTemporaryVisualState();
+}
 
     function getStartOfTodayMs() {
         const d = new Date();
@@ -4516,11 +4864,13 @@ function ensureHelpTextContainers(root = document.body){
     }
 
     function loadNoHelpTextSetting(){
+        // "Ingen hjelpetekst" er fjernet: sørg for at hjelpetekst alltid er aktiv.
         ensureHelpTextContainers(document.body);
-        const val = getProfileScopedSetting(NO_HELP_TEXT_KEY);
-        const on = (val === 'true');
-        if (cpNoHelpTextEl) cpNoHelpTextEl.checked = on;
-        applyNoHelpTextMode(on);
+        try { setProfileScopedSetting(NO_HELP_TEXT_KEY, false); } catch(e){}
+        if (cpNoHelpTextEl) {
+            try { cpNoHelpTextEl.checked = false; } catch(e){}
+        }
+        applyNoHelpTextMode(false);
     }
 function syncUnderDevelopmentVisibilityUi(){
         const open = !!underDevelopmentExpanded;
@@ -4555,6 +4905,7 @@ function setPersonalCustomizationUiState(isOn){
             toggleFrutigerMusicPlayerButtonEl.classList.toggle('active', !!frutigerMusicPlayerVisible);
             toggleFrutigerMusicPlayerButtonEl.setAttribute('aria-pressed', String(!!frutigerMusicPlayerVisible));
         }
+        syncPersonalOverlayBackdropStrongBlur();
     }
 
     function loadPersonalCustomizationToggle(){
@@ -4611,6 +4962,15 @@ function setPersonalCustomizationUiState(isOn){
 
     function isPersonalCustomizationEnabled(){
         return !!(cpPersonalCustomizationToggleEl && cpPersonalCustomizationToggleEl.checked);
+    }
+
+
+    function syncPersonalOverlayBackdropStrongBlur(){
+        // Aktivér kraftig blur bak innstillings-/tilpasningsvinduer kun når:
+        // - Personlig tilpasning er aktiv (toggle på), og
+        // - glassmodus er aktivert (glass-mode-active på body)
+        const enable = isPersonalCustomizationEnabled() && document.body.classList.contains('glass-mode-active');
+        document.body.classList.toggle('personal-strong-overlay-blur', !!enable);
     }
 
     function refreshThemeDependentVisuals(){
@@ -4729,7 +5089,7 @@ function setPersonalCustomizationUiState(isOn){
         writePersonalBgMediaHistoryToValues(personalCustomizationValues, preservedHistory);
         savePersonalCustomizationValues();
         personalCustomizeBackgroundDraft = getDefaultPersonalBackgroundState();
-        personalCustomizeBackgroundDraft.mediaHistory = (preservedHistory || []).slice(0, 8);
+        personalCustomizeBackgroundDraft.mediaHistory = limitPersonalBgMediaHistoryList(preservedHistory || []);
         personalCustomizeBackgroundSavedSnapshot = clonePersonalBackgroundState(personalCustomizeBackgroundDraft);
         renderPersonalCustomizeModalRows();
         renderPersonalBackgroundUiFromDraft();
@@ -4737,6 +5097,16 @@ function setPersonalCustomizationUiState(isOn){
         applyThemeMode('light');
         syncThemeButtonMediaPulse(false);
         applyPersonalCustomizationHeadings();
+    }
+
+    function normalizePersonalGlassBlurPx(v){
+        const n = Number(v);
+        if (!Number.isFinite(n)) return 1;
+        if (n <= 1) return 1;
+        if (n >= 24) return 24;
+        if (n <= 6) return 1;
+        if (n <= 18) return 12;
+        return 24;
     }
 
     function getDefaultPersonalBackgroundState(){
@@ -4748,7 +5118,8 @@ function setPersonalCustomizationUiState(isOn){
             mediaDataUrl: '',
             mediaKind: '',
             glassEnabled: false,
-            glassOpacity: 28,
+            glassOpacity: 30,
+            glassBlurPx: 1,
             textOverrideEnabled: false,
             textHue: 220,
             textSat: 12,
@@ -4767,12 +5138,13 @@ function setPersonalCustomizationUiState(isOn){
             mediaDataUrl: typeof src.mediaDataUrl === 'string' ? src.mediaDataUrl : '',
             mediaKind: (src.mediaKind === 'image' || src.mediaKind === 'video') ? src.mediaKind : '',
             glassEnabled: !!src.glassEnabled,
-            glassOpacity: Math.max(0, Math.min(100, Number.isFinite(Number(src.glassOpacity)) ? Number(src.glassOpacity) : 28)),
+            glassOpacity: Math.max(0, Math.min(100, Number.isFinite(Number(src.glassOpacity)) ? Number(src.glassOpacity) : 30)),
+            glassBlurPx: normalizePersonalGlassBlurPx(src.glassBlurPx),
             textOverrideEnabled: !!src.textOverrideEnabled,
             textHue: Math.max(0, Math.min(360, Number.isFinite(Number(src.textHue)) ? Number(src.textHue) : 220)),
             textSat: Math.max(0, Math.min(100, Number.isFinite(Number(src.textSat)) ? Number(src.textSat) : 12)),
             textLight: Math.max(0, Math.min(100, Number.isFinite(Number(src.textLight)) ? Number(src.textLight) : 18)),
-            mediaHistory: Array.isArray(src.mediaHistory) ? src.mediaHistory.map(item => normalizePersonalBgMediaHistoryEntry(item)).filter(Boolean).slice(0, 8) : []
+            mediaHistory: limitPersonalBgMediaHistoryList(src.mediaHistory)
         };
     }
 
@@ -4786,6 +5158,28 @@ function setPersonalCustomizationUiState(isOn){
         return { kind, dataUrl, name, addedAt };
     }
 
+    function limitPersonalBgMediaHistoryList(list){
+        const arr = (Array.isArray(list) ? list : []).map(item => normalizePersonalBgMediaHistoryEntry(item)).filter(Boolean);
+        let img = 0;
+        let vid = 0;
+        const out = [];
+        for (const item of arr) {
+            if (item.kind === 'image') {
+                if (img >= 10) continue;
+                img += 1;
+            } else if (item.kind === 'video') {
+                if (vid >= 10) continue;
+                vid += 1;
+            } else {
+                continue;
+            }
+            out.push(item);
+            if (img >= 10 && vid >= 10) break;
+        }
+        return out;
+    }
+
+
     function getPersonalBgMediaHistoryFromValues(valuesObj){
         if (!valuesObj || typeof valuesObj !== 'object') return [];
         let arr = [];
@@ -4794,12 +5188,12 @@ function setPersonalCustomizationUiState(isOn){
             try { arr = JSON.parse(valuesObj.pageBgMediaHistoryJson); } catch(e){ arr = []; }
         }
         if (!Array.isArray(arr)) arr = [];
-        return arr.map(item => normalizePersonalBgMediaHistoryEntry(item)).filter(Boolean).slice(0, 8);
+        return limitPersonalBgMediaHistoryList(arr);
     }
 
     function writePersonalBgMediaHistoryToValues(valuesObj, historyArr){
         if (!valuesObj || typeof valuesObj !== 'object') return valuesObj;
-        const normalized = (Array.isArray(historyArr) ? historyArr : []).map(item => normalizePersonalBgMediaHistoryEntry(item)).filter(Boolean).slice(0, 8);
+        const normalized = limitPersonalBgMediaHistoryList(historyArr);
         valuesObj.pageBgMediaHistoryJson = JSON.stringify(normalized);
         try { valuesObj.pageBgMediaHistory = normalized; } catch(e){}
         return valuesObj;
@@ -4817,6 +5211,7 @@ function setPersonalCustomizationUiState(isOn){
             mediaKind: values.pageBgMediaKind || '',
             glassEnabled: values.pageBgGlassEnabled === true || values.pageBgGlassEnabled === 'true',
             glassOpacity: values.pageBgGlassOpacity,
+            glassBlurPx: values.pageBgGlassBlurPx,
             textOverrideEnabled: values.pageTextColorOverrideEnabled === true || values.pageTextColorOverrideEnabled === 'true',
             textHue: values.pageTextColorHue,
             textSat: values.pageTextColorSat,
@@ -4843,6 +5238,7 @@ function setPersonalCustomizationUiState(isOn){
         valuesObj.pageBgMediaDataUrl = (s.type === 'image' || s.type === 'video') ? (s.mediaDataUrl || '') : '';
         valuesObj.pageBgGlassEnabled = s.glassEnabled ? 'true' : 'false';
         valuesObj.pageBgGlassOpacity = String(Math.round(s.glassOpacity));
+        valuesObj.pageBgGlassBlurPx = String(normalizePersonalGlassBlurPx(s.glassBlurPx));
         valuesObj.pageTextColorOverrideEnabled = s.textOverrideEnabled ? 'true' : 'false';
         valuesObj.pageTextColorHue = String(Math.round(s.textHue));
         valuesObj.pageTextColorSat = String(Math.round(s.textSat));
@@ -4888,6 +5284,18 @@ function setPersonalCustomizationUiState(isOn){
         document.body.classList.add('personal-text-override-active');
     }
 
+    function setPersonalRenameControlsOpen(isOpen){
+        personalRenameControlsOpen = !!isOpen;
+        if (personalRenameControlsWrapEl) {
+            personalRenameControlsWrapEl.classList.toggle('is-open', personalRenameControlsOpen);
+            personalRenameControlsWrapEl.setAttribute('aria-hidden', String(!personalRenameControlsOpen));
+        }
+        if (personalRenameControlsToggleButtonEl) {
+            personalRenameControlsToggleButtonEl.classList.toggle('active', personalRenameControlsOpen);
+            personalRenameControlsToggleButtonEl.setAttribute('aria-pressed', String(personalRenameControlsOpen));
+        }
+    }
+
     function setPersonalBgControlsOpen(isOpen){
         personalBgControlsOpen = !!isOpen;
         if (personalBgControlsWrapEl) {
@@ -4895,6 +5303,7 @@ function setPersonalCustomizationUiState(isOn){
             personalBgControlsWrapEl.setAttribute('aria-hidden', String(!personalBgControlsOpen));
         }
         if (personalBgCustomizeButtonEl) {
+            personalBgCustomizeButtonEl.classList.toggle('active', personalBgControlsOpen);
             personalBgCustomizeButtonEl.setAttribute('aria-pressed', String(personalBgControlsOpen));
         }
         if (!personalBgControlsOpen) setPersonalFruitigerArchiveOpen(false);
@@ -4915,6 +5324,7 @@ function setPersonalCustomizationUiState(isOn){
 
     function setPersonalBgGlassControlsOpen(isOpen){
         personalBgGlassControlsOpen = !!isOpen;
+        personalBgGlassControlsOpenInitialized = true;
         if (personalBgGlassControlsEl) {
             personalBgGlassControlsEl.classList.toggle('is-open', personalBgGlassControlsOpen);
             personalBgGlassControlsEl.setAttribute('aria-hidden', String(!personalBgGlassControlsOpen));
@@ -4929,6 +5339,7 @@ function setPersonalCustomizationUiState(isOn){
         const enabled = shouldUseCustom && !!s.glassEnabled;
         if (!enabled) {
             document.body.classList.remove('glass-mode-active');
+            syncPersonalOverlayBackdropStrongBlur();
             return;
         }
         const opacityPct = Math.max(0, Math.min(100, Number(s.glassOpacity)));
@@ -4937,7 +5348,9 @@ function setPersonalCustomizationUiState(isOn){
         const borderAlpha = Math.max(0.14, Math.min(0.85, alpha + 0.12));
         document.body.style.setProperty('--glass-ui-alpha', alpha.toFixed(3));
         document.body.style.setProperty('--glass-border-alpha', borderAlpha.toFixed(3));
+        document.body.style.setProperty('--glass-ui-blur', `${normalizePersonalGlassBlurPx(s.glassBlurPx)}px`);
         document.body.classList.add('glass-mode-active');
+        syncPersonalOverlayBackdropStrongBlur();
     }
 
     function updatePersonalBgPreviewChip(){
@@ -4960,6 +5373,9 @@ function setPersonalCustomizationUiState(isOn){
 
     function setPersonalBgMediaHistoryOpen(isOpen){
         personalBgMediaHistoryOpen = !!isOpen;
+        if (personalCustomizeOverlayEl) {
+            personalCustomizeOverlayEl.classList.toggle('history-only', personalBgMediaHistoryOpen);
+        }
         if (!personalBgMediaHistoryDropdownEl) return;
         personalBgMediaHistoryDropdownEl.classList.toggle('is-open', personalBgMediaHistoryOpen);
         personalBgMediaHistoryDropdownEl.setAttribute('aria-hidden', String(!personalBgMediaHistoryOpen));
@@ -4969,9 +5385,15 @@ function setPersonalCustomizationUiState(isOn){
         const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
         const entry = normalizePersonalBgMediaHistoryEntry({ kind, dataUrl, name: fileName || (kind === 'video' ? 'Video' : 'Bilde'), addedAt: Date.now() });
         if (!entry) return s;
-        const next = [entry].concat((s.mediaHistory || []).filter(item => !(item && item.dataUrl === entry.dataUrl && item.kind === entry.kind)));
-        s.mediaHistory = next.slice(0, 8);
+        const nextRaw = [entry].concat((s.mediaHistory || []).filter(item => !(item && item.dataUrl === entry.dataUrl && item.kind === entry.kind)));
+        s.mediaHistory = limitPersonalBgMediaHistoryList(nextRaw);
         personalCustomizeBackgroundDraft = s;
+        try {
+            if (!personalCustomizationValues || typeof personalCustomizationValues !== 'object') personalCustomizationValues = {};
+            // Lagre historikk umiddelbart slik at den ikke forsvinner hvis popupen lukkes uten OK
+            writePersonalBgMediaHistoryToValues(personalCustomizationValues, s.mediaHistory || []);
+            savePersonalCustomizationValues();
+        } catch(e){}
         return s;
     }
 
@@ -4992,21 +5414,38 @@ function setPersonalCustomizationUiState(isOn){
         if (!personalBgMediaHistoryDropdownEl) return;
         personalBgMediaHistoryDropdownEl.innerHTML = '';
         const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues));
-        const history = Array.isArray(s.mediaHistory) ? s.mediaHistory : [];
-        if (!history.length) {
+        const historyAll = Array.isArray(s.mediaHistory) ? limitPersonalBgMediaHistoryList(s.mediaHistory) : [];
+        const images = historyAll.filter(h => h && h.kind === 'image');
+        const videos = historyAll.filter(h => h && h.kind === 'video');
+
+        if (!images.length && !videos.length) {
             const empty = document.createElement('div');
             empty.className = 'personal-bg-media-history-empty';
             empty.textContent = 'Ingen lagret historikk ennå';
             personalBgMediaHistoryDropdownEl.appendChild(empty);
             return;
         }
-        history.forEach((item, idx) => {
-            const normalized = normalizePersonalBgMediaHistoryEntry(item);
-            if (!normalized) return;
+
+        const grid = document.createElement('div');
+        grid.className = 'personal-bg-media-history-grid';
+
+        const colImg = document.createElement('div');
+        const colVid = document.createElement('div');
+
+        const imgTitle = document.createElement('div');
+        imgTitle.className = 'personal-bg-media-history-col-title';
+        imgTitle.textContent = 'Bilder';
+        colImg.appendChild(imgTitle);
+
+        const vidTitle = document.createElement('div');
+        vidTitle.className = 'personal-bg-media-history-col-title';
+        vidTitle.textContent = 'Video';
+        colVid.appendChild(vidTitle);
+
+        const makeItemButton = (normalized) => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'personal-bg-media-history-item';
-            btn.dataset.index = String(idx);
+            btn.className = 'personal-bg-media-history-item thumb-only';
 
             const thumb = document.createElement('span');
             thumb.className = 'personal-bg-media-history-thumb';
@@ -5024,36 +5463,48 @@ function setPersonalCustomizationUiState(isOn){
                 thumb.appendChild(v);
             }
 
-            const meta = document.createElement('span');
-            meta.className = 'personal-bg-media-history-meta';
-            const title = document.createElement('span');
-            title.className = 'personal-bg-media-history-title';
-            title.textContent = normalized.name || (normalized.kind === 'video' ? 'Video' : 'Bilde');
-            const sub = document.createElement('span');
-            sub.className = 'personal-bg-media-history-sub';
-            sub.textContent = `${normalized.kind === 'video' ? 'Video' : 'Bilde'} • trykk for å bruke`;
-            meta.appendChild(title);
-            meta.appendChild(sub);
-
             btn.appendChild(thumb);
-            btn.appendChild(meta);
+
             btn.addEventListener('click', () => {
                 const d = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
                 d.type = normalized.kind;
                 d.mediaKind = normalized.kind;
                 d.mediaDataUrl = normalized.dataUrl;
-                d.mediaHistory = [normalized].concat((d.mediaHistory || []).filter(h => !(h && h.dataUrl === normalized.dataUrl && h.kind === normalized.kind))).slice(0, 8);
+                const nextRaw = [normalized].concat((d.mediaHistory || []).filter(h => !(h && h.dataUrl === normalized.dataUrl && h.kind === normalized.kind)));
+                d.mediaHistory = limitPersonalBgMediaHistoryList(nextRaw);
                 d.glassEnabled = true;
                 d.glassOpacity = 70;
+                d.glassBlurPx = 1;
                 personalCustomizeBackgroundDraft = d;
-                try { applyThemeMode('dark'); } catch(e){}
+                try { applyThemeMode('light'); } catch(e){}
                 setPersonalBgControlsOpen(true);
                 renderPersonalBackgroundUiFromDraft();
                 applyPersonalBackgroundState(d, { preview: true, forceOn: true });
                 setPersonalBgMediaHistoryOpen(false);
             });
-            personalBgMediaHistoryDropdownEl.appendChild(btn);
+
+            return btn;
+        };
+
+        images.forEach(item => {
+            const normalized = normalizePersonalBgMediaHistoryEntry(item);
+            if (!normalized) return;
+            colImg.appendChild(makeItemButton(normalized));
         });
+
+        videos.forEach(item => {
+            const normalized = normalizePersonalBgMediaHistoryEntry(item);
+            if (!normalized) return;
+            colVid.appendChild(makeItemButton(normalized));
+        });
+
+        const divider = document.createElement('div');
+        divider.className = 'personal-bg-media-history-divider';
+
+        grid.appendChild(colImg);
+        grid.appendChild(divider);
+        grid.appendChild(colVid);
+        personalBgMediaHistoryDropdownEl.appendChild(grid);
     }
 
     function renderPersonalTextUiFromDraftFast(){
@@ -5093,11 +5544,46 @@ function setPersonalCustomizationUiState(isOn){
             if (s.type === 'image' && s.mediaDataUrl) personalBgMediaStatusEl.textContent = 'Bilde valgt og klart for lagring';
             else if (s.type === 'video' && s.mediaDataUrl) personalBgMediaStatusEl.textContent = 'Video valgt og klart for lagring';
             else if (s.mediaDataUrl) personalBgMediaStatusEl.textContent = 'Media er valgt';
-            else personalBgMediaStatusEl.textContent = 'Ingen bilde/video valgt (trykk og hold for historikk)';
+            else personalBgMediaStatusEl.textContent = 'Ingen bilde/video valgt';
         }
         if (personalBgGlassOpacityRangeEl) personalBgGlassOpacityRangeEl.value = String(Math.round(s.glassOpacity));
         if (personalBgGlassOpacityValueEl) personalBgGlassOpacityValueEl.textContent = `${Math.round(s.glassOpacity)}%`;
-        if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.textHue));
+        const blurPx = normalizePersonalGlassBlurPx(s.glassBlurPx);
+        const glassOn = !!s.glassEnabled;
+
+        if (personalBgBlurOffButtonEl) {
+            const on = !glassOn;
+            personalBgBlurOffButtonEl.classList.toggle('active', on);
+            personalBgBlurOffButtonEl.setAttribute('aria-pressed', String(on));
+        }
+
+    if (personalBgBlurOffButtonEl) {
+        personalBgBlurOffButtonEl.addEventListener('click', () => setPersonalBgGlassOff());
+    }
+    if (personalBgBlurFastButtonEl) {
+            const on = glassOn && blurPx === 1;
+            personalBgBlurFastButtonEl.classList.toggle('active', on);
+            personalBgBlurFastButtonEl.setAttribute('aria-pressed', String(on));
+        }
+        if (personalBgBlurPrettyButtonEl) {
+            const on = glassOn && blurPx === 12;
+            personalBgBlurPrettyButtonEl.classList.toggle('active', on);
+            personalBgBlurPrettyButtonEl.setAttribute('aria-pressed', String(on));
+        }
+        if (personalBgBlurHeavyButtonEl) {
+            const on = glassOn && blurPx === 24;
+            personalBgBlurHeavyButtonEl.classList.toggle('active', on);
+            personalBgBlurHeavyButtonEl.setAttribute('aria-pressed', String(on));
+        }
+
+        if (personalBgGlassOpacityRangeEl) {
+            personalBgGlassOpacityRangeEl.disabled = !glassOn;
+        }
+        if (personalBgGlassOpacityValueEl) {
+            personalBgGlassOpacityValueEl.textContent = glassOn ? `${Math.round(s.glassOpacity)}%` : 'AV';
+        }
+
+if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.textHue));
         if (personalTextSatRangeEl) personalTextSatRangeEl.value = String(Math.round(s.textSat));
         if (personalTextLightRangeEl) personalTextLightRangeEl.value = String(Math.round(s.textLight));
         if (personalTextHueValueEl) personalTextHueValueEl.textContent = String(Math.round(s.textHue));
@@ -5127,9 +5613,22 @@ function setPersonalCustomizationUiState(isOn){
             personalBgColorButtonEl.classList.toggle('active', !!personalBgColorControlsOpen);
             personalBgColorButtonEl.setAttribute('aria-pressed', String(!!personalBgColorControlsOpen));
         }
-        setPersonalBgGlassControlsOpen(!!s.glassEnabled);
+        if (!personalBgGlassControlsOpenInitialized) {
+            personalBgGlassControlsOpen = !!s.glassEnabled;
+            personalBgGlassControlsOpenInitialized = true;
+        }
+        setPersonalBgGlassControlsOpen(!!personalBgGlassControlsOpen);
         setPersonalBgTextColorControlsOpen(!!s.textOverrideEnabled);
         setPersonalFruitigerArchiveOpen(!!personalFruitigerArchiveOpen);
+        const showAutoSwap = (s.type === 'image' && !!s.mediaDataUrl);
+        if (personalBgAutoSwapWrapEl) {
+            personalBgAutoSwapWrapEl.style.display = showAutoSwap ? '' : 'none';
+            personalBgAutoSwapWrapEl.setAttribute('aria-hidden', String(!showAutoSwap));
+        }
+        if (showAutoSwap) {
+            updatePersonalFruitigerArchiveIntervalUi();
+            setPersonalFruitigerArchiveModeToggle(personalFruitigerArchiveHistoryMode ? 'history' : (personalFruitigerArchiveRandomCategoryMode ? 'random' : 'same'));
+        }
         renderPersonalBgMediaHistoryDropdown();
         updatePersonalBgPreviewChip();
     }
@@ -5147,13 +5646,33 @@ function setPersonalCustomizationUiState(isOn){
         }
         if (personalFruitigerArchiveOpen) {
             updatePersonalFruitigerArchiveIntervalUi();
-            setPersonalFruitigerArchiveModeToggle(personalFruitigerArchiveRandomCategoryMode);
+            setPersonalFruitigerArchiveModeToggle(personalFruitigerArchiveHistoryMode ? 'history' : (personalFruitigerArchiveRandomCategoryMode ? 'random' : 'same'));
             if (personalFruitigerArchiveAutoRunning) schedulePersonalFruitigerArchiveAutoRotation();
         }
     }
 
-    function setPersonalFruitigerArchiveStatus(msg){
-        if (personalFruitigerArchiveStatusEl) personalFruitigerArchiveStatusEl.textContent = msg || '';
+    function setPersonalFruitigerArchiveStatus(msg, opts = {}){
+        if (!personalFruitigerArchiveStatusEl) return;
+        const loading = !!(opts && opts.loading);
+        personalFruitigerArchiveStatusEl.classList.toggle('is-loading', loading);
+        personalFruitigerArchiveStatusEl.textContent = msg || '';
+    }
+
+    function escapeHtmlText(text){
+        return String(text == null ? '' : text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function setPersonalFruitigerArchiveStatusWithCategory(categoryLabel, suffixText){
+        if (!personalFruitigerArchiveStatusEl) return;
+        personalFruitigerArchiveStatusEl.classList.remove('is-loading');
+        const safeCat = escapeHtmlText(categoryLabel || '');
+        const safeSuffix = escapeHtmlText(suffixText || '');
+        personalFruitigerArchiveStatusEl.innerHTML = `Bakgrunn satt fra «<span class="status-category">${safeCat}</span>». ${safeSuffix}`;
     }
 
     function updatePersonalFruitigerArchiveIntervalUi(){
@@ -5171,14 +5690,27 @@ function setPersonalCustomizationUiState(isOn){
         }
     }
 
-    function setPersonalFruitigerArchiveModeToggle(randomMode){
-        personalFruitigerArchiveRandomCategoryMode = !!randomMode;
+    function setPersonalFruitigerArchiveModeToggle(mode){
+        const m = String(mode || '').toLowerCase();
+        if (m === 'historikk' || m === 'history') {
+            personalFruitigerArchiveHistoryMode = true;
+            personalFruitigerArchiveRandomCategoryMode = false;
+        } else if (m === 'tilfeldig' || m === 'random') {
+            personalFruitigerArchiveHistoryMode = false;
+            personalFruitigerArchiveRandomCategoryMode = true;
+        } else {
+            personalFruitigerArchiveHistoryMode = false;
+            personalFruitigerArchiveRandomCategoryMode = false;
+        }
         if (personalFruitigerArchiveModeToggleEl) {
-            personalFruitigerArchiveModeToggleEl.textContent = personalFruitigerArchiveRandomCategoryMode ? 'Tilfeldig kategori' : 'Samme kategori';
-            personalFruitigerArchiveModeToggleEl.setAttribute('aria-pressed', String(personalFruitigerArchiveRandomCategoryMode));
-            personalFruitigerArchiveModeToggleEl.classList.toggle('active', personalFruitigerArchiveRandomCategoryMode);
+            personalFruitigerArchiveModeToggleEl.textContent = personalFruitigerArchiveHistoryMode ? 'Historikk'
+                : (personalFruitigerArchiveRandomCategoryMode ? 'Tilfeldig kategori' : 'Samme kategori');
+            const pressed = personalFruitigerArchiveHistoryMode || personalFruitigerArchiveRandomCategoryMode;
+            personalFruitigerArchiveModeToggleEl.setAttribute('aria-pressed', String(pressed));
+            personalFruitigerArchiveModeToggleEl.classList.toggle('active', pressed);
         }
     }
+
 
     function clearPersonalFruitigerArchiveAutoTimer(){
         if (personalFruitigerArchiveAutoTimer) {
@@ -5205,6 +5737,24 @@ function setPersonalCustomizationUiState(isOn){
         if (opts && opts.clearSelection) personalFruitigerArchiveSelectedCategoryHref = '';
     }
 
+    function getPersonalBgHistoryImagesForAuto(){
+        const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues));
+        const raw = Array.isArray(s.mediaHistory) ? s.mediaHistory : [];
+        return raw.map(item => normalizePersonalBgMediaHistoryEntry(item)).filter(h => h && h.kind === 'image' && h.dataUrl);
+    }
+
+    function applyPersonalBgHistoryAutoImage(dataUrl){
+        const url = String(dataUrl || '').trim();
+        if (!url) return;
+        const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues));
+        s.type = 'image';
+        s.mediaKind = 'image';
+        s.mediaDataUrl = url;
+        personalCustomizeBackgroundDraft = s;
+        renderPersonalBackgroundUiFromDraft();
+        applyPersonalBackgroundState(s, { preview: true, forceOn: true });
+    }
+
     function schedulePersonalFruitigerArchiveAutoRotation(){
         clearPersonalFruitigerArchiveAutoTimer();
         if (!personalFruitigerArchiveAutoRunning) return;
@@ -5215,12 +5765,36 @@ function setPersonalCustomizationUiState(isOn){
             if (!personalFruitigerArchiveAutoRunning || personalFruitigerArchiveAutoBusy) return;
             personalFruitigerArchiveAutoBusy = true;
             try {
+                if (personalFruitigerArchiveHistoryMode) {
+                    const list = getPersonalBgHistoryImagesForAuto();
+                    if (!list.length) return;
+                    const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues));
+                    const current = (s.type === 'image' && s.mediaDataUrl) ? String(s.mediaDataUrl) : '';
+                    let next = null;
+
+                    const currentIdx = list.findIndex(h => String(h.dataUrl) === current);
+                    if (list.length === 1) {
+                        next = list[0];
+                    } else if (currentIdx >= 0) {
+                        next = list[(currentIdx + 1) % list.length];
+                    } else {
+                        next = list[0];
+                    }
+
+                    if (next && String(next.dataUrl || '') && String(next.dataUrl) !== current) {
+                        personalBgHistoryAutoLastDataUrl = String(next.dataUrl);
+                        applyPersonalBgHistoryAutoImage(next.dataUrl);
+                    }
+                    return;
+                }
+
                 let cat = null;
                 if (personalFruitigerArchiveRandomCategoryMode) {
                     cat = getRandomFruitigerArchiveCategory();
                 } else {
                     cat = getPersonalFruitigerArchiveSelectedCategory() || getRandomFruitigerArchiveCategory();
                 }
+
                 if (cat) {
                     await applyRandomFruitigerArchiveImage(cat, { fromAuto: true });
                 }
@@ -5234,7 +5808,10 @@ function setPersonalCustomizationUiState(isOn){
 
     function startPersonalFruitigerArchiveAutoRotation(selectedCategory){
         if (selectedCategory && selectedCategory.href) personalFruitigerArchiveSelectedCategoryHref = selectedCategory.href;
-        if (!personalFruitigerArchiveSelectedCategoryHref && !personalFruitigerArchiveRandomCategoryMode) return;
+        if (personalFruitigerArchiveHistoryMode) {
+            const list = getPersonalBgHistoryImagesForAuto();
+            if (!list.length) return;
+        } else if (!personalFruitigerArchiveSelectedCategoryHref && !personalFruitigerArchiveRandomCategoryMode) return;
         const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
         if (sec <= 0) {
             stopPersonalFruitigerArchiveAutoRotation();
@@ -5275,6 +5852,26 @@ function setPersonalCustomizationUiState(isOn){
             personalFruitigerArchiveListEl.appendChild(btn);
         });
     }
+
+    async function applyDefaultFruitigerArchiveCategoryIfNeeded(){
+        // Standardvalg når panelet åpnes: "Asadal Stock Images"
+        // Overstyrer ikke dersom brukeren allerede har valgt en kategori tidligere.
+        if (!Array.isArray(personalFruitigerArchiveCategories) || !personalFruitigerArchiveCategories.length) return;
+        const existing = getPersonalFruitigerArchiveSelectedCategory();
+        if (existing) return;
+
+        const target = personalFruitigerArchiveCategories.find(c => {
+            const label = String(c && c.label || '').trim().toLowerCase();
+            return label === 'asadal stock images' || label.includes('asadal stock images');
+        });
+        if (!target || !target.href) return;
+
+        try {
+            await applyRandomFruitigerArchiveImage(target);
+            startPersonalFruitigerArchiveAutoRotation(target);
+        } catch(e){}
+    }
+
 
     async function fetchTextWithFallbacks(targetUrl){
         const cleanUrl = String(targetUrl || '').trim();
@@ -5659,7 +6256,7 @@ function setPersonalCustomizationUiState(isOn){
             return personalFruitigerArchiveCategories;
         }
         personalFruitigerArchiveLoading = true;
-        setPersonalFruitigerArchiveStatus('Henter kategorier fra Frutiger Aero Archive…');
+        setPersonalFruitigerArchiveStatus('Laster innhold...', { loading: true });
         renderPersonalFruitigerArchiveList();
         try {
             if (forceReload) personalFruitigerArchiveDocsCache.delete(baseUrl);
@@ -6397,9 +6994,10 @@ function setPersonalCustomizationUiState(isOn){
         s.mediaDataUrl = cleanUrl;
         s.glassEnabled = true;
         s.glassOpacity = 70;
+        s.glassBlurPx = 1;
         personalCustomizeBackgroundDraft = s;
         s = upsertMediaHistoryInDraft('image', cleanUrl, categoryLabel ? `FEA – ${categoryLabel}` : 'FEA bilde');
-        try { applyThemeMode('dark'); } catch(e){}
+        try { applyThemeMode('light'); } catch(e){}
         setPersonalBgControlsOpen(true);
         setPersonalBgMediaHistoryOpen(false);
         renderPersonalBackgroundUiFromDraft();
@@ -6411,7 +7009,7 @@ function setPersonalCustomizationUiState(isOn){
         const categoryUrl = String(category.href);
         const categoryLabel = category.label || 'Kategori';
         const fromAuto = !!(opts && opts.fromAuto);
-        setPersonalFruitigerArchiveStatus(fromAuto ? `Auto: henter nytt bilde (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `«${categoryLabel}»`})…` : `Henter tilfeldig bilde fra «${categoryLabel}»…`);
+        setPersonalFruitigerArchiveStatus('Laster innhold...', { loading: true });
         try {
             const targetNoHash = (() => { try { const u = new URL(categoryUrl); u.hash = ''; return u.toString(); } catch(e){ return categoryUrl; } })();
             const cached = await getCachedFruitigerDocument(targetNoHash);
@@ -6434,7 +7032,7 @@ function setPersonalCustomizationUiState(isOn){
             applyFruitigerArchiveImageUrl(pick.url, categoryLabel);
             const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
             const secLabel = sec <= 0 ? 'IR' : `${sec}s`;
-            setPersonalFruitigerArchiveStatus(`Bakgrunn satt fra «${categoryLabel}». Auto-bytte: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori'}). Trykk igjen for nytt bilde nå.`);
+            setPersonalFruitigerArchiveStatusWithCategory(categoryLabel, `Auto-bytte: ${secLabel} (${personalFruitigerArchiveHistoryMode ? 'historikk' : (personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori')}). Trykk igjen for nytt bilde nå.`);
             if (personalBgMediaStatusEl) personalBgMediaStatusEl.textContent = `FEA: «${categoryLabel}» valgt og klart for lagring`;
         } catch (err) {
             console.warn('Frutiger archive image apply failed', err);
@@ -6551,9 +7149,10 @@ function setPersonalCustomizationUiState(isOn){
             s.mediaDataUrl = dataUrl;
             s.glassEnabled = true;
             s.glassOpacity = 70;
+            s.glassBlurPx = 1;
             personalCustomizeBackgroundDraft = s;
             s = upsertMediaHistoryInDraft(s.type, dataUrl, file && file.name ? file.name : '');
-            try { applyThemeMode('dark'); } catch(e){}
+            try { applyThemeMode('light'); } catch(e){}
             setPersonalBgControlsOpen(true);
             setPersonalBgMediaHistoryOpen(false);
             setPersonalFruitigerArchiveOpen(false);
@@ -6570,6 +7169,7 @@ function setPersonalCustomizationUiState(isOn){
         personalCustomizeBackgroundSavedSnapshot = readPersonalBackgroundStateFromValues(personalCustomizationValues);
         personalCustomizeBackgroundDraft = clonePersonalBackgroundState(personalCustomizeBackgroundSavedSnapshot);
         personalBgControlsOpen = false;
+        personalRenameControlsOpen = false;
         personalBgColorControlsOpen = false;
         personalBgGlassControlsOpen = false;
         personalBgTextColorControlsOpen = false;
@@ -6577,14 +7177,16 @@ function setPersonalCustomizationUiState(isOn){
         personalFruitigerArchiveOpen = false;
         // Behold auto-bytte aktivt i bakgrunnen selv om popupen åpnes/lukkes.
         updatePersonalFruitigerArchiveIntervalUi();
-        setPersonalFruitigerArchiveModeToggle(personalFruitigerArchiveRandomCategoryMode);
+        setPersonalFruitigerArchiveModeToggle(personalFruitigerArchiveHistoryMode ? 'history' : (personalFruitigerArchiveRandomCategoryMode ? 'random' : 'same'));
         setPersonalBgControlsOpen(false);
+        setPersonalRenameControlsOpen(false);
         setPersonalBgColorControlsOpen(false);
         setPersonalBgGlassControlsOpen(false);
         setPersonalBgTextColorControlsOpen(false);
         setPersonalBgMediaHistoryOpen(false);
         setPersonalFruitigerArchiveOpen(false);
-        if (personalFruitigerArchiveStatusEl) personalFruitigerArchiveStatusEl.textContent = 'Trykk på knappen for å hente kategorier fra Frutiger Aero Archive.';
+        if (personalFruitigerArchiveStatusEl) personalFruitigerArchiveStatusEl.classList.remove('is-loading');
+        personalFruitigerArchiveStatusEl.textContent = 'Trykk på knappen for å hente kategorier fra Frutiger Aero Archive.';
         renderPersonalFruitigerArchiveList();
         renderPersonalBackgroundUiFromDraft();
     }
@@ -6876,6 +7478,27 @@ function clampInt(v, min, max) {
         }
     }
 
+    function setDayTimelineToVisibility(isVisible) {
+        const displayValue = isVisible ? "" : "none";
+        if (dayTimelineToLabelEl) dayTimelineToLabelEl.style.display = displayValue;
+        if (dayTimelineToEl) dayTimelineToEl.style.display = displayValue;
+    }
+
+    function handleDayTimelineFromChanged() {
+        if (!dayTimelineFromEl || !dayTimelineToEl) return;
+        if (dayTimelineBlockChange || !dayTimelineEditing) return;
+
+        if (dayTimelineEditing === "lunch") {
+            const fromMin = clampInt(dayTimelineFromEl.value, 0, 1440);
+            const autoTo = Math.min(1440, fromMin + 30);
+            dayTimelineToEl.value = String(autoTo);
+            dayTimelineLunchAwaitingFromSelection = false;
+            setDayTimelineToVisibility(true);
+        }
+
+        applyDayTimelineCurtainChange();
+    }
+
     function openDayTimelineCurtain(mode) {
         dayTimelineEditing = mode;
         buildTimelineTimeOptions(dayTimelineFromEl);
@@ -6886,13 +7509,19 @@ function clampInt(v, min, max) {
             dayTimelineCurtainTitleEl.textContent = "Juster lunsj";
             dayTimelineFromEl.value = String(dayTimelineSettings.lunchStartMin);
             dayTimelineToEl.value = String(dayTimelineSettings.lunchEndMin);
+            dayTimelineLunchAwaitingFromSelection = true;
+            setDayTimelineToVisibility(false);
             dayTimelineCurtainHintEl.textContent = `Nå: ${minutesToLabel(dayTimelineSettings.lunchStartMin)}–${minutesToLabel(dayTimelineSettings.lunchEndMin)}`;
         } else if (mode === "core") {
+            dayTimelineLunchAwaitingFromSelection = false;
+            setDayTimelineToVisibility(true);
             dayTimelineCurtainTitleEl.textContent = "Juster kjernetid";
             dayTimelineFromEl.value = String(dayTimelineSettings.coreStartMin);
             dayTimelineToEl.value = String(dayTimelineSettings.coreEndMin);
             dayTimelineCurtainHintEl.textContent = `Nå: ${minutesToLabel(dayTimelineSettings.coreStartMin)}–${minutesToLabel(dayTimelineSettings.coreEndMin)}`;
         } else {
+            dayTimelineLunchAwaitingFromSelection = false;
+            setDayTimelineToVisibility(true);
             dayTimelineCurtainTitleEl.textContent = "Juster arbeidsdag";
             dayTimelineFromEl.value = String(dayTimelineSettings.dayStartMin);
             dayTimelineToEl.value = String(dayTimelineSettings.dayEndMin);
@@ -6905,6 +7534,8 @@ function clampInt(v, min, max) {
     function closeDayTimelineCurtain() {
         dayTimelineCurtainEl.classList.remove("open");
         dayTimelineEditing = null;
+        dayTimelineLunchAwaitingFromSelection = false;
+        setDayTimelineToVisibility(true);
     }
 
     function applyDayTimelineCurtainChange() {
@@ -7883,6 +8514,7 @@ function clampInt(v, min, max) {
         taskInputEl.value = "";
         clearSuggestions();
         overduePopupShown = false;
+        oneNoteReminderCurrentTasksCopySignature = "";
         saveToStorage();
         disableCompactMode(); 
         updateUI();
@@ -7928,6 +8560,7 @@ function clampInt(v, min, max) {
 
     function clearAndArchiveTasks(archiveBaseTs = null) {
         overduePopupShown = false;
+        finalizeTemporaryMidnightGuardSuspend();
         const tasksToCopy = copySourceTasks || data.tasks;
             if (tasksToCopy.length === 0) return;
         const now = new Date();
@@ -8473,6 +9106,9 @@ startNewTask(pendingNewTaskName, projectNo);
         expandedCommentTaskId = null;
         showAllComments = false;
         data.archives.splice(idx, 1);
+
+        // Gjenoppta dagen skal midlertidig deaktivere «Hindre dobbeltelling»
+        activateTemporaryMidnightGuardSuspendForRestore();
         saveToStorage();
         disableCompactMode(); 
         updateUI();
@@ -8709,9 +9345,9 @@ groupedData.forEach((monthMap, monthKey) => {
         if (archiveAdhdRows.length) {
             const adhdDot = document.createElement('span');
             adhdDot.className = 'archive-adhd-dot';
-            adhdDot.title = 'Vis ADHD modus – Breakdown';
+            adhdDot.title = 'Vis Sekvensmodus – Breakdown';
             adhdDot.setAttribute('role', 'button');
-            adhdDot.setAttribute('aria-label', 'Vis ADHD modus – Breakdown');
+            adhdDot.setAttribute('aria-label', 'Vis Sekvensmodus – Breakdown');
             adhdDot.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -8750,9 +9386,9 @@ groupedData.forEach((monthMap, monthKey) => {
                 const adhdRowDot = document.createElement('span');
                 adhdRowDot.className = 'archive-adhd-dot';
                 adhdRowDot.style.marginRight = '6px';
-                adhdRowDot.title = 'Vis ADHD modus – Breakdown';
+                adhdRowDot.title = 'Vis Sekvensmodus – Breakdown';
                 adhdRowDot.setAttribute('role', 'button');
-                adhdRowDot.setAttribute('aria-label', 'Vis ADHD modus – Breakdown');
+                adhdRowDot.setAttribute('aria-label', 'Vis Sekvensmodus – Breakdown');
                 adhdRowDot.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -8857,6 +9493,7 @@ groupedData.forEach((monthMap, monthKey) => {
 
     function updateUI() {
         syncAdhdToActiveProject();
+        applyMidnightGuardTemporaryVisualState();
         normalizeActivePosition();
         const isPrevDayArchiveRequired = hasUnarchivedPreviousDayTasks();
         const isGuardArchiveLock = isPrevDayArchiveRequired || hasGuardArchiveLockAfterStop();
@@ -8964,6 +9601,24 @@ groupedData.forEach((monthMap, monthKey) => {
             if (hasTasks) taskListHelperEl.classList.add('hidden');
             else taskListHelperEl.classList.remove('hidden');
         }
+if (taskInputEl) {
+    const guardResumeMessage = "(Hindre dobbeltelling) er aktivert under Profil og Innstillinger";
+    if (typeof taskInputEl.dataset.defaultPlaceholder === "undefined") {
+        taskInputEl.dataset.defaultPlaceholder = taskInputEl.getAttribute("placeholder") || "";
+    }
+    const isPostEndGuardLock = hasGuardArchiveLockAfterStop();
+    if (isPostEndGuardLock) {
+        taskInputEl.disabled = true;
+        taskInputEl.value = "";
+        taskInputEl.setAttribute("placeholder", guardResumeMessage);
+        taskInputEl.title = guardResumeMessage;
+        clearSuggestions();
+    } else {
+        taskInputEl.disabled = false;
+        taskInputEl.setAttribute("placeholder", taskInputEl.dataset.defaultPlaceholder || "");
+        taskInputEl.removeAttribute("title");
+    }
+}
         taskListEl.innerHTML = "";
         if (data.tasks.length === 0) {
             emptyListTextEl.style.display = "block";
@@ -9256,6 +9911,38 @@ groupedData.forEach((monthMap, monthKey) => {
     }
     function hideClearTodayPopup() { clearTodayOverlayEl.classList.remove("show"); }
 
+    function showOneNoteReminderPopup() {
+        if (!oneNoteReminderOverlayEl) return;
+        oneNoteReminderOverlayEl.classList.add("show");
+    }
+    function hideOneNoteReminderPopup() {
+        if (!oneNoteReminderOverlayEl) return;
+        oneNoteReminderOverlayEl.classList.remove("show");
+    }
+    function buildOneNoteReminderSignatureForTasks(tasks) {
+        const arr = Array.isArray(tasks) ? tasks : [];
+        if (!arr.length) return "";
+        return arr.map(t => {
+            const totalMs = t && t.isActive ? getTaskElapsedMs(t) : Math.max(0, Number((t && t.totalMs) || 0));
+            const name = (t && typeof t.name === "string") ? t.name : "";
+            const comment = (t && typeof t.comment === "string") ? t.comment : "";
+            const id = t && t.id != null ? String(t.id) : "";
+            return [id, name, Math.round(totalMs), comment].join("¦");
+        }).join("‖");
+    }
+    function hasValidOneNoteCopyForCurrentTasks() {
+        if (!Array.isArray(data.tasks) || data.tasks.length === 0) return true;
+        const currentSig = buildOneNoteReminderSignatureForTasks(data.tasks);
+        return !!currentSig && currentSig === oneNoteReminderCurrentTasksCopySignature;
+    }
+    function shouldBlockClearArchiveForOneNoteReminder() {
+        if (!oneNoteReminderEnabled) return false;
+        const tasksToCopy = copySourceTasks || data.tasks;
+        if (!Array.isArray(tasksToCopy) || tasksToCopy.length === 0) return false;
+        if (copySourceTasks || selectedArchiveForCopy) return false;
+        return !hasValidOneNoteCopyForCurrentTasks();
+    }
+
     function enableCompactMode() {
         if (taskListEl) taskListEl.classList.add("compact-mode");
         if (taskListWrapperEl) taskListWrapperEl.classList.add("compact-active");
@@ -9346,7 +10033,15 @@ groupedData.forEach((monthMap, monthKey) => {
             deleteProfileButtonEl.style.display = "none";
             deleteProfileButtonEl.disabled = true;
         }
+        updateNewProfileAttention();
     }
+
+    function updateNewProfileAttention(){
+        if (!newProfileNameEl) return;
+        const shouldBlink = Array.isArray(profiles) && profiles.length <= 1;
+        newProfileNameEl.classList.toggle('new-profile-attention', shouldBlink);
+    }
+
     function switchProfile(newProfileName) {
         if (!profiles.includes(newProfileName)) return;
         if (newProfileName === currentProfile) return;
@@ -9360,10 +10055,12 @@ groupedData.forEach((monthMap, monthKey) => {
         loadAutoSaveSetting();
         loadMidnightDoubleCountGuardSetting();
         loadNoHelpTextSetting();
+        loadOneNoteReminderSetting();
         loadPersonalCustomizationValues();
         loadPersonalCustomizationToggle();
         loadControlPanelOpenSetting();
         loadUnderDevelopmentExpandedSetting();
+    moveUnderDevelopmentOutOfControlPanelButtons();
         applyStoredSuggestionsHeight();
         applyStoredSuggestionsHeight();
         applyStoredSuggestionsHeight();
@@ -9409,6 +10106,7 @@ groupedData.forEach((monthMap, monthKey) => {
         loadAutoSaveSetting();
         loadMidnightDoubleCountGuardSetting();
         loadNoHelpTextSetting();
+        loadOneNoteReminderSetting();
         loadPersonalCustomizationValues();
         loadPersonalCustomizationToggle();
         loadControlPanelOpenSetting();
@@ -9894,6 +10592,7 @@ groupedData.forEach((monthMap, monthKey) => {
                     loadAutoSaveSetting();
                     loadMidnightDoubleCountGuardSetting();
                     loadNoHelpTextSetting();
+                    loadOneNoteReminderSetting();
                     loadPersonalCustomizationValues();
                     loadPersonalCustomizationToggle();
                     loadControlPanelOpenSetting();
@@ -9956,7 +10655,20 @@ groupedData.forEach((monthMap, monthKey) => {
         updateTimelineNowDot();
     });
     
-    if (profileButtonEl) profileButtonEl.addEventListener("click", openSettingsModal);
+    if (profileButtonEl) {
+        profileButtonEl.addEventListener("click", (e) => {
+            // Hurtigtast: når Personlig tilpasning er aktiv -> CTRL + klikk på Profil åpner Personlig tilpasning direkte
+            const wantsPersonal = !!(e && e.ctrlKey && (typeof isPersonalCustomizationEnabled === 'function') && isPersonalCustomizationEnabled());
+            if (wantsPersonal) {
+                try { e.preventDefault(); e.stopPropagation(); } catch(_) {}
+                try { reopenSettingsAfterPersonalCustomizeClose = false; } catch(_) {}
+                if (typeof closeSettingsModal === 'function') closeSettingsModal();
+                requestAnimationFrame(() => openPersonalCustomizeModal());
+                return;
+            }
+            openSettingsModal();
+        });
+    }
     if (settingsCloseButtonEl) settingsCloseButtonEl.addEventListener("click", closeSettingsModal);
 
     
@@ -10104,11 +10816,17 @@ ${comment}
             try {
                 const ok = await copyToClipboard(htmlContent, plainText);
                 if (!ok) throw new Error('copy failed');
+                if (!copySourceTasks && !selectedArchiveForCopy) {
+                    oneNoteReminderCurrentTasksCopySignature = buildOneNoteReminderSignatureForTasks(data.tasks);
+                }
                     const originalText = copyOneNoteButtonEl.textContent;
                     copyOneNoteButtonEl.textContent = "Kopiert!";
                     setTimeout(() => { copyOneNoteButtonEl.textContent = originalText; }, 1500);
             } catch (e) {
                 navigator.clipboard.writeText(plainText);
+                if (!copySourceTasks && !selectedArchiveForCopy) {
+                    oneNoteReminderCurrentTasksCopySignature = buildOneNoteReminderSignatureForTasks(data.tasks);
+                }
                 alert("Kopierte som ren tekst (nettleseren støttet ikke rik formatering).");
             }
         });
@@ -10196,6 +10914,7 @@ ${comment}
     endButtonEl.addEventListener("click", async () => {
         endDayPressedAtMs = Date.now();
         finalizeActiveTask();
+        finalizeTemporaryMidnightGuardSuspend();
         saveToStorage();
         updateUI();
         autoResizeSplitter(); 
@@ -10216,9 +10935,24 @@ ${comment}
     adjustStartCloseButtonEl.addEventListener("click", () => hideAdjustStartPopup());
     adjustStartCancelButtonEl.addEventListener("click", () => hideAdjustStartPopup());
     adjustStartConfirmButtonEl.addEventListener("click", () => adjustStartConfirm());
-    clearButtonEl.addEventListener("click", async () => { if (!clearButtonEl.disabled) showClearTodayPopup(); });
+    clearButtonEl.addEventListener("click", async () => {
+        if (clearButtonEl.disabled) return;
+        if (shouldBlockClearArchiveForOneNoteReminder()) { showOneNoteReminderPopup(); return; }
+        showClearTodayPopup();
+    });
     clearTodayCancelButtonEl.addEventListener("click", () => hideClearTodayPopup());
-    clearTodayConfirmButtonEl.addEventListener("click", async () => { hideClearTodayPopup(); clearAndArchiveTasks(); });
+    clearTodayConfirmButtonEl.addEventListener("click", async () => {
+        if (shouldBlockClearArchiveForOneNoteReminder()) { hideClearTodayPopup(); showOneNoteReminderPopup(); return; }
+        hideClearTodayPopup();
+        clearAndArchiveTasks();
+    });
+    if (oneNoteReminderCloseButtonEl) oneNoteReminderCloseButtonEl.addEventListener("click", () => hideOneNoteReminderPopup());
+    if (oneNoteReminderOkButtonEl) oneNoteReminderOkButtonEl.addEventListener("click", () => hideOneNoteReminderPopup());
+    if (oneNoteReminderOverlayEl) {
+        oneNoteReminderOverlayEl.addEventListener("mousedown", (e) => {
+            if (e.target === oneNoteReminderOverlayEl) hideOneNoteReminderPopup();
+        });
+    }
     exportButtonEl.addEventListener("click", () => exportArchivesToCsv());
     clearArchivesButtonEl.addEventListener("click", () => showClearArchivesPopup());
     clearArchivesDeleteButtonEl.addEventListener("click", async () => { deleteAllArchives(); hideClearArchivesPopup(); });
@@ -10293,6 +11027,10 @@ ${comment}
         }
         hideOverduePopup();
         saveToStorage();
+        if (shouldBlockClearArchiveForOneNoteReminder()) {
+            showOneNoteReminderPopup();
+            return;
+        }
         clearAndArchiveTasks(archiveBaseTs);
     });
     projectCloseButtonEl.addEventListener("click", () => hideProjectPopup());
@@ -10549,15 +11287,15 @@ suggestionIndex = -1;
             const totalItems = Array.isArray(adhdTasksState.items) ? adhdTasksState.items.length : 0;
             const doneItems = Array.isArray(adhdTasksState.completed) ? adhdTasksState.completed.filter(Boolean).length : 0;
 
-            // Tillat flere ADHD-økter på samme prosjekt:
-            // hvis forrige økt er fullført og brukeren slår på ADHD-modus igjen,
+            // Tillat flere Sekvens-økter på samme prosjekt:
+            // hvis forrige økt er fullført og brukeren slår på Sekvensmodus igjen,
             // startes en ny tom økt i stedet for å låse seg til gammel fullført liste.
             if (totalItems > 0 && doneItems >= totalItems) {
                 adhdTasksState = normalizeAdhdTasksState(null);
                 saveAdhdTasksState();
             }
 
-            // ADHD-modus skal beholde aktivt tema (lys/mørk/AMOLED) og kun gjenopprette ved avslutning hvis tema ble endret underveis.
+            // Sekvensmodus skal beholde aktivt tema (lys/mørk/AMOLED) og kun gjenopprette ved avslutning hvis tema ble endret underveis.
             if (!adhdTasksState.startedAt && adhdTasksState.items.length) {
                 adhdTasksState.startedAt = Date.now();
                 saveAdhdTasksState();
@@ -10607,8 +11345,8 @@ suggestionIndex = -1;
         if (!adhdDiscardOverlayEl) return;
         if (adhdDiscardMessageEl) {
             adhdDiscardMessageEl.textContent = hasItems
-                ? 'Dette vil deaktivere ADHD modus og slette oppgavelisten for aktivt prosjekt. Fortsette?'
-                : 'Dette vil deaktivere ADHD modus. Fortsette?';
+                ? 'Dette vil deaktivere Sekvensmodus og slette oppgavelisten for aktivt prosjekt. Fortsette?'
+                : 'Dette vil deaktivere Sekvensmodus. Fortsette?';
         }
         adhdDiscardOverlayEl.classList.add('show');
     }
@@ -10713,7 +11451,7 @@ suggestionIndex = -1;
             if (chartCardEl) chartCardEl.style.display = '';
         }
 
-        if (timelineCardTitleEl) timelineCardTitleEl.textContent = adhdModeEnabled ? 'ADHD modus' : 'Tidslinje';
+        if (timelineCardTitleEl) timelineCardTitleEl.textContent = adhdModeEnabled ? 'Sekvensmodus' : 'Tidslinje';
         if (adhdTimelineHostEl) adhdTimelineHostEl.style.display = adhdModeEnabled ? 'block' : 'none';
         if (timelineWrapEl) timelineWrapEl.style.display = adhdModeEnabled ? 'none' : '';
     }
@@ -10811,7 +11549,7 @@ suggestionIndex = -1;
         const normalized = normalizeArchiveAdhdRows(rawRows);
         if (normalized.length) return normalized;
 
-        // Fallback for eldre arkiver opprettet før ADHD-breakdown ble lagret i historikk
+        // Fallback for eldre arkiver opprettet før Sekvens-breakdown ble lagret i historikk
         return getArchiveAdhdBreakdownRowsFromLegacyStorage(archive);
     }
 
@@ -10832,7 +11570,7 @@ suggestionIndex = -1;
             </div>
         `).join('');
         if (!safeRows.length) {
-            adhdBreakdownContentEl.innerHTML = '<div class="inline-note" style="padding:0.35rem 0;">Ingen ADHD-breakdown lagret.</div>';
+            adhdBreakdownContentEl.innerHTML = '<div class="inline-note" style="padding:0.35rem 0;">Ingen Sekvens-breakdown lagret.</div>';
         }
         adhdBreakdownOverlayEl.classList.add('show');
     }
@@ -11179,6 +11917,11 @@ suggestionIndex = -1;
             setPersonalBgControlsOpen(!personalBgControlsOpen);
         });
     }
+    if (personalRenameControlsToggleButtonEl) {
+        personalRenameControlsToggleButtonEl.addEventListener('click', () => {
+            setPersonalRenameControlsOpen(!personalRenameControlsOpen);
+        });
+    }
     if (personalBgColorButtonEl) {
         personalBgColorButtonEl.addEventListener('click', () => {
             setPersonalBgControlsOpen(true);
@@ -11198,35 +11941,8 @@ suggestionIndex = -1;
         });
     }
     if (personalBgMediaButtonEl) {
-        const clearMediaHoldTimer = () => {
-            if (personalBgMediaHoldTimer) { clearTimeout(personalBgMediaHoldTimer); personalBgMediaHoldTimer = null; }
-        };
-        const triggerMediaHistoryByHold = () => {
-            setPersonalBgControlsOpen(true);
-            renderPersonalBgMediaHistoryDropdown();
-            setPersonalFruitigerArchiveOpen(false);
-            setPersonalBgMediaHistoryOpen(!personalBgMediaHistoryOpen);
-        };
-        personalBgMediaButtonEl.addEventListener('pointerdown', (e) => {
-            if (e.button !== 0) return;
-            personalBgMediaHoldTriggered = false;
-            clearMediaHoldTimer();
-            personalBgMediaHoldTimer = setTimeout(() => {
-                personalBgMediaHoldTriggered = true;
-                triggerMediaHistoryByHold();
-            }, 500);
-        });
-        ['pointerup','pointerleave','pointercancel'].forEach(evt => {
-            personalBgMediaButtonEl.addEventListener(evt, () => {
-                clearMediaHoldTimer();
-            });
-        });
         personalBgMediaButtonEl.addEventListener('click', () => {
             setPersonalBgControlsOpen(true);
-            if (personalBgMediaHoldTriggered) {
-                personalBgMediaHoldTriggered = false;
-                return;
-            }
             setPersonalBgMediaHistoryOpen(false);
             setPersonalFruitigerArchiveOpen(false);
             if (!personalBgMediaInputEl) return;
@@ -11238,11 +11954,32 @@ suggestionIndex = -1;
             }
         });
     }
+
+    if (personalBgMediaHistoryButtonEl) {
+        personalBgMediaHistoryButtonEl.addEventListener('click', () => {
+            setPersonalBgControlsOpen(true);
+            renderPersonalBgMediaHistoryDropdown();
+            setPersonalFruitigerArchiveOpen(false);
+            setPersonalBgMediaHistoryOpen(!personalBgMediaHistoryOpen);
+        });
+    }
     if (personalBgGlassButtonEl) {
         personalBgGlassButtonEl.addEventListener('click', () => {
             setPersonalBgControlsOpen(true);
             const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
-            s.glassEnabled = !s.glassEnabled;
+
+            if (!s.glassEnabled) {
+                s.glassEnabled = true;
+                s.glassBlurPx = 1;
+                personalBgGlassControlsOpen = true;
+                personalBgGlassControlsOpenInitialized = true;
+                try { applyThemeMode('light'); } catch(e){}
+            } else {
+                // Når glassmodus allerede er aktiv: bruk knappen som vis/skjul for gjennomsiktighetskontroller
+                personalBgGlassControlsOpen = !personalBgGlassControlsOpen;
+                personalBgGlassControlsOpenInitialized = true;
+            }
+
             personalCustomizeBackgroundDraft = s;
             setPersonalBgMediaHistoryOpen(false);
             renderPersonalBackgroundUiFromDraft();
@@ -11269,6 +12006,7 @@ suggestionIndex = -1;
             setPersonalFruitigerArchiveOpen(willOpen);
             if (willOpen) {
                 try { await loadFruitigerArchiveCategories(false); } catch(e){}
+                try { await applyDefaultFruitigerArchiveCategoryIfNeeded(); } catch(e){}
             }
         });
     }
@@ -11282,36 +12020,59 @@ suggestionIndex = -1;
         personalFruitigerArchiveIntervalRangeEl.addEventListener('change', () => {
             onArchiveIntervalInput();
             const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+            const secLabel = sec <= 0 ? 'IR' : `${sec}s`;
             const selected = getPersonalFruitigerArchiveSelectedCategory();
+
             if (sec <= 0) {
                 stopPersonalFruitigerArchiveAutoRotation();
-                setPersonalFruitigerArchiveStatus(selected
-                    ? `Auto-bytte er deaktivert (IR): «${selected.label || 'Kategori'}».`
-                    : 'Auto-bytte er deaktivert (IR). Velg en kategori for manuelt bytte.');
+                if (personalFruitigerArchiveHistoryMode) {
+                    setPersonalFruitigerArchiveStatus('Auto-bytte er deaktivert (IR): historikk.');
+                } else {
+                    setPersonalFruitigerArchiveStatus(selected
+                        ? `Auto-bytte er deaktivert (IR): «${selected.label || 'Kategori'}».`
+                        : 'Auto-bytte er deaktivert (IR). Velg en kategori for manuelt bytte.');
+                }
                 return;
             }
-            if (selected || personalFruitigerArchiveRandomCategoryMode) {
+
+            const canRun = personalFruitigerArchiveHistoryMode || personalFruitigerArchiveRandomCategoryMode || !!selected;
+            if (canRun) {
                 personalFruitigerArchiveAutoRunning = true;
                 schedulePersonalFruitigerArchiveAutoRotation();
-                setPersonalFruitigerArchiveStatus(selected
-                    ? `Auto-bytte er aktivt: ${sec}s (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `samme kategori: «${selected.label || 'Kategori'}»`}).`
-                    : `Auto-bytte er aktivt: ${sec}s (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori'}).`);
+                if (personalFruitigerArchiveHistoryMode) {
+                    setPersonalFruitigerArchiveStatus(`Auto-bytte er aktivt: ${secLabel} (historikk).`);
+                } else {
+                    setPersonalFruitigerArchiveStatus(selected
+                        ? `Auto-bytte er aktivt: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `samme kategori: «${selected.label || 'Kategori'}»`}).`
+                        : `Auto-bytte er aktivt: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori'}).`);
+                }
             }
         });
-    }
+        }
     if (personalFruitigerArchiveModeToggleEl) {
         personalFruitigerArchiveModeToggleEl.addEventListener('click', () => {
-            setPersonalFruitigerArchiveModeToggle(!personalFruitigerArchiveRandomCategoryMode);
+            const nextMode = personalFruitigerArchiveHistoryMode ? 'same'
+                : (personalFruitigerArchiveRandomCategoryMode ? 'history' : 'random');
+            setPersonalFruitigerArchiveModeToggle(nextMode);
+
             if (personalFruitigerArchiveAutoRunning) schedulePersonalFruitigerArchiveAutoRotation();
+
             const selected = getPersonalFruitigerArchiveSelectedCategory();
             const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+            const secLabel = sec <= 0 ? 'IR' : `${sec}s`;
+
+            if (personalFruitigerArchiveHistoryMode) {
+                setPersonalFruitigerArchiveStatus(`Auto-bytte er ${sec <= 0 ? 'deaktivert (IR)' : 'aktivt'}: ${secLabel} (historikk).`);
+                return;
+            }
+
             setPersonalFruitigerArchiveStatus(selected
-                ? `Auto-bytte er ${sec <= 0 ? 'deaktivert (IR)' : 'aktivt'}: ${sec <= 0 ? 'IR' : `${sec}s`} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `samme kategori: «${selected.label || 'Kategori'}»`}).`
-                : `Velg en kategori. Auto-bytte bruker ${sec <= 0 ? 'IR' : `${sec}s`} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori'}).`);
+                ? `Auto-bytte er ${sec <= 0 ? 'deaktivert (IR)' : 'aktivt'}: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `samme kategori: «${selected.label || 'Kategori'}»`}).`
+                : `Velg en kategori. Auto-bytte bruker ${secLabel} (${personalFruitigerArchiveHistoryMode ? 'historikk' : (personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori')}).`);
         });
     }
     updatePersonalFruitigerArchiveIntervalUi();
-    setPersonalFruitigerArchiveModeToggle(personalFruitigerArchiveRandomCategoryMode);
+    setPersonalFruitigerArchiveModeToggle(personalFruitigerArchiveHistoryMode ? 'history' : (personalFruitigerArchiveRandomCategoryMode ? 'random' : 'same'));
 
     if (personalBgMediaInputEl) {
         personalBgMediaInputEl.addEventListener('change', (e) => {
@@ -11372,6 +12133,44 @@ suggestionIndex = -1;
             }
         });
     });
+    function setPersonalBgGlassBlurPreset(px){
+        const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
+        s.glassBlurPx = normalizePersonalGlassBlurPx(px);
+        if (!s.glassEnabled) {
+            s.glassEnabled = true;
+            try { applyThemeMode('light'); } catch(e){}
+        }
+        personalCustomizeBackgroundDraft = s;
+        personalBgGlassControlsOpen = true;
+        personalBgGlassControlsOpenInitialized = true;
+        setPersonalBgControlsOpen(true);
+        setPersonalBgMediaHistoryOpen(false);
+        renderPersonalBackgroundUiFromDraft();
+        applyPersonalBackgroundState(s, { preview: true, forceOn: true });
+    }
+
+    function setPersonalBgGlassOff(){
+        const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
+        s.glassEnabled = false;
+        personalCustomizeBackgroundDraft = s;
+        personalBgGlassControlsOpen = true;
+        personalBgGlassControlsOpenInitialized = true;
+        setPersonalBgControlsOpen(true);
+        setPersonalBgMediaHistoryOpen(false);
+        renderPersonalBackgroundUiFromDraft();
+        applyPersonalBackgroundState(s, { preview: true, forceOn: true });
+    }
+
+    if (personalBgBlurFastButtonEl) {
+        personalBgBlurFastButtonEl.addEventListener('click', () => setPersonalBgGlassBlurPreset(1));
+    }
+    if (personalBgBlurPrettyButtonEl) {
+        personalBgBlurPrettyButtonEl.addEventListener('click', () => setPersonalBgGlassBlurPreset(12));
+    }
+    if (personalBgBlurHeavyButtonEl) {
+        personalBgBlurHeavyButtonEl.addEventListener('click', () => setPersonalBgGlassBlurPreset(24));
+    }
+
     if (personalBgGlassOpacityRangeEl) {
         const updateGlassOpacityDraftValue = () => {
             const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
@@ -11402,8 +12201,9 @@ suggestionIndex = -1;
         personalCustomizeOverlayEl.addEventListener('click', (e) => {
             const clickedInsideHistory = !!(e.target && e.target.closest && e.target.closest('#personalBgMediaHistoryDropdown'));
             const clickedMediaButton = !!(e.target && e.target.closest && e.target.closest('#personalBgMediaButton'));
-            if (personalBgMediaHistoryOpen && !clickedInsideHistory && !clickedMediaButton) setPersonalBgMediaHistoryOpen(false);
-            const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest('#personalFruitigerArchivePanel'));
+            const clickedHistoryButton = !!(e.target && e.target.closest && e.target.closest('#personalBgMediaHistoryButton'));
+            if (personalBgMediaHistoryOpen && !clickedInsideHistory && !clickedMediaButton && !clickedHistoryButton) setPersonalBgMediaHistoryOpen(false);
+const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest('#personalFruitigerArchivePanel'));
             const clickedArchiveButton = !!(e.target && e.target.closest && e.target.closest('#personalFruitigerArchiveButton'));
             if (personalFruitigerArchiveOpen && !clickedInsideArchive && !clickedArchiveButton) setPersonalFruitigerArchiveOpen(false);
             if (e.target === personalCustomizeOverlayEl) closePersonalCustomizeModal();
@@ -11519,8 +12319,8 @@ suggestionIndex = -1;
 
     if (dayTimelineCurtainCloseEl) dayTimelineCurtainCloseEl.addEventListener("click", () => closeDayTimelineCurtain());
     if (dayTimelineFromEl) {
-        dayTimelineFromEl.addEventListener("change", () => applyDayTimelineCurtainChange());
-        dayTimelineFromEl.addEventListener("input", () => applyDayTimelineCurtainChange());
+        dayTimelineFromEl.addEventListener("change", () => handleDayTimelineFromChanged());
+        dayTimelineFromEl.addEventListener("input", () => handleDayTimelineFromChanged());
     }
     if (dayTimelineToEl) {
         dayTimelineToEl.addEventListener("change", () => applyDayTimelineCurtainChange());
@@ -11568,7 +12368,9 @@ suggestionIndex = -1;
     wireGroupEditModal();
     loadAutoSaveSetting();
     loadMidnightDoubleCountGuardSetting();
+    applyMidnightGuardTemporaryVisualState();
     loadNoHelpTextSetting();
+    loadOneNoteReminderSetting();
     loadPersonalCustomizationValues();
     loadPersonalCustomizationToggle();
     syncAdhdToActiveProject();
@@ -11589,8 +12391,15 @@ suggestionIndex = -1;
 
     if (cpMidnightGuardEl) {
         cpMidnightGuardEl.addEventListener("change", (e) => {
+            // Hvis bruker endrer manuelt, avslutt midlertidig gjenoppta-overstyring
+            if (midnightGuardTempResumeSuspended) {
+                midnightGuardTempResumeSuspended = false;
+                midnightGuardTempResumePrevEnabled = null;
+                profileTempGuardIndicatorActive = false;
+            }
             midnightDoubleCountGuardEnabled = !!e.target.checked;
             setProfileScopedSetting(MIDNIGHT_DOUBLE_COUNT_GUARD_KEY, !!midnightDoubleCountGuardEnabled);
+            applyMidnightGuardTemporaryVisualState();
             updateUI();
             checkOverdueActiveTask();
         });
@@ -11601,6 +12410,13 @@ suggestionIndex = -1;
             const on = !!e.target.checked;
             setProfileScopedSetting(NO_HELP_TEXT_KEY, !!on);
             applyNoHelpTextMode(on);
+        });
+    }
+
+    if (cpOneNoteReminderToggleEl) {
+        cpOneNoteReminderToggleEl.addEventListener("change", (e) => {
+            oneNoteReminderEnabled = !!e.target.checked;
+            setProfileScopedSetting(ONENOTE_REMINDER_KEY, !!oneNoteReminderEnabled);
         });
     }
 
@@ -12000,6 +12816,5 @@ ${comment}
 </body>
 
 </html>
-
 
 
