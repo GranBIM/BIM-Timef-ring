@@ -54,8 +54,8 @@
 
         body.theme-dark{
             --bg: #0b1220;
-            --text: #e5e7eb;
-            --muted: #9ca3af;
+            --text: #ffffff;
+            --muted: #ffffff;
             --card: #0f172a;
             --border: #334155;
             --border-soft: #1f2937;
@@ -65,12 +65,12 @@
 
             --modal-backdrop: rgba(0,0,0,0.32);
 
-            --chart-hand: #e5e7eb;
+            --chart-hand: #ffffff;
 
             --timebar-base: #1f2937;
 
-            --select-bg: #f9fafb;
-            --select-text: #111827;
+            --select-bg: #0f172a;
+            --select-text: #ffffff;
 
             --btn-copy-bg: #4b5563;
 
@@ -195,6 +195,25 @@
             background: var(--card) !important;
             border-color: var(--border) !important;
             box-shadow: 0 10px 28px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.06);
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        body.glass-solid-active .card,
+        body.glass-solid-active .modal,
+        body.glass-solid-active .btn-secondary,
+        body.glass-solid-active .modal-button-primary,
+        body.glass-solid-active .btn-stepper,
+        body.glass-solid-active input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+        body.glass-solid-active select,
+        body.glass-solid-active textarea,
+        body.glass-solid-active .personal-bg-panel,
+        body.glass-solid-active .personal-bg-color-controls,
+        body.glass-solid-active .personal-customize-scroll-panel{
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        body.glass-solid-active.personal-strong-overlay-blur #settingsOverlay.overlay.show .modal,
+        body.glass-solid-active.personal-strong-overlay-blur #personalCustomizeOverlay.overlay.show .modal{
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
         }
@@ -1077,6 +1096,19 @@
 .helper-text.hidden {
             display: none;
         }
+
+        body.theme-dark .helper-text,
+        body.theme-dark .empty-text,
+        body.theme-dark .task-time,
+        body.theme-dark .modal p,
+        body.theme-dark .chart-legend,
+        body.theme-dark input,
+        body.theme-dark textarea,
+        body.theme-dark select,
+        body.theme-dark option,
+        body.theme-dark ::placeholder{
+            color: #ffffff !important;
+        }
         body.theme-dark .helper-text { color: var(--muted); }
 
         .current-task {
@@ -1350,6 +1382,48 @@
             max-width: calc(var(--dynamic-gap) - 10px);
             overflow: hidden;
         }
+
+        .task-list.compact-mode .project-division-comment-row {
+            width: calc(var(--dynamic-gap) - 10px - 2.15rem);
+            max-width: calc(var(--dynamic-gap) - 10px - 2.15rem);
+            overflow: hidden;
+        }
+
+        .task-list.compact-mode .project-division-row {
+            position: relative;
+            padding-right: 0;
+        }
+
+        .task-list.compact-mode .project-division-item {
+            position: relative;
+            padding-right: 0;
+            min-height: 1.55rem;
+        }
+
+        .task-list.compact-mode .project-division-index,
+        .task-list.compact-mode .project-division-text,
+        .task-list.compact-mode .btn-comment-copy {
+            position: relative;
+            z-index: 1;
+        }
+
+        .task-list.compact-mode .project-division-time {
+            position: absolute;
+            left: calc(var(--dynamic-gap) - 1.35rem);
+            top: 0;
+            bottom: 0;
+            right: 0;
+            margin: 0;
+            z-index: 10;
+            background: var(--card);
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            justify-content: flex-start;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
         
         .task-list.compact-mode .task-comment-box {
             white-space: nowrap; 
@@ -1479,6 +1553,140 @@
             color: #64748b;
         }
 
+        .project-division-row {
+            padding: 0.25rem 0 0.55rem 1.35rem;
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .project-division-list {
+            list-style: none;
+            margin: 0;
+            padding: 0.15rem 0 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.22rem;
+        }
+
+
+        .project-division-comment-row {
+            margin: -0.05rem 0 0.15rem 2.15rem;
+            width: calc(100% - 2.15rem);
+            max-width: calc(100% - 2.15rem);
+            box-sizing: border-box;
+        }
+
+        .project-division-comment-row .task-comment-box {
+            font-size: 0.82rem;
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .project-division-item {
+            display: flex;
+            gap: 0.55rem;
+            align-items: flex-start;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            line-height: 1.3;
+            color: var(--text);
+            cursor: pointer;
+            padding: 0.16rem 0.3rem 0.16rem 0.1rem;
+            border-radius: 10px;
+        }
+
+        .project-division-item:hover {
+            background: rgba(244, 114, 182, 0.10);
+        }
+
+        .project-division-item.is-active .project-division-text,
+        .project-division-item.is-active .project-division-time {
+            color: var(--dot-green);
+            font-weight: 700;
+        }
+
+        .project-division-item.is-selected {
+            background: rgba(244, 114, 182, 0.18);
+        }
+
+        .project-division-item.is-selected .project-division-text,
+        .project-division-item.is-selected .project-division-time {
+            color: #db2777;
+            font-weight: 700;
+        }
+
+        .project-division-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 0.95rem;
+            min-width: 0.95rem;
+            font-size: 0.9rem;
+            line-height: 1;
+            color: #f472b6;
+            transform: translateY(1px);
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .project-division-arrow.is-collapsed {
+            opacity: 1;
+            transition: opacity 0.16s linear;
+            animation: projectDivisionArrowBlinkEven 2s steps(1, end) infinite;
+        }
+
+        .project-division-arrow.is-collapsed.is-blink-off {
+            opacity: 0.2;
+        }
+
+        .project-division-arrow.is-expanded {
+            opacity: 1;
+            animation: none;
+        }
+
+        @keyframes projectDivisionArrowBlinkEven {
+            0%, 49.999% { opacity: 1; }
+            50%, 100% { opacity: 0.2; }
+        }
+
+        .task-name.is-project-division-parent {
+            color: #f472b6;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .project-division-index {
+            min-width: 1.25rem;
+            color: #f472b6;
+            font-weight: 700;
+            text-align: right;
+            flex: 0 0 auto;
+        }
+
+        .project-division-text {
+            min-width: 0;
+            word-break: break-word;
+            opacity: 0.95;
+            flex: 1 1 auto;
+        }
+
+        .project-division-time {
+            flex: 0 0 auto;
+            margin-left: 0.65rem;
+            font-size: 0.8rem;
+            opacity: 0.82;
+            white-space: nowrap;
+        }
+
+        .task-list-item.project-division-open .task-name {
+            color: #f472b6;
+        }
+
+        .task-list-item.task-selected .task-name.is-project-division-parent,
+        body.temp-task-selection .task-list-item.task-selected .task-name.is-project-division-parent {
+            color: var(--dot-green) !important;
+        }
+
         .btn-comment-copy {
             background: transparent;
             border: none;
@@ -1506,6 +1714,12 @@
         .btn-comment-copy:hover::after {
             transform: scale(1.3);
         }
+
+        .project-division-item .btn-comment-copy {
+            margin-right: 0.15rem;
+            margin-left: 0.05rem;
+            flex: 0 0 auto;
+        }
         
         .task-time {
             font-family: monospace;
@@ -1514,7 +1728,7 @@
             white-space: nowrap;
             margin-left: 0.75rem;
         }
-        body.theme-dark .task-time { color: #cbd5e1; }
+        body.theme-dark .task-time { color: #ffffff; }
 
         /* FAVORITT (gul markering) */
         .task-list-item.task-favorite{
@@ -2070,6 +2284,9 @@
             -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
         }
 
+        #projectTaskDivisionOverlay{
+            z-index: 12150;
+        }
         #projectOverlay{
             z-index: 12000;
         }
@@ -2107,7 +2324,7 @@
             font-size: 0.9rem;
             color: #374151;
         }
-        body.theme-dark .modal p { color: #cbd5e1; }
+        body.theme-dark .modal p { color: #ffffff; }
         
         .settings-section {
             margin-bottom: 1.25rem;
@@ -2132,6 +2349,15 @@
             flex-wrap: wrap;
         }
         .modal-row label { font-size: 0.9rem; }
+        .transfer-project-row {
+            align-items: flex-start;
+        }
+        .transfer-subtask-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
 
         .modal-select, .modal-input, .modal-textarea {
             padding: 0.4rem 0.5rem;
@@ -2217,7 +2443,7 @@
             font-size: 0.8rem;
             color: #374151;
         }
-        body.theme-dark .chart-legend { color: #cbd5e1; }
+        body.theme-dark .chart-legend { color: #ffffff; }
 
         .chart-legend-item {
             display: flex;
@@ -2276,6 +2502,7 @@
             overflow: hidden;
             user-select: none;
             cursor: default;
+            isolation: isolate;
         }
         body.theme-dark .timeline-bar{
             background: rgba(37,99,235,0.25);
@@ -2286,6 +2513,8 @@
             top: 0;
             bottom: 0;
             border-radius: 999px; /* Can be 0 if contiguous, but small radius looks ok */
+            transform: translateZ(0);
+            will-change: left, width;
         }
         .timeline-seg.blue{ background: var(--dot-blue); opacity: 0.75; }
         .timeline-seg.orange{ background: var(--dot-orange); opacity: 0.85; }
@@ -2504,6 +2733,11 @@ body.theme-dark #profileButton.profile-temp-guard-indicator {
         /* Standardfunksjon: Lagre profil automatisk ved «Avslutt arbeid» = blå */
         #autoSaveToggle:checked + .slider {
             background-color: var(--dot-blue) !important;
+        }
+
+        /* Under utvikling: Prosjektinndeling = rosa */
+        #cpProjectDivisionToggle:checked + .slider {
+            background-color: var(--comment-pink) !important;
         }
 
         /* Under utvikling: Sekvensmodus = orange */
@@ -3052,6 +3286,22 @@ ${comment}
     </div>
 </div>
 
+<div id="projectTaskDivisionOverlay" class="overlay">
+    <div class="modal">
+        <button class="modal-close" id="projectTaskDivisionCloseButton">&times;</button>
+        <h2>Prosjektoppgaver</h2>
+        <p class="helper-text">Legg inn én oppgave per linje. Listen er knyttet til valgt prosjekt.</p>
+        <div class="adhd-modal-grid">
+            <div id="projectTaskDivisionLineNumbers" class="adhd-line-numbers">1</div>
+            <textarea id="projectTaskDivisionTextarea" class="modal-textarea adhd-textarea" spellcheck="false" placeholder="SHIFT + ENTER for linjeskift"></textarea>
+        </div>
+        <div class="modal-actions" style="margin-top:0.9rem;">
+            <button id="projectTaskDivisionCancelButton" type="button" class="btn-secondary">Avbryt</button>
+            <button id="projectTaskDivisionOkButton" type="button" class="btn-secondary">OK</button>
+        </div>
+    </div>
+</div>
+
 <div id="adhdDiscardOverlay" class="overlay">
     <div class="modal">
         <h2>Deaktiver Sekvensmodus</h2>
@@ -3302,6 +3552,18 @@ ${comment}
                     <div class="control-panel-row under-development">
                         <div class="control-panel-left">
                             <label class="switch">
+                                <input type="checkbox" id="cpProjectDivisionToggle">
+                                <span class="slider"></span>
+                            </label>
+                            <label for="cpProjectDivisionToggle" style="cursor:pointer; font-size: 0.9rem;">Prosjektinndeling</label>
+                        </div>
+                        <div class="helptext-container" data-helptext-container="true">
+                            <span class="helper-text control-panel-help">Når denne er aktivert blir det mulig å dele inn et prosjekt i prosjektoppgaver, tid føres separat per oppgave, men alle oppgavene ligger under det samme prosjektet</span>
+                        </div>
+                    </div>
+                    <div class="control-panel-row under-development">
+                        <div class="control-panel-left">
+                            <label class="switch">
                                 <input type="checkbox" id="cpOneNoteReminderToggle">
                                 <span class="slider"></span>
                             </label>
@@ -3396,6 +3658,9 @@ ${comment}
             <input id="projectNumberInput" class="modal-input" type="text" placeholder="Prosjektnummer …" />
         </div>
 
+        <div class="modal-row" id="projectTaskDivisionButtonRow" style="width:100%; justify-content:flex-start; display:none;">
+            <button id="projectTaskDivisionButton" class="btn-secondary" type="button" aria-pressed="false">Prosjektoppgaver</button>
+        </div>
 
         <div id="projectOutdatedWrap" class="project-outdated-wrap" style="display:none;">
             <label class="outdated-label" title="Marker prosjektet som utgått">
@@ -3493,14 +3758,22 @@ ${comment}
             Velg «Fra prosjekt» og «Til prosjekt». Det er ikke mulig å overføre mer tid enn det som er registrert på «Fra».
         </p>
 
-        <div class="modal-row">
+        <div class="modal-row transfer-project-row">
             <label for="transferSource">Fra prosjekt:</label>
             <select id="transferSource" class="modal-select"></select>
+            <div id="transferSourceSubtaskWrap" class="transfer-subtask-wrap" style="display:none;">
+                <label for="transferSourceSubtask">Fra prosjektoppgave:</label>
+                <select id="transferSourceSubtask" class="modal-select"></select>
+            </div>
         </div>
 
-        <div class="modal-row">
+        <div class="modal-row transfer-project-row">
             <label for="transferTarget">Til prosjekt:</label>
             <select id="transferTarget" class="modal-select"></select>
+            <div id="transferTargetSubtaskWrap" class="transfer-subtask-wrap" style="display:none;">
+                <label for="transferTargetSubtask">Til prosjektoppgave:</label>
+                <select id="transferTargetSubtask" class="modal-select"></select>
+            </div>
         </div>
 
         <div class="modal-row">
@@ -3528,7 +3801,15 @@ ${comment}
             Juster tid på det aktive prosjektet.
         </p>
 
-        <!-- Mode 1: Set Time (Visible for 1st task only) -->
+        <div id="adjustStartTargetRow" class="modal-row transfer-project-row" style="display:none; margin-bottom:0.75rem;">
+            <label for="adjustStartTarget">Prosjekt:</label>
+            <select id="adjustStartTarget" class="modal-select"></select>
+            <div id="adjustStartTargetSubtaskWrap" class="transfer-subtask-wrap" style="display:none;">
+                <label for="adjustStartTargetSubtask">Prosjektoppgave:</label>
+                <select id="adjustStartTargetSubtask" class="modal-select"></select>
+            </div>
+        </div>
+
         <div id="adjustStartModeTime" style="display:none;">
             <p>Sett starttidspunkt:</p>
             <div class="modal-row">
@@ -3538,7 +3819,6 @@ ${comment}
             </div>
         </div>
 
-        <!-- Mode 2: Add Duration (Visible for subsequent tasks) -->
         <div id="adjustStartModeAdd">
             <div class="modal-row" style="justify-content: space-around; gap: 1rem;">
                 <div id="adjustAddTimeDisplay" class="time-add-display">0t 0min</div>
@@ -3625,6 +3905,7 @@ ${comment}
         archives: [],
         taskNames: [],
         projectNumbers: {},
+        projectDivisions: {},
         favorites: {},
         favoritesOrder: [],
         outdated: {},
@@ -3665,12 +3946,15 @@ let profileTempGuardIndicatorActive = false;
     let escListenerAdded = false;
 
     let commentEditingTaskId = null;
+    let suppressProjectDivisionOutsideCloseUntil = 0;
     let pendingRestoreArchiveId = null;
 
     let showAllComments = false;
     let expandedCommentTaskId = null;
 
     let pendingNewTaskName = null;
+    let expandedProjectDivisionTaskId = null;
+    let selectedProjectDivisionTarget = null;
     let timelineMode = localStorage.getItem('taskTimeTracker_timeline_mode') || 'setup';
 
     function getTotalWorkedMsToday(){
@@ -3773,7 +4057,6 @@ const startButtonEl = document.getElementById("startButton");
     const toggleRoundingButtonEl = document.getElementById("toggleRoundingButton");
     
     const copyOneNoteButtonEl = document.getElementById("copyOneNoteButton");
-    const El = document.getElementById("");
 
     const resizeHandleEl = document.getElementById("resizeHandle");
     const taskListWrapperEl = document.querySelector(".task-list-wrapper");
@@ -3784,6 +4067,14 @@ const startButtonEl = document.getElementById("startButton");
     const projectConfirmButtonEl = document.getElementById("projectConfirmButton");
     const projectTaskNameEl = document.getElementById("projectTaskName");
     const projectNumberInputEl = document.getElementById("projectNumberInput");
+    const projectTaskDivisionButtonRowEl = document.getElementById("projectTaskDivisionButtonRow");
+    const projectTaskDivisionButtonEl = document.getElementById("projectTaskDivisionButton");
+    const projectTaskDivisionOverlayEl = document.getElementById("projectTaskDivisionOverlay");
+    const projectTaskDivisionCloseButtonEl = document.getElementById("projectTaskDivisionCloseButton");
+    const projectTaskDivisionCancelButtonEl = document.getElementById("projectTaskDivisionCancelButton");
+    const projectTaskDivisionOkButtonEl = document.getElementById("projectTaskDivisionOkButton");
+    const projectTaskDivisionTextareaEl = document.getElementById("projectTaskDivisionTextarea");
+    const projectTaskDivisionLineNumbersEl = document.getElementById("projectTaskDivisionLineNumbers");
     const projectNameEditInputEl = document.getElementById("projectNameEditInput");
     const projectNameEditRowEl = document.getElementById("projectNameEditRow");
 
@@ -3830,6 +4121,10 @@ const startButtonEl = document.getElementById("startButton");
     const transferConfirmButtonEl = document.getElementById("transferConfirmButton");
     const transferSourceEl = document.getElementById("transferSource");
     const transferTargetEl = document.getElementById("transferTarget");
+    const transferSourceSubtaskWrapEl = document.getElementById("transferSourceSubtaskWrap");
+    const transferSourceSubtaskEl = document.getElementById("transferSourceSubtask");
+    const transferTargetSubtaskWrapEl = document.getElementById("transferTargetSubtaskWrap");
+    const transferTargetSubtaskEl = document.getElementById("transferTargetSubtask");
     const transferHoursEl = document.getElementById("transferHours");
     const transferMinutesEl = document.getElementById("transferMinutes");
     const transferMaxHintEl = document.getElementById("transferMaxHint");
@@ -3844,6 +4139,10 @@ const startButtonEl = document.getElementById("startButton");
     const adjustStartModeAddEl = document.getElementById("adjustStartModeAdd");
     const adjustStartHourEl = document.getElementById("adjustStartHour");
     const adjustStartMinuteEl = document.getElementById("adjustStartMinute");
+    const adjustStartTargetRowEl = document.getElementById("adjustStartTargetRow");
+    const adjustStartTargetEl = document.getElementById("adjustStartTarget");
+    const adjustStartTargetSubtaskWrapEl = document.getElementById("adjustStartTargetSubtaskWrap");
+    const adjustStartTargetSubtaskEl = document.getElementById("adjustStartTargetSubtask");
     const adjustAddTimeDisplayEl = document.getElementById("adjustAddTimeDisplay");
     const adjustTimeStepperBtnEl = document.getElementById("adjustTimeStepperBtn");
 
@@ -4017,10 +4316,13 @@ const startButtonEl = document.getElementById("startButton");
     const newProfileNameEl = document.getElementById("newProfileName");
     const cpGenerateTestDataEl = document.getElementById("cpGenerateTestData");
     const cpNoHelpTextEl = document.getElementById("cpToggle1");
+    const cpProjectDivisionToggleEl = document.getElementById("cpProjectDivisionToggle");
     const cpOneNoteReminderToggleEl = document.getElementById("cpOneNoteReminderToggle");
+    const PROJECT_DIVISION_TOGGLE_KEY = "taskTimeTracker_projectDivisionToggle";
     const PERSONAL_CUSTOMIZATION_TOGGLE_KEY = "taskTimeTracker_personalCustomizationToggle";
     const PERSONAL_CUSTOMIZATION_VALUES_KEY = "taskTimeTracker_personalCustomizationValues_v1";
     const cpMidnightGuardEl = document.getElementById("cpToggle2");
+    let projectDivisionEnabled = false;
 
     const deleteProfileOverlayEl = document.getElementById("deleteProfileOverlay");
 
@@ -4092,6 +4394,7 @@ const startButtonEl = document.getElementById("startButton");
     let personalFruitigerArchiveAutoTimer = null;
     let personalFruitigerArchiveAutoRunning = false;
     let personalFruitigerArchiveAutoBusy = false;
+    let personalFruitigerArchiveAutoRunToken = 0;
     let personalFruitigerArchiveAutoIntervalSec = 45;
     let personalFruitigerArchiveRandomCategoryMode = false;
     let personalFruitigerArchiveHistoryMode = false;
@@ -4099,6 +4402,12 @@ const startButtonEl = document.getElementById("startButton");
     let personalBgHistoryAutoLastDataUrl = '';
     let personalFruitigerArchiveSelectedCategoryHref = "";
     let personalFruitigerArchiveLastImageUrl = "";
+    const PERSONAL_BG_MEDIA_DB_NAME = 'bimforingPersonalBgMedia';
+    const PERSONAL_BG_MEDIA_DB_VERSION = 1;
+    const PERSONAL_BG_MEDIA_STORE = 'media';
+    let personalBgMediaDbPromise = null;
+    let personalBgMediaHydrationToken = 0;
+    let personalBgVisualApplyToken = 0;
 
     let frutigerMusicPlayerVisible = false;
     let frutigerMusicLoading = false;
@@ -4195,22 +4504,9 @@ const startButtonEl = document.getElementById("startButton");
     }
 
     function enforceAmoledThemeForMediaBackground(hasMediaBg){
-        if (!hasMediaBg) return;
-        if (personalCtrlLightHoldActive) {
-            syncThemeButtonMediaPulse(true);
-            return;
-        }
-        if (document.body.classList.contains("theme-dark") && !document.body.classList.contains("theme-black")) {
-            syncThemeButtonMediaPulse(true);
-            return;
-        }
-        applyThemeMode("dark");
-        try {
-            drawTaskChart();
-            renderDayTimeline();
-            updateTimelineNowDot();
-        } catch(e){}
-        syncThemeButtonMediaPulse(true);
+        // Mediebakgrunn skal ikke lenger tvinge mørk modus.
+        // Behold kun visuell indikator på knapp dersom det brukes bilde/video.
+        syncThemeButtonMediaPulse(!!hasMediaBg);
     }
 
     function rememberThemeBeforeAdhd(){
@@ -4319,6 +4615,7 @@ function enforceStandardProfileDefaultPanelSettings(){
 
     try { localStorage.setItem(getProfileScopedSettingKeyForProfile(AUTO_SAVE_KEY, 'Standard'), 'true'); } catch(e){}
     try { localStorage.setItem(getProfileScopedSettingKeyForProfile(MIDNIGHT_DOUBLE_COUNT_GUARD_KEY, 'Standard'), 'true'); } catch(e){}
+    try { localStorage.setItem(getProfileScopedSettingKeyForProfile(PROJECT_DIVISION_TOGGLE_KEY, 'Standard'), 'false'); } catch(e){}
     try { localStorage.setItem(getProfileScopedSettingKeyForProfile(ONENOTE_REMINDER_KEY, 'Standard'), 'false'); } catch(e){}
     try { localStorage.setItem(getProfileScopedSettingKeyForProfile(PERSONAL_CUSTOMIZATION_TOGGLE_KEY, 'Standard'), 'false'); } catch(e){}
 
@@ -4341,6 +4638,7 @@ function collectProfileSettingsForExport(profileName = currentProfile) {
         autoSave: getProfileScopedSettingForProfile(AUTO_SAVE_KEY, pid),
         noHelpText: getProfileScopedSettingForProfile(NO_HELP_TEXT_KEY, pid),
         midnightDoubleCountGuard: getProfileScopedSettingForProfile(MIDNIGHT_DOUBLE_COUNT_GUARD_KEY, pid),
+        projectDivisionToggle: getProfileScopedSettingForProfile(PROJECT_DIVISION_TOGGLE_KEY, pid),
         oneNoteReminder: getProfileScopedSettingForProfile(ONENOTE_REMINDER_KEY, pid),
         controlPanelOpen: getProfileScopedSettingForProfile(CONTROL_PANEL_OPEN_KEY, pid, { fallbackToGlobal: false }),
         underDevelopmentExpanded: getProfileScopedSettingForProfile(UNDER_DEVELOPMENT_EXPANDED_KEY, pid, { fallbackToGlobal: false }),
@@ -4364,6 +4662,7 @@ function applyImportedProfileSettings(profileName, settings) {
         ['autoSave', AUTO_SAVE_KEY],
         ['noHelpText', NO_HELP_TEXT_KEY],
         ['midnightDoubleCountGuard', MIDNIGHT_DOUBLE_COUNT_GUARD_KEY],
+        ['projectDivisionToggle', PROJECT_DIVISION_TOGGLE_KEY],
         ['oneNoteReminder', ONENOTE_REMINDER_KEY],
         ['controlPanelOpen', CONTROL_PANEL_OPEN_KEY],
         ['underDevelopmentExpanded', UNDER_DEVELOPMENT_EXPANDED_KEY],
@@ -4466,7 +4765,7 @@ function initSuggestionsResizePersistence() {
         const key = getStorageKey();
         const raw = localStorage.getItem(key);
         
-        data = { tasks: [], archives: [], taskNames: [], projectNumbers: {}, favorites: {}, favoritesOrder: [], outdated: {}, appNotes: "" };
+        data = { tasks: [], archives: [], taskNames: [], projectNumbers: {}, projectDivisions: {}, favorites: {}, favoritesOrder: [], outdated: {}, appNotes: "" };
 
         if (raw) {
             try {
@@ -4476,6 +4775,7 @@ function initSuggestionsResizePersistence() {
                     data.archives = Array.isArray(parsed.archives) ? parsed.archives : [];
                     data.taskNames = Array.isArray(parsed.taskNames) ? parsed.taskNames : [];
                     data.projectNumbers = (parsed.projectNumbers && typeof parsed.projectNumbers === "object") ? parsed.projectNumbers : {};
+                    data.projectDivisions = (parsed.projectDivisions && typeof parsed.projectDivisions === "object") ? parsed.projectDivisions : {};
                     data.favorites = (parsed.favorites && typeof parsed.favorites === "object") ? parsed.favorites : {};
                     data.favoritesOrder = Array.isArray(parsed.favoritesOrder) ? parsed.favoritesOrder.filter(x => typeof x === "string") : [];
 
@@ -4520,6 +4820,9 @@ function initSuggestionsResizePersistence() {
                         data.tasks.forEach(t => ingest(t.name, t.projectNumber));
                         data.archives.forEach(a => (a.tasks || []).forEach(t => ingest(t.name, t.projectNumber)));
                     }
+                    if (!parsed.projectDivisions || typeof parsed.projectDivisions !== "object") {
+                        data.projectDivisions = {};
+                    }
 
                     if (!parsed.taskNames) {
                         const nameSet = new Set();
@@ -4540,7 +4843,13 @@ function initSuggestionsResizePersistence() {
 
     function saveToStorage() {
         const key = getStorageKey();
-        localStorage.setItem(key, JSON.stringify(data));
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+            return true;
+        } catch (e) {
+            console.warn('Kunne ikke lagre arbeidsdata i localStorage.', e);
+            return false;
+        }
     }
 
     function loadAutoSaveSetting() {
@@ -4554,6 +4863,12 @@ function initSuggestionsResizePersistence() {
         const val = getProfileScopedSetting(MIDNIGHT_DOUBLE_COUNT_GUARD_KEY);
         midnightDoubleCountGuardEnabled = (val === null) ? true : (val === "true");
         if (cpMidnightGuardEl) cpMidnightGuardEl.checked = midnightDoubleCountGuardEnabled;
+    }
+
+    function loadProjectDivisionToggleSetting() {
+        const val = getProfileScopedSetting(PROJECT_DIVISION_TOGGLE_KEY);
+        projectDivisionEnabled = (val === null) ? false : (val === "true");
+        if (cpProjectDivisionToggleEl) cpProjectDivisionToggleEl.checked = projectDivisionEnabled;
     }
 
     function loadOneNoteReminderSetting() {
@@ -4708,6 +5023,7 @@ function finalizeTemporaryMidnightGuardSuspend() {
             saveTimelineMode('work');
             saveToStorage();
             updateUI();
+    refreshProjectDivisionArrowBlink();
             autoResizeSplitter();
             enableCompactMode();
             showOverduePopup(activeTask, "midnightGuard");
@@ -4741,7 +5057,7 @@ function finalizeTemporaryMidnightGuardSuspend() {
 
     function applyNoHelpPlaceholders(enable){
         // Only the placeholders requested by the user
-        const ids = ['taskInput', 'projectNumberInput', 'appNotesTextarea', 'commentTextarea', 'adhdTasksTextarea'];
+        const ids = ['taskInput', 'projectNumberInput', 'appNotesTextarea', 'commentTextarea', 'adhdTasksTextarea', 'projectTaskDivisionTextarea'];
         ids.forEach(id => {
             const el = document.getElementById(id);
             if (!el) return;
@@ -4918,6 +5234,154 @@ function setPersonalCustomizationUiState(isOn){
         try { setProfileScopedSetting(PERSONAL_CUSTOMIZATION_TOGGLE_KEY, !!isOn); } catch(e){}
     }
 
+    function openPersonalBgMediaDb(){
+        if (personalBgMediaDbPromise) return personalBgMediaDbPromise;
+        personalBgMediaDbPromise = new Promise((resolve, reject) => {
+            try {
+                const request = indexedDB.open(PERSONAL_BG_MEDIA_DB_NAME, PERSONAL_BG_MEDIA_DB_VERSION);
+                request.onupgradeneeded = () => {
+                    const db = request.result;
+                    if (!db.objectStoreNames.contains(PERSONAL_BG_MEDIA_STORE)) {
+                        db.createObjectStore(PERSONAL_BG_MEDIA_STORE, { keyPath: 'key' });
+                    }
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error || new Error('IndexedDB åpnet ikke.'));
+            } catch (err) {
+                reject(err);
+            }
+        }).catch(err => {
+            console.warn('Kunne ikke åpne IndexedDB for bakgrunnsmedia.', err);
+            personalBgMediaDbPromise = null;
+            return null;
+        });
+        return personalBgMediaDbPromise;
+    }
+
+    function getPersonalBgMediaStorageKey(profileName){
+        const profile = String(profileName || currentProfile || 'Standard').trim() || 'Standard';
+        return `pageBgMedia::${profile}`;
+    }
+
+    async function putPersonalBgMediaInDb(key, payload){
+        const db = await openPersonalBgMediaDb();
+        if (!db || !key) return false;
+        return new Promise(resolve => {
+            try {
+                const tx = db.transaction(PERSONAL_BG_MEDIA_STORE, 'readwrite');
+                const store = tx.objectStore(PERSONAL_BG_MEDIA_STORE);
+                store.put({ key, payload });
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => resolve(false);
+                tx.onabort = () => resolve(false);
+            } catch (err) {
+                console.warn('Kunne ikke lagre bakgrunnsmedia i IndexedDB.', err);
+                resolve(false);
+            }
+        });
+    }
+
+    async function getPersonalBgMediaFromDb(key){
+        const db = await openPersonalBgMediaDb();
+        if (!db || !key) return null;
+        return new Promise(resolve => {
+            try {
+                const tx = db.transaction(PERSONAL_BG_MEDIA_STORE, 'readonly');
+                const store = tx.objectStore(PERSONAL_BG_MEDIA_STORE);
+                const req = store.get(key);
+                req.onsuccess = () => {
+                    const result = req.result;
+                    resolve(result && result.payload ? result.payload : null);
+                };
+                req.onerror = () => resolve(null);
+            } catch (err) {
+                console.warn('Kunne ikke lese bakgrunnsmedia fra IndexedDB.', err);
+                resolve(null);
+            }
+        });
+    }
+
+    async function deletePersonalBgMediaFromDb(key){
+        const db = await openPersonalBgMediaDb();
+        if (!db || !key) return false;
+        return new Promise(resolve => {
+            try {
+                const tx = db.transaction(PERSONAL_BG_MEDIA_STORE, 'readwrite');
+                const store = tx.objectStore(PERSONAL_BG_MEDIA_STORE);
+                store.delete(key);
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => resolve(false);
+                tx.onabort = () => resolve(false);
+            } catch (err) {
+                console.warn('Kunne ikke slette bakgrunnsmedia fra IndexedDB.', err);
+                resolve(false);
+            }
+        });
+    }
+
+    function valuesUseExternalPersonalBgMedia(valuesObj){
+        return !!(valuesObj && (valuesObj.pageBgMediaExternal === true || valuesObj.pageBgMediaExternal === 'true'));
+    }
+
+    function buildPersonalCustomizationValuesForStorage(valuesObj){
+        const base = (valuesObj && typeof valuesObj === 'object' && !Array.isArray(valuesObj))
+            ? JSON.parse(JSON.stringify(valuesObj))
+            : {};
+        const state = readPersonalBackgroundStateFromValues(base);
+        const isMedia = (state.type === 'image' || state.type === 'video') && !!state.mediaDataUrl;
+        if (isMedia) {
+            base.pageBgMediaExternal = 'true';
+            base.pageBgMediaStorageKey = getPersonalBgMediaStorageKey();
+            base.pageBgMediaDataUrl = '';
+        } else {
+            delete base.pageBgMediaExternal;
+            delete base.pageBgMediaStorageKey;
+        }
+        return base;
+    }
+
+    async function persistCurrentPersonalBgMedia(valuesObj, profileName){
+        const values = (valuesObj && typeof valuesObj === 'object' && !Array.isArray(valuesObj)) ? valuesObj : {};
+        const state = readPersonalBackgroundStateFromValues(values);
+        const storageKey = getPersonalBgMediaStorageKey(profileName);
+        if ((state.type === 'image' || state.type === 'video') && state.mediaDataUrl) {
+            await putPersonalBgMediaInDb(storageKey, {
+                dataUrl: state.mediaDataUrl,
+                kind: state.mediaKind || state.type,
+                savedAt: Date.now()
+            });
+            return true;
+        }
+        await deletePersonalBgMediaFromDb(storageKey);
+        return true;
+    }
+
+    function hydratePersonalBgMediaForCurrentProfile(opts = {}){
+        const token = ++personalBgMediaHydrationToken;
+        const profileAtStart = String(currentProfile || 'Standard');
+        const targetValues = personalCustomizationValues;
+        if (!valuesUseExternalPersonalBgMedia(targetValues)) return Promise.resolve(false);
+        const storageKey = String(targetValues.pageBgMediaStorageKey || getPersonalBgMediaStorageKey(profileAtStart));
+        return getPersonalBgMediaFromDb(storageKey).then(payload => {
+            if (!payload || !payload.dataUrl) return false;
+            if (token !== personalBgMediaHydrationToken) return false;
+            if (String(currentProfile || 'Standard') !== profileAtStart) return false;
+            if (personalCustomizationValues !== targetValues) return false;
+            personalCustomizationValues.pageBgMediaDataUrl = String(payload.dataUrl || '');
+            if (!personalCustomizationValues.pageBgMediaKind) {
+                personalCustomizationValues.pageBgMediaKind = String(payload.kind || personalCustomizationValues.pageBgType || '');
+            }
+            if (opts.apply !== false) {
+                if (isPersonalCustomizeModalOpen()) return true;
+                applyPersonalCustomizationHeadings();
+            }
+            return true;
+        }).catch(err => {
+            console.warn('Kunne ikke hydrere bakgrunnsmedia fra IndexedDB.', err);
+            return false;
+        });
+    }
+
 
     function getPersonalCustomizationFieldElement(def){
         if (!def || !def.selector) return null;
@@ -4954,10 +5418,76 @@ function setPersonalCustomizationUiState(isOn){
         } catch(e){ parsed = {}; }
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) parsed = {};
         personalCustomizationValues = parsed;
+        hydratePersonalBgMediaForCurrentProfile({ apply: true });
+    }
+
+    function isPersonalCustomizeModalOpen(){
+        return !!(personalCustomizeOverlayEl && personalCustomizeOverlayEl.classList.contains('show'));
+    }
+
+    const PERSONAL_BG_HISTORY_MAX_IMAGE_ITEMS = 6;
+    const PERSONAL_BG_HISTORY_MAX_VIDEO_ITEMS = 2;
+    const PERSONAL_BG_HISTORY_MAX_TOTAL_STORAGE_BYTES = 4 * 1024 * 1024;
+    const PERSONAL_BG_MAX_UPLOAD_IMAGE_BYTES = 5 * 1024 * 1024;
+    const PERSONAL_BG_MAX_UPLOAD_VIDEO_BYTES = 10 * 1024 * 1024;
+
+    function estimateStorageBytesFromString(str){
+        return (typeof str === 'string' ? str.length : 0) * 2;
+    }
+
+    function estimatePersonalBgMediaEntryStorageBytes(entry){
+        if (!entry || typeof entry !== 'object') return 0;
+        return estimateStorageBytesFromString(entry.dataUrl || '') + estimateStorageBytesFromString(entry.name || '') + 256;
+    }
+
+    function trimPersonalCustomizationValuesForStorage(valuesObj, opts = {}){
+        const base = (valuesObj && typeof valuesObj === 'object' && !Array.isArray(valuesObj))
+            ? JSON.parse(JSON.stringify(valuesObj))
+            : {};
+        const state = readPersonalBackgroundStateFromValues(base);
+        if (opts.clearHistory) state.mediaHistory = [];
+        if (opts.clearCurrentMedia) {
+            state.type = 'none';
+            state.mediaKind = '';
+            state.mediaDataUrl = '';
+        }
+        writePersonalBackgroundStateToValues(base, state);
+        return base;
     }
 
     function savePersonalCustomizationValues(){
-        try { localStorage.setItem(getProfileScopedSettingKey(PERSONAL_CUSTOMIZATION_VALUES_KEY), JSON.stringify(personalCustomizationValues || {})); } catch(e){}
+        const storageKey = getProfileScopedSettingKey(PERSONAL_CUSTOMIZATION_VALUES_KEY);
+        const liveValues = (personalCustomizationValues && typeof personalCustomizationValues === 'object') ? personalCustomizationValues : {};
+        persistCurrentPersonalBgMedia(liveValues, currentProfile);
+        const tryWrite = (valuesObj) => {
+            const payload = JSON.stringify(valuesObj || {});
+            localStorage.setItem(storageKey, payload);
+            return true;
+        };
+        try {
+            return tryWrite(buildPersonalCustomizationValuesForStorage(liveValues));
+        } catch(e){}
+
+        try {
+            const trimmedHistoryValues = trimPersonalCustomizationValuesForStorage(buildPersonalCustomizationValuesForStorage(liveValues), { clearHistory: true });
+            const ok = tryWrite(trimmedHistoryValues);
+            if (ok && personalBgMediaStatusEl) {
+                personalBgMediaStatusEl.textContent = 'Historikk for bilde/video ble trimmet for å frigjøre lagringsplass.';
+            }
+            return ok;
+        } catch(e){}
+
+        try {
+            const trimmedMediaValues = trimPersonalCustomizationValuesForStorage(buildPersonalCustomizationValuesForStorage(liveValues), { clearHistory: true, clearCurrentMedia: true });
+            const ok = tryWrite(trimmedMediaValues);
+            if (ok && personalBgMediaStatusEl) {
+                personalBgMediaStatusEl.textContent = 'Bakgrunnsmedia ble lagret separat for å unngå at visningen forsvinner.';
+            }
+            return ok;
+        } catch(e) {
+            console.warn('Kunne ikke lagre personlig tilpasning i localStorage.', e);
+        }
+        return false;
     }
 
     function isPersonalCustomizationEnabled(){
@@ -5084,12 +5614,12 @@ function setPersonalCustomizationUiState(isOn){
     }
 
     function resetPersonalCustomizationValues(){
-        const preservedHistory = getPersonalBgMediaHistoryFromValues(personalCustomizationValues);
+        deletePersonalBgMediaFromDb(getPersonalBgMediaStorageKey());
         personalCustomizationValues = {};
-        writePersonalBgMediaHistoryToValues(personalCustomizationValues, preservedHistory);
+        writePersonalBgMediaHistoryToValues(personalCustomizationValues, []);
         savePersonalCustomizationValues();
         personalCustomizeBackgroundDraft = getDefaultPersonalBackgroundState();
-        personalCustomizeBackgroundDraft.mediaHistory = limitPersonalBgMediaHistoryList(preservedHistory || []);
+        personalCustomizeBackgroundDraft.mediaHistory = [];
         personalCustomizeBackgroundSavedSnapshot = clonePersonalBackgroundState(personalCustomizeBackgroundDraft);
         renderPersonalCustomizeModalRows();
         renderPersonalBackgroundUiFromDraft();
@@ -5159,22 +5689,28 @@ function setPersonalCustomizationUiState(isOn){
     }
 
     function limitPersonalBgMediaHistoryList(list){
-        const arr = (Array.isArray(list) ? list : []).map(item => normalizePersonalBgMediaHistoryEntry(item)).filter(Boolean);
+        const arr = (Array.isArray(list) ? list : [])
+            .map(item => normalizePersonalBgMediaHistoryEntry(item))
+            .filter(Boolean)
+            .sort((a, b) => Number(b.addedAt || 0) - Number(a.addedAt || 0));
         let img = 0;
         let vid = 0;
+        let totalBytes = 0;
         const out = [];
         for (const item of arr) {
+            const itemBytes = estimatePersonalBgMediaEntryStorageBytes(item);
             if (item.kind === 'image') {
-                if (img >= 10) continue;
-                img += 1;
+                if (img >= PERSONAL_BG_HISTORY_MAX_IMAGE_ITEMS) continue;
             } else if (item.kind === 'video') {
-                if (vid >= 10) continue;
-                vid += 1;
+                if (vid >= PERSONAL_BG_HISTORY_MAX_VIDEO_ITEMS) continue;
             } else {
                 continue;
             }
+            if ((totalBytes + itemBytes) > PERSONAL_BG_HISTORY_MAX_TOTAL_STORAGE_BYTES) continue;
             out.push(item);
-            if (img >= 10 && vid >= 10) break;
+            totalBytes += itemBytes;
+            if (item.kind === 'image') img += 1;
+            else if (item.kind === 'video') vid += 1;
         }
         return out;
     }
@@ -5218,7 +5754,8 @@ function setPersonalCustomizationUiState(isOn){
             textLight: values.pageTextColorLight,
             mediaHistory: getPersonalBgMediaHistoryFromValues(values)
         });
-        if ((next.type === 'image' || next.type === 'video') && !next.mediaDataUrl) {
+        const hasExternalMedia = valuesUseExternalPersonalBgMedia(values);
+        if ((next.type === 'image' || next.type === 'video') && !next.mediaDataUrl && !hasExternalMedia) {
             next.type = 'none';
         }
         if (next.type === 'none' && values.pageBgType === 'color') {
@@ -5236,6 +5773,13 @@ function setPersonalCustomizationUiState(isOn){
         valuesObj.pageBgLight = String(Math.round(s.light));
         valuesObj.pageBgMediaKind = (s.type === 'image' || s.type === 'video') ? s.mediaKind || s.type : '';
         valuesObj.pageBgMediaDataUrl = (s.type === 'image' || s.type === 'video') ? (s.mediaDataUrl || '') : '';
+        if (s.type === 'image' || s.type === 'video') {
+            valuesObj.pageBgMediaExternal = 'false';
+            valuesObj.pageBgMediaStorageKey = getPersonalBgMediaStorageKey();
+        } else {
+            delete valuesObj.pageBgMediaExternal;
+            delete valuesObj.pageBgMediaStorageKey;
+        }
         valuesObj.pageBgGlassEnabled = s.glassEnabled ? 'true' : 'false';
         valuesObj.pageBgGlassOpacity = String(Math.round(s.glassOpacity));
         valuesObj.pageBgGlassBlurPx = String(normalizePersonalGlassBlurPx(s.glassBlurPx));
@@ -5339,18 +5883,40 @@ function setPersonalCustomizationUiState(isOn){
         const enabled = shouldUseCustom && !!s.glassEnabled;
         if (!enabled) {
             document.body.classList.remove('glass-mode-active');
+            document.body.classList.remove('glass-solid-active');
             syncPersonalOverlayBackdropStrongBlur();
             return;
         }
         const opacityPct = Math.max(0, Math.min(100, Number(s.glassOpacity)));
+        const solidMode = opacityPct <= 0;
         // 0% = solid, 100% = mest gjennomsiktig
         const alpha = 1 - (opacityPct / 100);
         const borderAlpha = Math.max(0.14, Math.min(0.85, alpha + 0.12));
+        const blurPx = solidMode ? 0 : normalizePersonalGlassBlurPx(s.glassBlurPx);
         document.body.style.setProperty('--glass-ui-alpha', alpha.toFixed(3));
         document.body.style.setProperty('--glass-border-alpha', borderAlpha.toFixed(3));
-        document.body.style.setProperty('--glass-ui-blur', `${normalizePersonalGlassBlurPx(s.glassBlurPx)}px`);
+        document.body.style.setProperty('--glass-ui-blur', `${blurPx}px`);
         document.body.classList.add('glass-mode-active');
+        document.body.classList.toggle('glass-solid-active', solidMode);
         syncPersonalOverlayBackdropStrongBlur();
+    }
+
+    let personalGlassOpacityPreviewRaf = 0;
+    function schedulePersonalGlassOpacityPreview(state){
+        const nextState = clonePersonalBackgroundState(state);
+        if (personalGlassOpacityPreviewRaf) {
+            try { cancelAnimationFrame(personalGlassOpacityPreviewRaf); } catch(e){}
+            personalGlassOpacityPreviewRaf = 0;
+        }
+        const runner = () => {
+            personalGlassOpacityPreviewRaf = 0;
+            applyPersonalGlassModeState(nextState, { preview: true, forceOn: true });
+        };
+        if (typeof requestAnimationFrame === 'function') {
+            personalGlassOpacityPreviewRaf = requestAnimationFrame(runner);
+        } else {
+            runner();
+        }
     }
 
     function updatePersonalBgPreviewChip(){
@@ -5473,10 +6039,10 @@ function setPersonalCustomizationUiState(isOn){
                 const nextRaw = [normalized].concat((d.mediaHistory || []).filter(h => !(h && h.dataUrl === normalized.dataUrl && h.kind === normalized.kind)));
                 d.mediaHistory = limitPersonalBgMediaHistoryList(nextRaw);
                 d.glassEnabled = true;
-                d.glassOpacity = 70;
+                d.glassOpacity = 20;
                 d.glassBlurPx = 1;
                 personalCustomizeBackgroundDraft = d;
-                try { applyThemeMode('light'); } catch(e){}
+                try { applyThemeMode('dark'); } catch(e){}
                 setPersonalBgControlsOpen(true);
                 renderPersonalBackgroundUiFromDraft();
                 applyPersonalBackgroundState(d, { preview: true, forceOn: true });
@@ -5557,10 +6123,7 @@ function setPersonalCustomizationUiState(isOn){
             personalBgBlurOffButtonEl.setAttribute('aria-pressed', String(on));
         }
 
-    if (personalBgBlurOffButtonEl) {
-        personalBgBlurOffButtonEl.addEventListener('click', () => setPersonalBgGlassOff());
-    }
-    if (personalBgBlurFastButtonEl) {
+        if (personalBgBlurFastButtonEl) {
             const on = glassOn && blurPx === 1;
             personalBgBlurFastButtonEl.classList.toggle('active', on);
             personalBgBlurFastButtonEl.setAttribute('aria-pressed', String(on));
@@ -5679,7 +6242,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         const secRaw = Number(personalFruitigerArchiveAutoIntervalSec || 0);
         const sec = Math.max(0, Math.min(600, Number.isFinite(secRaw) ? secRaw : 45));
         if (personalFruitigerArchiveIntervalValueEl) {
-            let display = 'IR';
+            let display = 'AV';
             if (sec > 0) {
                 display = sec >= 60 ? `${(sec / 60).toFixed(sec % 60 === 0 ? 0 : 1)}m` : `${sec}s`;
             }
@@ -5734,6 +6297,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         clearPersonalFruitigerArchiveAutoTimer();
         personalFruitigerArchiveAutoRunning = false;
         personalFruitigerArchiveAutoBusy = false;
+        personalFruitigerArchiveAutoRunToken += 1;
         if (opts && opts.clearSelection) personalFruitigerArchiveSelectedCategoryHref = '';
     }
 
@@ -5761,8 +6325,10 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
         if (sec <= 0) return;
         const delay = sec * 1000;
+        const runToken = personalFruitigerArchiveAutoRunToken;
         personalFruitigerArchiveAutoTimer = setTimeout(async () => {
             if (!personalFruitigerArchiveAutoRunning || personalFruitigerArchiveAutoBusy) return;
+            if (runToken !== personalFruitigerArchiveAutoRunToken) return;
             personalFruitigerArchiveAutoBusy = true;
             try {
                 if (personalFruitigerArchiveHistoryMode) {
@@ -5796,12 +6362,12 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
                 }
 
                 if (cat) {
-                    await applyRandomFruitigerArchiveImage(cat, { fromAuto: true });
+                    await applyRandomFruitigerArchiveImage(cat, { fromAuto: true, runToken });
                 }
             } catch(e) {
             } finally {
                 personalFruitigerArchiveAutoBusy = false;
-                if (personalFruitigerArchiveAutoRunning) schedulePersonalFruitigerArchiveAutoRotation();
+                if (personalFruitigerArchiveAutoRunning && runToken === personalFruitigerArchiveAutoRunToken) schedulePersonalFruitigerArchiveAutoRotation();
             }
         }, delay);
     }
@@ -5817,6 +6383,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
             stopPersonalFruitigerArchiveAutoRotation();
             return;
         }
+        personalFruitigerArchiveAutoRunToken += 1;
         personalFruitigerArchiveAutoRunning = true;
         schedulePersonalFruitigerArchiveAutoRotation();
     }
@@ -5865,6 +6432,13 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
             return label === 'asadal stock images' || label.includes('asadal stock images');
         });
         if (!target || !target.href) return;
+
+        personalFruitigerArchiveSelectedCategoryHref = target.href;
+        const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+        if (sec <= 0) {
+            setPersonalFruitigerArchiveStatus(`Standardkategori valgt: «${target.label || 'Asadal Stock Images'}». Auto-bytte er av.`);
+            return;
+        }
 
         try {
             await applyRandomFruitigerArchiveImage(target);
@@ -6269,7 +6843,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
             }));
             personalFruitigerArchiveCategories = categories;
             setPersonalFruitigerArchiveStatus(categories.length
-                ? 'Velg en kategori. Etter første valg starter automatisk bytte av bilde (hvis intervall ikke står på IR).'
+                ? 'Velg en kategori. Etter første valg starter automatisk bytte av bilde (hvis intervall ikke står på AV).'
                 : 'Fant ingen kategorier. Nettstedet kan ha endret struktur eller blokkert henting.');
             renderPersonalFruitigerArchiveList();
             return categories;
@@ -6993,11 +7567,11 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         s.mediaKind = 'image';
         s.mediaDataUrl = cleanUrl;
         s.glassEnabled = true;
-        s.glassOpacity = 70;
+        s.glassOpacity = 20;
         s.glassBlurPx = 1;
         personalCustomizeBackgroundDraft = s;
         s = upsertMediaHistoryInDraft('image', cleanUrl, categoryLabel ? `FEA – ${categoryLabel}` : 'FEA bilde');
-        try { applyThemeMode('light'); } catch(e){}
+        try { applyThemeMode('dark'); } catch(e){}
         setPersonalBgControlsOpen(true);
         setPersonalBgMediaHistoryOpen(false);
         renderPersonalBackgroundUiFromDraft();
@@ -7009,6 +7583,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         const categoryUrl = String(category.href);
         const categoryLabel = category.label || 'Kategori';
         const fromAuto = !!(opts && opts.fromAuto);
+        const runToken = Number(opts && opts.runToken || 0);
         setPersonalFruitigerArchiveStatus('Laster innhold...', { loading: true });
         try {
             const targetNoHash = (() => { try { const u = new URL(categoryUrl); u.hash = ''; return u.toString(); } catch(e){ return categoryUrl; } })();
@@ -7028,10 +7603,11 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
                 if (filteredPool.length) pool = filteredPool;
             }
             const pick = pool[Math.floor(Math.random() * pool.length)];
+            if (fromAuto && runToken && runToken !== personalFruitigerArchiveAutoRunToken) return;
             personalFruitigerArchiveLastImageUrl = String(pick && pick.url || '');
             applyFruitigerArchiveImageUrl(pick.url, categoryLabel);
             const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
-            const secLabel = sec <= 0 ? 'IR' : `${sec}s`;
+            const secLabel = sec <= 0 ? 'AV' : `${sec}s`;
             setPersonalFruitigerArchiveStatusWithCategory(categoryLabel, `Auto-bytte: ${secLabel} (${personalFruitigerArchiveHistoryMode ? 'historikk' : (personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori')}). Trykk igjen for nytt bilde nå.`);
             if (personalBgMediaStatusEl) personalBgMediaStatusEl.textContent = `FEA: «${categoryLabel}» valgt og klart for lagring`;
         } catch (err) {
@@ -7044,6 +7620,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         const previewMode = !!opts.preview;
         const forceOn = !!opts.forceOn;
         const s = clonePersonalBackgroundState(state);
+        const applyToken = ++personalBgVisualApplyToken;
         applyPersonalGlassModeState(s, opts);
         applyPersonalTextOverrideState(s, opts);
         const shouldUseCustom = forceOn || previewMode || isPersonalCustomizationEnabled();
@@ -7051,20 +7628,45 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         const shouldEnable = shouldUseCustom && (s.type === 'color' || hasMediaBg);
         syncThemeButtonMediaPulse(hasMediaBg);
 
+        const isLatestApply = () => applyToken === personalBgVisualApplyToken;
+        const clearImageHandlers = () => {
+            if (!customPageBgImageEl) return;
+            customPageBgImageEl.onload = null;
+            customPageBgImageEl.onerror = null;
+        };
+        const clearVideoHandlers = () => {
+            if (!customPageBgVideoEl) return;
+            customPageBgVideoEl.onloadeddata = null;
+            customPageBgVideoEl.oncanplay = null;
+            customPageBgVideoEl.onerror = null;
+        };
         const hideImage = (clearSrc = false) => {
             if (!customPageBgImageEl) return;
+            clearImageHandlers();
+            customPageBgImageEl.style.visibility = 'hidden';
             if (customPageBgImageEl.style.display !== 'none') customPageBgImageEl.style.display = 'none';
             if (clearSrc && customPageBgImageEl.getAttribute('src')) customPageBgImageEl.removeAttribute('src');
         };
         const hideVideo = (clearSrc = false) => {
             if (!customPageBgVideoEl) return;
+            clearVideoHandlers();
             try { customPageBgVideoEl.pause(); } catch(e){}
+            customPageBgVideoEl.style.visibility = 'hidden';
             if (customPageBgVideoEl.style.display !== 'none') customPageBgVideoEl.style.display = 'none';
             const hadSrc = !!customPageBgVideoEl.getAttribute('src');
             if (clearSrc && hadSrc) {
                 customPageBgVideoEl.removeAttribute('src');
                 try { customPageBgVideoEl.load(); } catch(e){}
             }
+        };
+        const syncVideoPlayback = () => {
+            if (!customPageBgVideoEl) return;
+            if (isPersonalCustomizeModalOpen()) {
+                try { customPageBgVideoEl.pause(); } catch(e){}
+                return;
+            }
+            const p = customPageBgVideoEl.play();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
         };
 
         if (!shouldEnable) {
@@ -7085,28 +7687,58 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         }
 
         if (s.type === 'image' && customPageBgImageEl && s.mediaDataUrl) {
-            hideVideo(true);
+            const nextImageSrc = String(s.mediaDataUrl || '');
+            const commitImage = () => {
+                if (!isLatestApply()) return;
+                hideVideo(true);
+                clearImageHandlers();
+                if ((customPageBgImageEl.getAttribute('src') || '') !== nextImageSrc) {
+                    customPageBgImageEl.src = nextImageSrc;
+                }
+                customPageBgImageEl.style.visibility = 'visible';
+                if (customPageBgImageEl.style.display !== 'block') customPageBgImageEl.style.display = 'block';
+            };
             const currentImgSrc = customPageBgImageEl.getAttribute('src') || '';
-            if (currentImgSrc !== s.mediaDataUrl) {
-                customPageBgImageEl.src = s.mediaDataUrl;
+            if (currentImgSrc === nextImageSrc && customPageBgImageEl.complete) {
+                commitImage();
+                return;
             }
-            if (customPageBgImageEl.style.display !== 'block') customPageBgImageEl.style.display = 'block';
+            const preloadImage = new Image();
+            try { preloadImage.decoding = 'async'; } catch(e){}
+            preloadImage.onload = commitImage;
+            preloadImage.onerror = commitImage;
+            preloadImage.src = nextImageSrc;
             return;
         }
 
         if (s.type === 'video' && customPageBgVideoEl && s.mediaDataUrl) {
-            hideImage(true);
+            const nextVideoSrc = String(s.mediaDataUrl || '');
+            const commitVideo = () => {
+                if (!isLatestApply()) return;
+                hideImage(true);
+                clearVideoHandlers();
+                if ((customPageBgVideoEl.getAttribute('src') || '') !== nextVideoSrc) {
+                    customPageBgVideoEl.src = nextVideoSrc;
+                }
+                customPageBgVideoEl.style.visibility = 'visible';
+                if (customPageBgVideoEl.style.display !== 'block') customPageBgVideoEl.style.display = 'block';
+                syncVideoPlayback();
+            };
             const currentVideoSrc = customPageBgVideoEl.getAttribute('src') || '';
-            if (currentVideoSrc !== s.mediaDataUrl) {
-                customPageBgVideoEl.src = s.mediaDataUrl;
+            const sameVideo = currentVideoSrc === nextVideoSrc;
+            if (sameVideo && Number(customPageBgVideoEl.readyState || 0) >= 2) {
+                commitVideo();
+                return;
             }
+            clearVideoHandlers();
+            customPageBgVideoEl.style.visibility = 'hidden';
             if (customPageBgVideoEl.style.display !== 'block') customPageBgVideoEl.style.display = 'block';
-            const personalModalOpen = !!(personalCustomizeOverlayEl && personalCustomizeOverlayEl.classList.contains('show'));
-            if (personalModalOpen) {
-                try { customPageBgVideoEl.pause(); } catch(e){}
-            } else {
-                const p = customPageBgVideoEl.play();
-                if (p && typeof p.catch === 'function') p.catch(() => {});
+            customPageBgVideoEl.onloadeddata = commitVideo;
+            customPageBgVideoEl.oncanplay = commitVideo;
+            customPageBgVideoEl.onerror = commitVideo;
+            if (!sameVideo) {
+                customPageBgVideoEl.src = nextVideoSrc;
+                try { customPageBgVideoEl.load(); } catch(e){}
             }
             return;
         }
@@ -7117,6 +7749,33 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
 
     function applyPersonalCustomizationBackground(){
         const saved = readPersonalBackgroundStateFromValues(personalCustomizationValues);
+        const expectsExternalMedia = valuesUseExternalPersonalBgMedia(personalCustomizationValues)
+            && (saved.type === 'image' || saved.type === 'video');
+        if (expectsExternalMedia && !saved.mediaDataUrl) {
+            const activeImageSrc = customPageBgImageEl ? String(customPageBgImageEl.getAttribute('src') || '') : '';
+            const activeVideoSrc = customPageBgVideoEl ? String(customPageBgVideoEl.getAttribute('src') || '') : '';
+            const hasVisibleImage = saved.type === 'image' && !!activeImageSrc;
+            const hasVisibleVideo = saved.type === 'video' && !!activeVideoSrc;
+            if (hasVisibleImage || hasVisibleVideo) {
+                document.body.classList.add('custom-page-bg-active');
+                if (customPageBgFillEl) customPageBgFillEl.style.background = 'var(--bg)';
+                if (hasVisibleImage) {
+                    if (customPageBgImageEl.style.display !== 'block') customPageBgImageEl.style.display = 'block';
+                    if (customPageBgVideoEl) {
+                        try { customPageBgVideoEl.pause(); } catch(e){}
+                        customPageBgVideoEl.style.display = 'none';
+                    }
+                }
+                if (hasVisibleVideo) {
+                    if (customPageBgVideoEl.style.display !== 'block') customPageBgVideoEl.style.display = 'block';
+                    if (customPageBgImageEl) customPageBgImageEl.style.display = 'none';
+                }
+                hydratePersonalBgMediaForCurrentProfile({ apply: true });
+                return;
+            }
+            hydratePersonalBgMediaForCurrentProfile({ apply: true });
+            return;
+        }
         applyPersonalBackgroundState(saved, { preview: false });
     }
 
@@ -7139,6 +7798,14 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
             if (personalBgMediaStatusEl) personalBgMediaStatusEl.textContent = 'Filtype støttes ikke. Velg bilde eller video.';
             return;
         }
+        const maxBytes = isVideo ? PERSONAL_BG_MAX_UPLOAD_VIDEO_BYTES : PERSONAL_BG_MAX_UPLOAD_IMAGE_BYTES;
+        if (Number(file.size || 0) > maxBytes) {
+            const maxMb = (maxBytes / (1024 * 1024)).toFixed(0);
+            if (personalBgMediaStatusEl) {
+                personalBgMediaStatusEl.textContent = `${isVideo ? 'Videoen' : 'Bildet'} er for stor. Maks anbefalt størrelse er ${maxMb} MB for å unngå treghet og lagringsfeil.`;
+            }
+            return;
+        }
         const reader = new FileReader();
         reader.onload = () => {
             const dataUrl = typeof reader.result === 'string' ? reader.result : '';
@@ -7148,11 +7815,11 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
             s.mediaKind = s.type;
             s.mediaDataUrl = dataUrl;
             s.glassEnabled = true;
-            s.glassOpacity = 70;
+            s.glassOpacity = 20;
             s.glassBlurPx = 1;
             personalCustomizeBackgroundDraft = s;
             s = upsertMediaHistoryInDraft(s.type, dataUrl, file && file.name ? file.name : '');
-            try { applyThemeMode('light'); } catch(e){}
+            try { applyThemeMode('dark'); } catch(e){}
             setPersonalBgControlsOpen(true);
             setPersonalBgMediaHistoryOpen(false);
             setPersonalFruitigerArchiveOpen(false);
@@ -7328,6 +7995,46 @@ function clampInt(v, min, max) {
         }
     }
 
+    function renderTimelineSetupGuide(ds, de, total) {
+        const cs = dayTimelineSettings.coreStartMin;
+        const ce = dayTimelineSettings.coreEndMin;
+        const ls = dayTimelineSettings.lunchStartMin;
+        const le = dayTimelineSettings.lunchEndMin;
+
+        dayTimelineBarEl.appendChild(createTimelineSegment(0, 100, 'blue', null, 'setup', 'day'));
+
+        const coreLeft = ((Math.max(ds, cs) - ds) / total) * 100;
+        const coreRight = ((Math.min(de, ce) - ds) / total) * 100;
+        const coreWidth = Math.max(0, coreRight - coreLeft);
+        dayTimelineBarEl.appendChild(createTimelineSegment(coreLeft, coreWidth, 'orange', null, 'setup', 'core'));
+
+        const lunchLeft = ((Math.max(ds, ls) - ds) / total) * 100;
+        const lunchRight = ((Math.min(de, le) - ds) / total) * 100;
+        const lunchWidth = Math.max(0, lunchRight - lunchLeft);
+        dayTimelineBarEl.appendChild(createTimelineSegment(lunchLeft, lunchWidth, 'green', null, 'setup', 'lunch'));
+    }
+
+    function scheduleCrossBrowserTimelineRefresh() {
+        const redraw = () => {
+            try { renderDayTimeline(); } catch (e) {}
+            try { updateTimelineNowDot(); } catch (e) {}
+        };
+
+        redraw();
+
+        if (typeof requestAnimationFrame === 'function') {
+            requestAnimationFrame(() => {
+                redraw();
+                requestAnimationFrame(() => redraw());
+            });
+        } else {
+            setTimeout(redraw, 0);
+            setTimeout(redraw, 60);
+        }
+
+        setTimeout(redraw, 120);
+    }
+
     function renderDayTimeline() {
         if (!dayTimelineBarEl || !dayTimelineTicksEl) return;
         validateDayTimelineSettings();
@@ -7343,31 +8050,13 @@ function clampInt(v, min, max) {
         if (timelineMode === 'setup') {
             dayTimelineBarEl.title = "Dobbeltklikk på en farge for å justere tid.";
             dayTimelineBarEl.style.cursor = "default";
-            
-            const cs = dayTimelineSettings.coreStartMin;
-            const ce = dayTimelineSettings.coreEndMin;
-            const ls = dayTimelineSettings.lunchStartMin;
-            const le = dayTimelineSettings.lunchEndMin;
-
-            // Blue
-            dayTimelineBarEl.appendChild(createTimelineSegment(0, 100, 'blue', null, 'setup', 'day'));
-
-            // Core
-            const coreLeft = ((Math.max(ds, cs) - ds) / total) * 100;
-            const coreRight = ((Math.min(de, ce) - ds) / total) * 100;
-            const coreWidth = Math.max(0, coreRight - coreLeft);
-            dayTimelineBarEl.appendChild(createTimelineSegment(coreLeft, coreWidth, 'orange', null, 'setup', 'core'));
-
-            // Lunch
-            const lunchLeft = ((Math.max(ds, ls) - ds) / total) * 100;
-            const lunchRight = ((Math.min(de, le) - ds) / total) * 100;
-            const lunchWidth = Math.max(0, lunchRight - lunchLeft);
-            dayTimelineBarEl.appendChild(createTimelineSegment(lunchLeft, lunchWidth, 'green', null, 'setup', 'lunch'));
+            renderTimelineSetupGuide(ds, de, total);
 
         } else {
             // WORK MODE
             dayTimelineBarEl.title = "Viser arbeidsfordeling.";
             dayTimelineBarEl.style.cursor = "default";
+            let renderedWorkSegments = 0;
             
             data.tasks.forEach((task, idx) => {
                 const d = new Date(task.firstStartAt || task.createdAt);
@@ -7390,8 +8079,15 @@ function clampInt(v, min, max) {
                     const seg = createTimelineSegment(leftPct, widthPct, color, 0.9, 'work', null);
                     seg.title = `${task.name} (${formatDuration(elapsedMs, false)})`;
                     dayTimelineBarEl.appendChild(seg);
+                    renderedWorkSegments++;
                 }
             });
+
+            // Firefox can occasionally paint the first empty work-mode render without visible segmentation.
+            // Show the configured day/core/lunch guide until real work segments exist.
+            if (renderedWorkSegments === 0) {
+                renderTimelineSetupGuide(ds, de, total);
+            }
         }
 
         // Ticks Logic
@@ -7584,6 +8280,20 @@ function clampInt(v, min, max) {
         }
     }
 
+
+    function formatDurationWorkList(ms, forceShowSeconds = false) {
+        const safeMs = Math.max(0, Number(ms) || 0);
+        return formatDuration(safeMs, forceShowSeconds || safeMs < 60000);
+    }
+
+    function isActiveProjectDivisionSelection(selection) {
+        if (!selection) return false;
+        const activeTask = getActiveTask();
+        if (!activeTask) return false;
+        return normalizeTaskName(activeTask.parentProject || '') === normalizeTaskName(selection.projectName || '')
+            && normalizeTaskName(activeTask.subTaskName || '') === normalizeTaskName(selection.subTaskName || '');
+    }
+
     function formatColoredDuration(ms) {
         ms = Math.max(0, ms || 0);
         const totalSeconds = Math.floor(ms / 1000);
@@ -7648,6 +8358,15 @@ function clampInt(v, min, max) {
         const diff = Date.now() - task.lastStartMs;
         const running = Math.max(0, diff);
         return base + running;
+    }
+
+    function getTaskCurrentRunMs(task) {
+        if (!task || !task.isActive || !task.lastStartMs) return 0;
+        return Math.max(0, Date.now() - task.lastStartMs);
+    }
+
+    function shouldShowWorkListSecondsForTask(task) {
+        return !!(task && task.isActive && getTaskCurrentRunMs(task) < 60000);
     }
 
     function getActiveTaskIndex() { return data.tasks.findIndex(t => t.isActive); }
@@ -8000,8 +8719,9 @@ function clampInt(v, min, max) {
         ensureGroupData();
 
         const query = taskInputEl.value.trim().toLowerCase();
+        const visibleTaskNames = (data.taskNames || []).filter(n => !isProjectDivisionHistoryName(n));
         const keyToName = {};
-        data.taskNames.forEach(n => { const k = normalizeTaskName(n); if (k) keyToName[k] = n; });
+        visibleTaskNames.forEach(n => { const k = normalizeTaskName(n); if (k) keyToName[k] = n; });
 
         const nameMatches = (name) => {
             if (!query) return true;
@@ -8030,7 +8750,7 @@ function clampInt(v, min, max) {
                     const fb = isFavoriteForName(b);
                     if (fa && fb) return getFavoriteRankForName(a) - getFavoriteRankForName(b);
                     if (fa !== fb) return fa ? -1 : 1;
-                    return data.taskNames.indexOf(a) - data.taskNames.indexOf(b);
+                    return visibleTaskNames.indexOf(a) - visibleTaskNames.indexOf(b);
                 });
 
                 namesInGroup.forEach(n => rows.push({ type: "task", name: n }));
@@ -8050,7 +8770,7 @@ function clampInt(v, min, max) {
                 .filter(Boolean);
 
             // Ungrouped tasks
-            let taskRows = data.taskNames
+            let taskRows = visibleTaskNames
                 .filter(name => {
                     const k = normalizeTaskName(name);
                     if (!k) return false;
@@ -8064,7 +8784,7 @@ function clampInt(v, min, max) {
                 const fb = isFavoriteForName(b);
                 if (fa && fb) return getFavoriteRankForName(a) - getFavoriteRankForName(b);
                 if (fa !== fb) return fa ? -1 : 1;
-                return data.taskNames.indexOf(a) - data.taskNames.indexOf(b);
+                return visibleTaskNames.indexOf(a) - visibleTaskNames.indexOf(b);
             });
 
             // Favorites ALWAYS on top, regardless of groups
@@ -8338,6 +9058,7 @@ function clampInt(v, min, max) {
                 if (e.target && (e.target.closest && e.target.closest(".suggestion-actions"))) return;
                 if (suppressNextSuggestionClick) { suppressNextSuggestionClick = false; return; }
                 selectedTaskId = null;
+                selectedProjectDivisionTarget = null;
                 startOrResumeByName(name);
             });
 
@@ -8370,6 +9091,123 @@ function clampInt(v, min, max) {
         const val = (projectNumber || "").trim();
         if (val) data.projectNumbers[key] = val;
         else delete data.projectNumbers[key];
+    }
+
+    function getStoredProjectDivisionForName(name) {
+        const key = normalizeTaskName(name);
+        if (!key) return [];
+        if (!data.projectDivisions || typeof data.projectDivisions !== "object") data.projectDivisions = {};
+        const val = data.projectDivisions[key];
+        return Array.isArray(val) ? val.filter(v => typeof v === 'string' && v.trim()) : [];
+    }
+
+    function setStoredProjectDivisionForName(name, items) {
+        const key = normalizeTaskName(name);
+        if (!key) return;
+        if (!data.projectDivisions || typeof data.projectDivisions !== "object") data.projectDivisions = {};
+        const cleaned = Array.isArray(items) ? items.map(v => String(v || '').trim()).filter(Boolean) : [];
+        if (cleaned.length) data.projectDivisions[key] = cleaned;
+        else delete data.projectDivisions[key];
+    }
+
+    function updateProjectTaskDivisionButtonState() {
+        if (!projectTaskDivisionButtonEl) return;
+        const name = (pendingNewTaskName || '').trim();
+        const hasItems = name ? getStoredProjectDivisionForName(name).length > 0 : false;
+        projectTaskDivisionButtonEl.setAttribute('aria-pressed', hasItems ? 'true' : 'false');
+        projectTaskDivisionButtonEl.style.background = hasItems ? 'var(--accent)' : '';
+        projectTaskDivisionButtonEl.style.color = hasItems ? '#111' : '';
+        projectTaskDivisionButtonEl.style.borderColor = hasItems ? 'var(--accent)' : '';
+    }
+
+    function updateProjectTaskDivisionVisibility() {
+        if (!projectTaskDivisionButtonRowEl) return;
+        projectTaskDivisionButtonRowEl.style.display = projectDivisionEnabled ? 'flex' : 'none';
+        updateProjectTaskDivisionButtonState();
+    }
+
+    function updateProjectTaskDivisionLineNumbers() {
+        if (!projectTaskDivisionTextareaEl || !projectTaskDivisionLineNumbersEl) return;
+        const lines = Math.max(1, projectTaskDivisionTextareaEl.value.split('\n').length);
+        let out = '';
+        for (let i = 1; i <= lines; i++) out += i + (i < lines ? '\n' : '');
+        projectTaskDivisionLineNumbersEl.textContent = out;
+        projectTaskDivisionLineNumbersEl.scrollTop = projectTaskDivisionTextareaEl.scrollTop;
+    }
+
+    function getCurrentProjectPopupTaskName() {
+        const fromPending = String(pendingNewTaskName || '').trim();
+        if (fromPending) return fromPending;
+        const fromLabel = projectTaskNameEl ? String(projectTaskNameEl.textContent || '').trim() : '';
+        if (fromLabel) return fromLabel;
+        const fromInput = taskInputEl ? String(taskInputEl.value || '').trim() : '';
+        return fromInput;
+    }
+
+    function refreshProjectTaskDivisionPopupState() {
+        const currentName = getCurrentProjectPopupTaskName();
+        if (currentName) pendingNewTaskName = currentName;
+        updateProjectTaskDivisionVisibility();
+        if (!projectTaskDivisionTextareaEl) return;
+        const items = currentName ? getStoredProjectDivisionForName(currentName) : [];
+        projectTaskDivisionTextareaEl.value = items.join('\n');
+        updateProjectTaskDivisionLineNumbers();
+    }
+
+    function openProjectTaskDivisionModal() {
+        if (!projectDivisionEnabled || !projectTaskDivisionOverlayEl || !projectTaskDivisionTextareaEl) return;
+        const currentName = getCurrentProjectPopupTaskName();
+        if (!currentName) return;
+        pendingNewTaskName = currentName;
+        refreshProjectTaskDivisionPopupState();
+        projectTaskDivisionOverlayEl.classList.add('show');
+        requestAnimationFrame(() => {
+            refreshProjectTaskDivisionPopupState();
+            projectTaskDivisionTextareaEl.focus();
+            projectTaskDivisionTextareaEl.selectionStart = projectTaskDivisionTextareaEl.value.length;
+            projectTaskDivisionTextareaEl.selectionEnd = projectTaskDivisionTextareaEl.value.length;
+        });
+    }
+
+    function closeProjectTaskDivisionModal() {
+        if (!projectTaskDivisionOverlayEl) return;
+        projectTaskDivisionOverlayEl.classList.remove('show');
+    }
+
+    function saveProjectTaskDivisionFromModal() {
+        if (!pendingNewTaskName || !projectTaskDivisionTextareaEl) return;
+        const items = projectTaskDivisionTextareaEl.value.split('\n').map(v => v.trim()).filter(Boolean);
+        setStoredProjectDivisionForName(pendingNewTaskName, items);
+        saveToStorage();
+        updateProjectTaskDivisionButtonState();
+        closeProjectTaskDivisionModal();
+    }
+
+    function getStoredProjectDivisionItemsForDisplay(taskOrName) {
+        const projectName = typeof taskOrName === 'string'
+            ? String(taskOrName || '').trim()
+            : String((taskOrName && taskOrName.name) || '').trim();
+        if (!projectName) return [];
+        return getStoredProjectDivisionForName(projectName);
+    }
+
+    function getWorkListProjectDivisionItems(task) {
+        if (!projectDivisionEnabled || !task || !task.name) return [];
+        return getStoredProjectDivisionItemsForDisplay(task);
+    }
+
+    function taskHasWorkListProjectDivision(task) {
+        return getStoredProjectDivisionItemsForDisplay(task).length > 0;
+    }
+
+    function toggleWorkListProjectDivision(taskId) {
+        const id = Number(taskId) || 0;
+        if (!id) return false;
+        const task = data.tasks.find(t => t.id === id);
+        if (!taskHasWorkListProjectDivision(task)) return false;
+        expandedProjectDivisionTaskId = (expandedProjectDivisionTaskId === id) ? null : id;
+        updateUI();
+        return true;
     }
 
 
@@ -8435,6 +9273,13 @@ function clampInt(v, min, max) {
                 data.projectNumbers[newKey] = oldVal;
             }
             delete data.projectNumbers[oldKey];
+            if (data.projectDivisions && typeof data.projectDivisions === "object") {
+                const oldDiv = data.projectDivisions[oldKey];
+                if (Array.isArray(oldDiv) && !Array.isArray(data.projectDivisions[newKey])) {
+                    data.projectDivisions[newKey] = oldDiv.slice();
+                }
+                delete data.projectDivisions[oldKey];
+            }
         
         ensureOutdatedData();
         if (data.outdated && typeof data.outdated === "object") {
@@ -8456,6 +9301,199 @@ function clampInt(v, min, max) {
         const key = normalizeTaskName(name);
         if (!key) return null;
         return data.tasks.find(t => normalizeTaskName(t.name) === key) || null;
+    }
+
+    function makeProjectDivisionTaskName(projectName, subTaskName) {
+        const p = String(projectName || '').trim();
+        const s = String(subTaskName || '').trim();
+        if (!p || !s) return '';
+        return p + ' — ' + s;
+    }
+
+    function getTaskDisplayLabel(task) {
+        if (!task) return '';
+        if (isProjectDivisionSubTask(task)) {
+            return makeProjectDivisionTaskName(task.parentProject || '', task.subTaskName || '') || (task.name || '');
+        }
+        return task.name || '';
+    }
+
+    function isProjectDivisionSubTask(task) {
+        return !!(task && typeof task.parentProject === 'string' && task.parentProject.trim() && typeof task.subTaskName === 'string' && task.subTaskName.trim());
+    }
+
+    function isProjectDivisionHistoryName(name) {
+        const trimmed = String(name || '').trim();
+        if (!trimmed || !data.projectDivisions || typeof data.projectDivisions !== 'object') return false;
+        return Object.keys(data.projectDivisions).some((projectKey) => {
+            const items = Array.isArray(data.projectDivisions[projectKey]) ? data.projectDivisions[projectKey] : [];
+            const projectName = (data.taskNames || []).find(n => normalizeTaskName(n) === projectKey) || projectKey;
+            return items.some(item => makeProjectDivisionTaskName(projectName, item) === trimmed);
+        });
+    }
+
+    function findProjectDivisionTask(projectName, subTaskName) {
+        const projectKey = normalizeTaskName(projectName);
+        const subKey = normalizeTaskName(subTaskName);
+        if (!projectKey || !subKey) return null;
+        const compositeKey = normalizeTaskName(makeProjectDivisionTaskName(projectName, subTaskName));
+        const matches = data.tasks.filter(t => {
+            const directMatch = normalizeTaskName(t.parentProject || '') === projectKey && normalizeTaskName(t.subTaskName || '') === subKey;
+            const legacyMatch = !directMatch && normalizeTaskName(t.name || '') === compositeKey;
+            return directMatch || legacyMatch;
+        });
+        if (!matches.length) return null;
+        matches.sort((a, b) => {
+            if (!!a.isActive !== !!b.isActive) return a.isActive ? -1 : 1;
+            const aStamp = Number(a.lastStartMs || a.createdAt || 0);
+            const bStamp = Number(b.lastStartMs || b.createdAt || 0);
+            if (aStamp !== bStamp) return bStamp - aStamp;
+            return getTaskElapsedMs(b) - getTaskElapsedMs(a);
+        });
+        return matches[0] || null;
+    }
+
+    function startOrResumeProjectDivisionTask(projectName, subTaskName) {
+        const project = String(projectName || '').trim();
+        const subTask = String(subTaskName || '').trim();
+        if (!project || !subTask) return;
+        const nextSelection = makeProjectDivisionSelection(project, subTask);
+        const existing = findProjectDivisionTask(project, subTask);
+        if (existing) {
+            selectedProjectDivisionTarget = nextSelection;
+            if (existing.isActive) {
+                selectedTaskId = null;
+                saveToStorage();
+                updateUI();
+                return;
+            }
+            const isFreshCommentOnlyInstance = !existing.firstStartAt && !existing.lastStartMs && !existing.isActive && Number(existing.totalMs || 0) <= 0;
+            if (isFreshCommentOnlyInstance) {
+                finalizeActiveTask();
+                const idx = data.tasks.findIndex(t => t.id === existing.id);
+                if (idx > 0) {
+                    data.tasks.splice(idx, 1);
+                    data.tasks.unshift(existing);
+                }
+                const now = Date.now();
+                existing.isActive = true;
+                existing.lastStartMs = now;
+                existing.firstStartAt = existing.firstStartAt || now;
+                existing.lastEndAt = null;
+                existing.resumed = false;
+                existing.resumeCount = Number(existing.resumeCount || 0);
+                selectedTaskId = null;
+                saveToStorage();
+                updateUI();
+                return;
+            }
+            resumeTask(existing.id);
+            selectedProjectDivisionTarget = nextSelection;
+            updateUI();
+            return;
+        }
+        const compositeName = makeProjectDivisionTaskName(project, subTask);
+        const storedPN = getStoredProjectNumberForName(project).trim();
+        startNewTask(compositeName, storedPN, {
+            parentProject: project,
+            subTaskName: subTask
+        });
+        selectedProjectDivisionTarget = nextSelection;
+        updateUI();
+    }
+
+    function getProjectDivisionTaskDisplayMs(task) {
+        if (!task) return 0;
+        const rawMs = task.isActive ? getTaskElapsedMs(task) : (task.totalMs || getTaskElapsedMs(task));
+        return isRoundingEnabled ? getRoundedMs(rawMs) : rawMs;
+    }
+
+    function getProjectDivisionParentRawMs(projectName) {
+        const projectKey = normalizeTaskName(projectName);
+        if (!projectKey) return 0;
+        return data.tasks.reduce((sum, task) => {
+            if (isProjectDivisionSubTask(task)) return sum;
+            if (normalizeTaskName(task.name || '') !== projectKey) return sum;
+            return sum + (task.isActive ? getTaskElapsedMs(task) : (task.totalMs || 0));
+        }, 0);
+    }
+
+    function getProjectDivisionTotalRawMs(projectName) {
+        const projectKey = normalizeTaskName(projectName);
+        if (!projectKey) return 0;
+        return data.tasks.reduce((sum, task) => {
+            if (normalizeTaskName(task.name || '') === projectKey || normalizeTaskName(task.parentProject || '') === projectKey) {
+                return sum + (task.isActive ? getTaskElapsedMs(task) : (task.totalMs || 0));
+            }
+            return sum;
+        }, 0);
+    }
+
+    function getProjectDivisionParentDisplayRawMs(projectName) {
+        return projectDivisionEnabled
+            ? getProjectDivisionParentRawMs(projectName)
+            : getProjectDivisionTotalRawMs(projectName);
+    }
+
+    function hasLiveProjectDivisionSeconds(projectName) {
+        const projectKey = normalizeTaskName(projectName);
+        if (!projectKey) return false;
+        return data.tasks.some(task => {
+            if (!(normalizeTaskName(task.name || '') === projectKey || normalizeTaskName(task.parentProject || '') === projectKey)) return false;
+            return shouldShowWorkListSecondsForTask(task);
+        });
+    }
+
+    function getProjectDivisionSubtaskRawMs(projectName) {
+        const projectKey = normalizeTaskName(projectName);
+        if (!projectKey) return 0;
+        return data.tasks.reduce((sum, task) => {
+            if (normalizeTaskName(task.parentProject || '') !== projectKey) return sum;
+            return sum + (task.isActive ? getTaskElapsedMs(task) : (task.totalMs || 0));
+        }, 0);
+    }
+
+    function shouldShowProjectDivisionArrow(task) {
+        if (!task) return false;
+        const storedItems = getStoredProjectDivisionItemsForDisplay(task);
+        if (!storedItems.length) return false;
+        return projectDivisionEnabled || getProjectDivisionSubtaskRawMs(task.name) > 0;
+    }
+
+    function resolveLiveProjectDivisionTask(projectName, subTaskName, fallbackTaskId = 0) {
+        const liveTask = findProjectDivisionTask(projectName, subTaskName);
+        if (liveTask) return liveTask;
+        const fallbackId = Number(fallbackTaskId || 0);
+        if (!fallbackId) return null;
+        return data.tasks.find(t => Number(t.id) === fallbackId) || null;
+    }
+
+    function makeProjectDivisionSelection(projectName, subTaskName) {
+        const project = String(projectName || '').trim();
+        const subTask = String(subTaskName || '').trim();
+        if (!project || !subTask) return null;
+        return { projectName: project, subTaskName: subTask };
+    }
+
+    function isSameProjectDivisionSelection(a, b) {
+        if (!a || !b) return false;
+        return normalizeTaskName(a.projectName) === normalizeTaskName(b.projectName)
+            && normalizeTaskName(a.subTaskName) === normalizeTaskName(b.subTaskName);
+    }
+
+    function isSelectedProjectDivision(projectName, subTaskName) {
+        return isSameProjectDivisionSelection(selectedProjectDivisionTarget, makeProjectDivisionSelection(projectName, subTaskName));
+    }
+
+    function getProjectDivisionTotalDisplayMs(projectName) {
+        const projectKey = normalizeTaskName(projectName);
+        if (!projectKey) return 0;
+        return data.tasks.reduce((sum, task) => {
+            if (normalizeTaskName(task.name || '') === projectKey || normalizeTaskName(task.parentProject || '') === projectKey) {
+                return sum + getProjectDivisionTaskDisplayMs(task);
+            }
+            return sum;
+        }, 0);
     }
 
     function startOrResumeByName(name) {
@@ -8492,7 +9530,7 @@ function clampInt(v, min, max) {
         showProjectPopup(trimmed);
     }
 
-    function startNewTask(name, projectNumber) {
+    function startNewTask(name, projectNumber, extra = null) {
         if (!canStartOrResumeWorkNow(true)) return;
         if (!name) return;
         // Reset to Setup mode when starting a new task
@@ -8504,11 +9542,14 @@ function clampInt(v, min, max) {
         const newTask = {
             id: now, name: name, totalMs: 0, isActive: true, lastStartMs: now, resumed: false,
             createdAt: now, firstStartAt: now, lastEndAt: null, resumeCount: 0,
-            comment: "", startAdjusted: false, projectNumber: pn
+            comment: "", startAdjusted: false, projectNumber: pn,
+            parentProject: extra && typeof extra.parentProject === 'string' ? extra.parentProject.trim() : '',
+            subTaskName: extra && typeof extra.subTaskName === 'string' ? extra.subTaskName.trim() : ''
         };
         if (pn) setStoredProjectNumberForName(name, pn);
         data.tasks.unshift(newTask);
         selectedTaskId = null;
+        selectedProjectDivisionTarget = null;
         expandedCommentTaskId = null;
         addTaskNameToHistory(name);
         taskInputEl.value = "";
@@ -8544,6 +9585,8 @@ function clampInt(v, min, max) {
         if (typeof task.comment !== "string") task.comment = "";
         if (typeof task.startAdjusted !== "boolean") task.startAdjusted = false;
         if (typeof task.projectNumber !== "string") task.projectNumber = "";
+        if (typeof task.parentProject !== "string") task.parentProject = "";
+        if (typeof task.subTaskName !== "string") task.subTaskName = "";
         
         const pn = (task.projectNumber || "").trim();
         if (pn) setStoredProjectNumberForName(task.name, pn);
@@ -8631,13 +9674,17 @@ function clampInt(v, min, max) {
         if (projectOutdatedWrapEl) projectOutdatedWrapEl.style.display = "none";
         if (projectConfirmButtonEl) projectConfirmButtonEl.textContent = projectConfirmDefaultText;
 
+        loadProjectDivisionToggleSetting();
         pendingNewTaskName = (taskName || "").trim();
         if (!pendingNewTaskName) return;
         projectTaskNameEl.textContent = pendingNewTaskName;
         projectNumberInputEl.value = getStoredProjectNumberForName(pendingNewTaskName) || "";
         if (projectOutdatedCheckboxEl) projectOutdatedCheckboxEl.checked = isOutdatedForName(pendingNewTaskName);
+        refreshProjectTaskDivisionPopupState();
         projectOverlayEl.classList.add("show");
+        requestAnimationFrame(() => refreshProjectTaskDivisionPopupState());
         setTimeout(() => {
+            refreshProjectTaskDivisionPopupState();
             if (projectPopupMode === "edit" && projectNameEditInputEl) projectNameEditInputEl.focus();
             else projectNumberInputEl.focus();
         }, 0);
@@ -8648,6 +9695,7 @@ function clampInt(v, min, max) {
         projectPopupMode = "edit";
         if (projectConfirmButtonEl) projectConfirmButtonEl.textContent = "Lagre";
 
+        loadProjectDivisionToggleSetting();
         pendingNewTaskName = (taskName || "").trim();
         projectEditOriginalName = pendingNewTaskName;
         if (projectNameEditRowEl) projectNameEditRowEl.style.display = "block";
@@ -8662,8 +9710,11 @@ function clampInt(v, min, max) {
             projectOutdatedCheckboxEl.checked = isOutdatedForName(pendingNewTaskName);
         }
 
+        refreshProjectTaskDivisionPopupState();
         projectOverlayEl.classList.add("show");
+        requestAnimationFrame(() => refreshProjectTaskDivisionPopupState());
         setTimeout(() => {
+            refreshProjectTaskDivisionPopupState();
             if (projectPopupMode === "edit" && projectNameEditInputEl) projectNameEditInputEl.focus();
             else projectNumberInputEl.focus();
         }, 0);
@@ -8676,6 +9727,8 @@ function clampInt(v, min, max) {
         projectNumberInputEl.value = "";
         if (projectNameEditInputEl) projectNameEditInputEl.value = "";
         if (projectNameEditRowEl) projectNameEditRowEl.style.display = "none";
+        updateProjectTaskDivisionVisibility();
+        closeProjectTaskDivisionModal();
         projectPopupMode = "start";
         if (projectConfirmButtonEl) projectConfirmButtonEl.textContent = projectConfirmDefaultText;
     }
@@ -8718,6 +9771,36 @@ function clampInt(v, min, max) {
         }
 startNewTask(pendingNewTaskName, projectNo);
         hideProjectPopup();
+    }
+
+    function ensureProjectDivisionTask(projectName, subTaskName) {
+        const existing = findProjectDivisionTask(projectName, subTaskName);
+        if (existing) {
+            if (typeof existing.comment !== "string") existing.comment = "";
+            return existing;
+        }
+        const now = Date.now() + Math.floor(Math.random() * 1000);
+        const compositeName = makeProjectDivisionTaskName(projectName, subTaskName);
+        const pn = getStoredProjectNumberForName(projectName).trim();
+        const newTask = {
+            id: now,
+            name: compositeName,
+            totalMs: 0,
+            isActive: false,
+            lastStartMs: null,
+            resumed: false,
+            createdAt: now,
+            firstStartAt: null,
+            lastEndAt: now,
+            resumeCount: 0,
+            comment: "",
+            startAdjusted: false,
+            projectNumber: pn,
+            parentProject: String(projectName || '').trim(),
+            subTaskName: String(subTaskName || '').trim()
+        };
+        data.tasks.push(newTask);
+        return newTask;
     }
 
     function showCommentPopup(task) {
@@ -8779,58 +9862,321 @@ startNewTask(pendingNewTaskName, projectNo);
         if (!task) return 0;
         return getTaskElapsedMs(task);
     }
-    function refreshTransferHint() {
+    function getProjectAggregateTasks(projectTask) {
+        if (!projectTask) return [];
+        const projectKey = normalizeTaskName(projectTask.name || '');
+        if (!projectKey) return projectTask ? [projectTask] : [];
+        const matches = data.tasks.filter(task => {
+            if (!task) return false;
+            if (Number(task.id) === Number(projectTask.id)) return true;
+            return normalizeTaskName(task.parentProject || '') === projectKey;
+        });
+        matches.sort((a, b) => {
+            const aIsParent = Number(a.id) === Number(projectTask.id);
+            const bIsParent = Number(b.id) === Number(projectTask.id);
+            if (aIsParent !== bIsParent) return aIsParent ? -1 : 1;
+            if (!!a.isActive !== !!b.isActive) return a.isActive ? -1 : 1;
+            const aStamp = Number(a.lastStartMs || a.createdAt || 0);
+            const bStamp = Number(b.lastStartMs || b.createdAt || 0);
+            if (aStamp !== bStamp) return bStamp - aStamp;
+            return getTaskElapsedMs(b) - getTaskElapsedMs(a);
+        });
+        return matches;
+    }
+    function getProjectAggregateAvailableMs(projectTask) {
+        return getProjectAggregateTasks(projectTask).reduce((sum, task) => sum + getTaskElapsedMs(task), 0);
+    }
+    function reduceTimeFromProjectAggregate(projectTask, amountMs) {
+        let remaining = Math.max(0, amountMs || 0);
+        if (!projectTask || remaining <= 0) return false;
+        const matches = getProjectAggregateTasks(projectTask);
+        if (!matches.length) return false;
+        for (const task of matches) {
+            if (remaining <= 0) break;
+            const available = getTaskElapsedMs(task);
+            if (available <= 0) continue;
+            const slice = Math.min(remaining, available);
+            reduceTimeFromTask(task, slice);
+            remaining -= slice;
+        }
+        return remaining < amountMs;
+    }
+    function getTransferTopLevelTasks() {
+        return data.tasks.filter(t => !isProjectDivisionSubTask(t));
+    }
+    function canTransferWithinSingleProject() {
+        if (!projectDivisionEnabled) return false;
+        const topLevelTasks = getTransferTopLevelTasks();
+        if (topLevelTasks.length !== 1) return false;
+        const projectTask = topLevelTasks[0] || null;
+        if (!projectTask) return false;
+        const items = getStoredProjectDivisionItemsForDisplay(projectTask);
+        if (!items.length) return false;
+        return getProjectAggregateAvailableMs(projectTask) > 0;
+    }
+    function canUseTransferBetweenProjectsOrSubtasks() {
+        const topLevelTasks = getTransferTopLevelTasks();
+        const hasAnyTime = topLevelTasks.some(t => getProjectAggregateAvailableMs(t) > 0);
+        if (!hasAnyTime) return false;
+        if (topLevelTasks.length >= 2) return true;
+        return canTransferWithinSingleProject();
+    }
+    function getTransferProjectDivisionItems(taskOrName) {
+        if (!projectDivisionEnabled) return [];
+        const projectName = typeof taskOrName === 'string'
+            ? String(taskOrName || '').trim()
+            : String((taskOrName && taskOrName.name) || '').trim();
+        if (!projectName) return [];
+        return getStoredProjectDivisionForName(projectName);
+    }
+    function fillTransferSubtaskSelect(selectEl, wrapEl, projectTask, preferredValue = '', includeProjectOption = false) {
+        if (!selectEl || !wrapEl) return;
+        const items = getTransferProjectDivisionItems(projectTask);
+        selectEl.innerHTML = '';
+        if (!items.length) {
+            wrapEl.style.display = 'none';
+            selectEl.value = '';
+            return;
+        }
+        if (includeProjectOption) {
+            const projectOpt = document.createElement('option');
+            projectOpt.value = '';
+            projectOpt.textContent = 'Kun prosjektet';
+            selectEl.appendChild(projectOpt);
+        }
+        items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item;
+            opt.textContent = item;
+            selectEl.appendChild(opt);
+        });
+        wrapEl.style.display = 'flex';
+        const nextValue = ((preferredValue === '' && includeProjectOption) || items.includes(preferredValue))
+            ? preferredValue
+            : (includeProjectOption ? '' : items[0]);
+        selectEl.value = nextValue;
+    }
+    function getTransferSourceSelection() {
         const sourceId = Number(transferSourceEl.value);
-        const source = data.tasks.find(t => t.id === sourceId);
-        const maxMs = getTaskAvailableMs(source);
-        const showSec = source ? source.isActive : false;
+        const projectTask = data.tasks.find(t => t.id === sourceId) || null;
+        if (!projectTask) return { projectTask: null, effectiveTask: null, selectedSubtask: '', label: '', availableMs: 0, usesAggregate: false };
+        const selectedSubtask = (transferSourceSubtaskWrapEl && transferSourceSubtaskWrapEl.style.display !== 'none')
+            ? String(transferSourceSubtaskEl.value || '').trim()
+            : '';
+        const effectiveTask = selectedSubtask ? findProjectDivisionTask(projectTask.name, selectedSubtask) : projectTask;
+        const usesAggregate = !selectedSubtask;
+        const availableMs = selectedSubtask ? getTaskAvailableMs(effectiveTask) : getProjectAggregateAvailableMs(projectTask);
+        const label = selectedSubtask ? `${projectTask.name} → ${selectedSubtask}` : projectTask.name;
+        return { projectTask, effectiveTask, selectedSubtask, label, availableMs, usesAggregate };
+    }
+    function getTransferTargetSelection() {
+        const targetId = Number(transferTargetEl.value);
+        const projectTask = data.tasks.find(t => t.id === targetId) || null;
+        if (!projectTask) return { projectTask: null, effectiveTask: null, label: '' };
+        const selectedSubtask = (transferTargetSubtaskWrapEl && transferTargetSubtaskWrapEl.style.display !== 'none')
+            ? String(transferTargetSubtaskEl.value || '').trim()
+            : '';
+        const effectiveTask = selectedSubtask ? ensureProjectDivisionTask(projectTask.name, selectedSubtask) : projectTask;
+        const label = selectedSubtask ? `${projectTask.name} → ${selectedSubtask}` : projectTask.name;
+        return { projectTask, effectiveTask, selectedSubtask, label };
+    }
+    function fillAdjustTargetSubtaskSelect(projectTask, preferredValue = '') {
+        if (!adjustStartTargetSubtaskEl || !adjustStartTargetSubtaskWrapEl) return;
+        const items = projectDivisionEnabled ? getStoredProjectDivisionItemsForDisplay(projectTask) : [];
+        adjustStartTargetSubtaskEl.innerHTML = '';
+        if (!items.length) {
+            adjustStartTargetSubtaskWrapEl.style.display = 'none';
+            adjustStartTargetSubtaskEl.value = '';
+            return;
+        }
+        const projectOpt = document.createElement('option');
+        projectOpt.value = '';
+        projectOpt.textContent = 'Kun prosjektet';
+        adjustStartTargetSubtaskEl.appendChild(projectOpt);
+        items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item;
+            opt.textContent = item;
+            adjustStartTargetSubtaskEl.appendChild(opt);
+        });
+        adjustStartTargetSubtaskWrapEl.style.display = 'flex';
+        const nextValue = (preferredValue === '' || items.includes(preferredValue)) ? preferredValue : '';
+        adjustStartTargetSubtaskEl.value = nextValue;
+    }
+    function getAdjustTargetSelection(createIfMissing = false) {
+        const targetId = Number(adjustStartTargetEl && adjustStartTargetEl.value);
+        const projectTask = data.tasks.find(t => Number(t.id) === targetId) || null;
+        if (!projectTask) return { projectTask: null, effectiveTask: null, selectedSubtask: '', label: '' };
+        const selectedSubtask = (adjustStartTargetSubtaskWrapEl && adjustStartTargetSubtaskWrapEl.style.display !== 'none')
+            ? String(adjustStartTargetSubtaskEl.value || '').trim()
+            : '';
+        let effectiveTask = projectTask;
+        if (selectedSubtask) {
+            effectiveTask = findProjectDivisionTask(projectTask.name, selectedSubtask) || null;
+            if (!effectiveTask && createIfMissing) {
+                effectiveTask = ensureProjectDivisionTask(projectTask.name, selectedSubtask);
+            }
+        }
+        const label = selectedSubtask ? `${projectTask.name} → ${selectedSubtask}` : projectTask.name;
+        return { projectTask, effectiveTask, selectedSubtask, label };
+    }
+    function initAdjustTargetSelects() {
+        if (!adjustStartTargetEl || !adjustStartTargetRowEl) return;
+        const topLevelTasks = getTransferTopLevelTasks();
+        adjustStartTargetEl.innerHTML = '';
+        if (adjustStartTargetSubtaskEl) adjustStartTargetSubtaskEl.innerHTML = '';
+        topLevelTasks.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = String(t.id);
+            opt.textContent = t.isActive ? (t.name + ' (aktiv)') : t.name;
+            adjustStartTargetEl.appendChild(opt);
+        });
+        const selectedTopLevel = selectedTaskId
+            ? (data.tasks.find(t => Number(t.id) === Number(selectedTaskId)) || null)
+            : null;
+        const activeTask = getActiveTask();
+        let preferredProjectName = '';
+        let preferredSubtask = '';
+        if (selectedTopLevel && !isProjectDivisionSubTask(selectedTopLevel)) {
+            preferredProjectName = selectedTopLevel.name || '';
+        } else if (selectedTopLevel && isProjectDivisionSubTask(selectedTopLevel)) {
+            preferredProjectName = selectedTopLevel.parentProject || '';
+            preferredSubtask = selectedTopLevel.subTaskName || '';
+        } else if (selectedProjectDivisionTarget) {
+            preferredProjectName = selectedProjectDivisionTarget.projectName || '';
+            preferredSubtask = selectedProjectDivisionTarget.subTaskName || '';
+        } else if (activeTask && isProjectDivisionSubTask(activeTask)) {
+            preferredProjectName = activeTask.parentProject || '';
+            preferredSubtask = activeTask.subTaskName || '';
+        } else if (activeTask) {
+            preferredProjectName = activeTask.name || '';
+        }
+        let preferredTask = topLevelTasks.find(t => normalizeTaskName(t.name) === normalizeTaskName(preferredProjectName)) || null;
+        if (!preferredTask && activeTask) {
+            preferredTask = isProjectDivisionSubTask(activeTask)
+                ? topLevelTasks.find(t => normalizeTaskName(t.name) === normalizeTaskName(activeTask.parentProject || '')) || null
+                : topLevelTasks.find(t => Number(t.id) === Number(activeTask.id)) || null;
+        }
+        if (!preferredTask && topLevelTasks.length) preferredTask = topLevelTasks[0];
+        adjustStartTargetEl.value = preferredTask ? String(preferredTask.id) : '';
+        fillAdjustTargetSubtaskSelect(preferredTask, preferredSubtask);
+        const hasDivisionChoices = !!(projectDivisionEnabled && topLevelTasks.length);
+        adjustStartTargetRowEl.style.display = hasDivisionChoices ? 'flex' : 'none';
+        const refreshAdjustDialogHeading = () => {
+            const selection = getAdjustTargetSelection();
+            if (!selection.label) return;
+            if (adjustPopupMode === 'set-start') {
+                adjustStartTitleEl.textContent = `Sett starttid - ${selection.label}`;
+                adjustStartDescEl.textContent = `Endre starttidspunkt for: ${selection.label}.`;
+            } else if (adjustPopupMode === 'subtract') {
+                adjustStartTitleEl.textContent = `Trekk tid fra: ${selection.label}`;
+                adjustStartDescEl.textContent = `Trekk fra tid på: ${selection.label}.`;
+            } else {
+                adjustStartTitleEl.textContent = `Tilfør tid på - ${selection.label}`;
+                adjustStartDescEl.textContent = `Juster tid på: ${selection.label}.`;
+            }
+        };
+        adjustStartTargetEl.onchange = () => {
+            const projectTask = data.tasks.find(t => Number(t.id) === Number(adjustStartTargetEl.value)) || null;
+            fillAdjustTargetSubtaskSelect(projectTask, '');
+            refreshAdjustDialogHeading();
+        };
+        if (adjustStartTargetSubtaskEl) {
+            adjustStartTargetSubtaskEl.onchange = () => {
+                refreshAdjustDialogHeading();
+            };
+        }
+        refreshAdjustDialogHeading();
+    }
+    function refreshTransferHint() {
+        const sourceSelection = getTransferSourceSelection();
+        const source = sourceSelection.effectiveTask;
+        const maxMs = Math.max(0, Number(sourceSelection.availableMs || 0));
+        const showSec = sourceSelection.usesAggregate
+            ? hasLiveProjectDivisionSeconds(sourceSelection.projectTask ? sourceSelection.projectTask.name : '')
+            : (source ? source.isActive : false);
         transferMaxHintEl.textContent = source
-            ? `Maks tilgjengelig å overføre fra valgt prosjekt: ${formatDuration(maxMs, showSec)}`
-            : "";
+            ? `Maks tilgjengelig å overføre fra valgt prosjekt: ${sourceSelection.label} — ${formatDuration(maxMs, showSec)}`
+            : '';
     }
     function showTransferPopup() {
-        if (data.tasks.length < 2) return;
-        const hasAnyTime = data.tasks.some(t => getTaskElapsedMs(t) > 0);
-        if (!hasAnyTime) return;
+        const topLevelTasks = getTransferTopLevelTasks();
+        if (!canUseTransferBetweenProjectsOrSubtasks()) return;
         initTransferSelects();
-        transferSourceEl.innerHTML = "";
-        transferTargetEl.innerHTML = "";
-        const sources = data.tasks.filter(t => getTaskElapsedMs(t) > 0);
+        transferSourceEl.innerHTML = '';
+        transferTargetEl.innerHTML = '';
+        if (transferSourceSubtaskEl) transferSourceSubtaskEl.innerHTML = '';
+        if (transferTargetSubtaskEl) transferTargetSubtaskEl.innerHTML = '';
+        const sources = topLevelTasks.filter(t => getProjectAggregateAvailableMs(t) > 0);
         let defaultSourceId = null;
-        if (selectedTaskId) {
+        if (selectedProjectDivisionTarget && selectedProjectDivisionTarget.projectName) {
+            const selectedParent = topLevelTasks.find(t => normalizeTaskName(t.name) === normalizeTaskName(selectedProjectDivisionTarget.projectName));
+            if (selectedParent) defaultSourceId = selectedParent.id;
+        }
+        if (!defaultSourceId && selectedTaskId) {
             const sel = data.tasks.find(t => t.id === selectedTaskId);
-            if (sel && getTaskElapsedMs(sel) > 0) defaultSourceId = sel.id;
+            if (sel && !isProjectDivisionSubTask(sel) && sources.some(s => s.id === sel.id)) defaultSourceId = sel.id;
+            if (sel && isProjectDivisionSubTask(sel)) {
+                const parent = topLevelTasks.find(t => normalizeTaskName(t.name) === normalizeTaskName(sel.parentProject || ''));
+                if (parent && sources.some(s => s.id === parent.id)) defaultSourceId = parent.id;
+            }
         }
         if (!defaultSourceId) {
             const active = getActiveTask();
-            if (active && getTaskElapsedMs(active) > 0) defaultSourceId = active.id;
+            if (active && !isProjectDivisionSubTask(active) && sources.some(s => s.id === active.id)) defaultSourceId = active.id;
+            if (active && isProjectDivisionSubTask(active)) {
+                const parent = topLevelTasks.find(t => normalizeTaskName(t.name) === normalizeTaskName(active.parentProject || ''));
+                if (parent && sources.some(s => s.id === parent.id)) defaultSourceId = parent.id;
+            }
         }
         if (!defaultSourceId && sources.length > 0) defaultSourceId = sources[0].id;
         sources.forEach(t => {
-            const opt = document.createElement("option");
+            const opt = document.createElement('option');
             opt.value = String(t.id);
-            opt.textContent = t.isActive ? (t.name + " (aktiv)") : t.name;
+            opt.textContent = t.isActive ? (t.name + ' (aktiv)') : t.name;
             transferSourceEl.appendChild(opt);
         });
-        transferSourceEl.value = String(defaultSourceId || (sources[0] ? sources[0].id : ""));
+        transferSourceEl.value = String(defaultSourceId || (sources[0] ? sources[0].id : ''));
         function fillTargets() {
             const sourceId = Number(transferSourceEl.value);
-            transferTargetEl.innerHTML = "";
-            data.tasks.filter(t => t.id !== sourceId).forEach(t => {
-                const opt = document.createElement("option");
+            const currentTargetId = Number(transferTargetEl.value);
+            transferTargetEl.innerHTML = '';
+            topLevelTasks.forEach(t => {
+                const opt = document.createElement('option');
                 opt.value = String(t.id);
-                opt.textContent = t.isActive ? (t.name + " (aktiv)") : t.name;
+                opt.textContent = t.isActive ? (t.name + ' (aktiv)') : t.name;
                 transferTargetEl.appendChild(opt);
             });
+            const validTargetIds = Array.from(transferTargetEl.options).map(opt => Number(opt.value));
+            const nextTargetId = validTargetIds.includes(currentTargetId) ? currentTargetId : (validTargetIds[0] || sourceId || '');
+            transferTargetEl.value = String(nextTargetId || sourceId || '');
+            const sourceTask = data.tasks.find(t => t.id === sourceId) || null;
+            const targetTask = data.tasks.find(t => t.id === Number(transferTargetEl.value)) || null;
+            const preferredSourceSubtask = selectedProjectDivisionTarget && sourceTask && normalizeTaskName(selectedProjectDivisionTarget.projectName) === normalizeTaskName(sourceTask.name)
+                ? String(selectedProjectDivisionTarget.subTaskName || '')
+                : (sourceTask && isProjectDivisionSubTask(getActiveTask()) && normalizeTaskName(getActiveTask().parentProject || '') === normalizeTaskName(sourceTask.name)
+                    ? String(getActiveTask().subTaskName || '')
+                    : '');
+            const preferredTargetSubtask = targetTask && isProjectDivisionSubTask(getActiveTask()) && normalizeTaskName(getActiveTask().parentProject || '') === normalizeTaskName(targetTask.name)
+                ? String(getActiveTask().subTaskName || '')
+                : '';
+            fillTransferSubtaskSelect(transferSourceSubtaskEl, transferSourceSubtaskWrapEl, sourceTask, preferredSourceSubtask, true);
+            fillTransferSubtaskSelect(transferTargetSubtaskEl, transferTargetSubtaskWrapEl, targetTask, preferredTargetSubtask, true);
         }
         fillTargets();
-        transferHoursEl.value = "00";
-        transferMinutesEl.value = "05";
+        transferHoursEl.value = '00';
+        transferMinutesEl.value = '05';
         refreshTransferHint();
         transferSourceEl.onchange = () => { fillTargets(); refreshTransferHint(); };
+        transferTargetEl.onchange = () => {
+            const targetTask = data.tasks.find(t => t.id === Number(transferTargetEl.value)) || null;
+            fillTransferSubtaskSelect(transferTargetSubtaskEl, transferTargetSubtaskWrapEl, targetTask, transferTargetSubtaskEl.value, true);
+        };
+        if (transferSourceSubtaskEl) transferSourceSubtaskEl.onchange = refreshTransferHint;
+        if (transferTargetSubtaskEl) transferTargetSubtaskEl.onchange = () => {};
         transferHoursEl.onchange = refreshTransferHint;
         transferMinutesEl.onchange = refreshTransferHint;
-        transferOverlayEl.classList.add("show");
+        transferOverlayEl.classList.add('show');
     }
     function hideTransferPopup() { transferOverlayEl.classList.remove("show"); }
     function reduceTimeFromTask(task, amountMs) {
@@ -8858,19 +10204,20 @@ startNewTask(pendingNewTaskName, projectNo);
         }
     }
     function transferTimeConfirm() {
-        const sourceId = Number(transferSourceEl.value);
-        const targetId = Number(transferTargetEl.value);
-        if (!sourceId || !targetId || sourceId === targetId) return;
-        const source = data.tasks.find(t => t.id === sourceId);
-        const target = data.tasks.find(t => t.id === targetId);
-        if (!source || !target) return;
+        const sourceSelection = getTransferSourceSelection();
+        const targetSelection = getTransferTargetSelection();
+        const sourceProjectId = Number(transferSourceEl.value);
+        const targetProjectId = Number(transferTargetEl.value);
+        if (!sourceProjectId || !targetProjectId || !sourceSelection.effectiveTask || !targetSelection.effectiveTask) return;
+        if (sourceSelection.effectiveTask.id === targetSelection.effectiveTask.id) return;
         const amountMsRaw = getTransferAmountMs();
         if (amountMsRaw <= 0) { hideTransferPopup(); return; }
-        const available = getTaskAvailableMs(source);
+        const available = Math.max(0, Number(sourceSelection.availableMs || 0));
         const amountMs = Math.min(amountMsRaw, available);
         if (amountMs <= 0) { hideTransferPopup(); return; }
-        target.totalMs = Math.max(0, target.totalMs || 0) + amountMs;
-        reduceTimeFromTask(source, amountMs);
+        targetSelection.effectiveTask.totalMs = Math.max(0, targetSelection.effectiveTask.totalMs || 0) + amountMs;
+        if (sourceSelection.usesAggregate) reduceTimeFromProjectAggregate(sourceSelection.projectTask, amountMs);
+        else reduceTimeFromTask(sourceSelection.effectiveTask, amountMs);
         saveToStorage();
         updateUI();
         hideTransferPopup();
@@ -8901,6 +10248,32 @@ startNewTask(pendingNewTaskName, projectNo);
         const active = getActiveTask();
         return !!active;
     }
+    function isAdjustButtonInSetStartMode() {
+        return !!(adjustStartButtonEl && String(adjustStartButtonEl.textContent || '').trim() === 'Legg til starttid');
+    }
+    function hasAnyManualStartAdjustment() {
+        return data.tasks.some(task => !!(task && task.startAdjusted));
+    }
+    function applySetStartTimeToTask(targetTask, newTs) {
+        if (!targetTask || !Number.isFinite(newTs)) return false;
+        const now = Date.now();
+        const effectiveStart = Math.min(newTs, now);
+        if (!targetTask.firstStartAt || effectiveStart < Number(targetTask.firstStartAt || 0)) {
+            targetTask.firstStartAt = effectiveStart;
+        }
+        if (!targetTask.createdAt || effectiveStart < Number(targetTask.createdAt || 0)) {
+            targetTask.createdAt = effectiveStart;
+        }
+        if (targetTask.isActive) {
+            targetTask.lastStartMs = effectiveStart;
+        } else {
+            const computedMs = Math.max(0, now - effectiveStart);
+            targetTask.totalMs = Math.max(Number(targetTask.totalMs || 0), computedMs);
+            targetTask.lastEndAt = now;
+        }
+        targetTask.startAdjusted = true;
+        return true;
+    }
     function updateAddTimeDisplay() {
         const h = Math.floor(addedMinutesBuffer / 60);
         const m = addedMinutesBuffer % 60;
@@ -8909,26 +10282,31 @@ startNewTask(pendingNewTaskName, projectNo);
     function showAdjustStartPopup() {
         const active = getActiveTask();
 
-        // Special mode: After "Avslutt dagens arbeid" – allow subtract-only time correction
         if (!active) {
             if (!(endDayPressedAtMs && data.tasks.length > 0)) return;
 
-            const fallbackId = (data.tasks[0] ? data.tasks[0].id : null);
-            const targetId = (selectedTaskId !== null) ? selectedTaskId : fallbackId;
-            const target = data.tasks.find(t => t.id === targetId) || null;
-            if (!target) return;
-
             adjustPopupMode = "subtract";
-            adjustPopupTargetId = target.id;
+            adjustPopupTargetId = null;
+
+            initAdjustTargetSelects();
+            const selection = getAdjustTargetSelection(true);
+            if (!selection.projectTask) return;
+            adjustPopupTargetId = selection.projectTask.id;
 
             addedMinutesBuffer = 0;
             updateAddTimeDisplay();
 
-            adjustStartTitleEl.textContent = `Trekk tid fra: ${target.name}`;
-            adjustStartDescEl.textContent = "Trekk fra tid på valgt prosjekt.";
+            adjustStartTitleEl.textContent = selection.label ? `Trekk tid fra: ${selection.label}` : `Trekk tid fra: ${selection.projectTask.name}`;
+            adjustStartDescEl.textContent = selection.label
+                ? `Trekk fra tid på: ${selection.label}.`
+                : "Trekk fra tid på valgt prosjekt.";
 
             adjustStartModeTimeEl.style.display = "none";
             adjustStartModeAddEl.style.display = "block";
+            if (adjustStartTargetRowEl) {
+                const shouldShowTargetRow = !!(projectDivisionEnabled && getTransferTopLevelTasks().length);
+                adjustStartTargetRowEl.style.display = shouldShowTargetRow ? 'flex' : 'none';
+            }
 
             if (adjustTimeStepperBtnEl) {
                 adjustTimeStepperBtnEl.textContent = "-15 min";
@@ -8939,31 +10317,36 @@ startNewTask(pendingNewTaskName, projectNo);
                 adjustStepperHelpEl.innerHTML = "Enkeltrykk = -15 min<br>Dobbeltrykk = +15 min (angre)";
             }
 
-                        adjustStartOverlayEl.classList.add("show");
+            adjustStartOverlayEl.classList.add("show");
             return;
         }
 
-        adjustPopupMode = "normal";
+        adjustPopupMode = isAdjustButtonInSetStartMode() ? "set-start" : "add-duration";
         adjustPopupTargetId = null;
         if (adjustStartConfirmButtonEl) adjustStartConfirmButtonEl.classList.remove("danger");
 
-        // Check if this is the ONLY task
-        if (data.tasks.length === 1) {
-            // MODE 1: Set Start Time
-            initAdjustStartSelects();
-            
-            // Pre-fill with current start time
-            const d = new Date(active.firstStartAt || active.createdAt);
+        initAdjustStartSelects();
+        initAdjustTargetSelects();
+
+        if (adjustPopupMode === "set-start") {
+            const selection = getAdjustTargetSelection(true);
+            const targetTask = selection.effectiveTask || active;
+            const d = new Date((targetTask && (targetTask.firstStartAt || targetTask.createdAt)) || active.firstStartAt || active.createdAt);
             adjustStartHourEl.value = d.getHours();
             adjustStartMinuteEl.value = d.getMinutes();
-            
-            adjustStartTitleEl.textContent = "Sett starttid";
-            adjustStartDescEl.textContent = "Endre starttidspunkt for dagens første oppgave.";
-            
+
+            adjustStartTitleEl.textContent = selection.label ? `Sett starttid - ${selection.label}` : "Sett starttid";
+            adjustStartDescEl.textContent = selection.label
+                ? `Endre starttidspunkt for: ${selection.label}.`
+                : "Endre starttidspunkt for valgt prosjekt.";
+
             adjustStartModeTimeEl.style.display = "block";
             adjustStartModeAddEl.style.display = "none";
+            if (adjustStartTargetRowEl) {
+                const shouldShowTargetRow = !!getTransferTopLevelTasks().length;
+                adjustStartTargetRowEl.style.display = shouldShowTargetRow ? 'flex' : 'none';
+            }
         } else {
-            // MODE 2: Add Duration
             addedMinutesBuffer = 0;
             updateAddTimeDisplay();
 
@@ -8976,13 +10359,18 @@ startNewTask(pendingNewTaskName, projectNo);
                 adjustStepperHelpEl.innerHTML = "Enkeltrykk = +15 min<br>Dobbeltrykk = -15 min";
             }
 
-            adjustStartTitleEl.textContent = "Tilfør tid";
-            adjustStartDescEl.textContent = "Juster tid på det aktive prosjektet.";
-            
             adjustStartModeTimeEl.style.display = "none";
             adjustStartModeAddEl.style.display = "block";
+            const selection = getAdjustTargetSelection();
+            const activeLabel = selection.label || getTaskDisplayLabel(active) || 'Ukjent prosjekt';
+            adjustStartTitleEl.textContent = `Tilfør tid på - ${activeLabel}`;
+            adjustStartDescEl.textContent = `Juster tid på: ${activeLabel}.`;
+            if (adjustStartTargetRowEl) {
+                const shouldShowTargetRow = !!getTransferTopLevelTasks().length;
+                adjustStartTargetRowEl.style.display = shouldShowTargetRow ? 'flex' : 'none';
+            }
         }
-        
+
         adjustStartOverlayEl.classList.add("show");
     }
     function hideAdjustStartPopup() {
@@ -8992,50 +10380,47 @@ startNewTask(pendingNewTaskName, projectNo);
         if (!active && adjustPopupMode !== "subtract") return;
 
         if (adjustPopupMode === "subtract") {
-            const target = data.tasks.find(t => t.id === adjustPopupTargetId) || null;
-            if (!target) { hideAdjustStartPopup(); return; }
+            const selection = getAdjustTargetSelection(true);
+            const targetProject = selection.projectTask || (data.tasks.find(t => t.id === adjustPopupTargetId) || null);
+            if (!targetProject) { hideAdjustStartPopup(); return; }
             if (addedMinutesBuffer === 0) { hideAdjustStartPopup(); return; }
             const msToReduce = addedMinutesBuffer * 60 * 1000;
-            reduceTimeFromTask(target, msToReduce);
+            if (selection.selectedSubtask && selection.effectiveTask) {
+                reduceTimeFromTask(selection.effectiveTask, msToReduce);
+            } else {
+                reduceTimeFromProjectAggregate(targetProject, msToReduce);
+            }
             saveToStorage();
             updateUI();
             hideAdjustStartPopup();
             return;
         }
 
-        if (data.tasks.length === 1) {
-            // MODE 1: Set Start Time Logic
+        if (adjustPopupMode === "set-start") {
             const h = parseInt(adjustStartHourEl.value, 10);
             const m = parseInt(adjustStartMinuteEl.value, 10);
-            
-            const newStart = new Date(active.firstStartAt || active.createdAt);
-            newStart.setHours(h, m, 0, 0);
-            
-            const newTs = newStart.getTime();
-            
-            // Update task properties
-            active.firstStartAt = newTs;
-            active.createdAt = newTs; 
-            
-            // If active, we must update lastStartMs to shift the timeline anchor
-            if (active.isActive) {
-                active.lastStartMs = newTs;
-            }
-            // Reset totalMs for the first task usually implies a clean slate calculation from start
-            // active.totalMs = 0; 
-            
+            const selection = getAdjustTargetSelection(true);
+            const targetTask = selection.effectiveTask || active;
+            if (!targetTask) { hideAdjustStartPopup(); return; }
+
+            const baseDate = new Date((targetTask.firstStartAt || targetTask.createdAt || active.firstStartAt || active.createdAt));
+            baseDate.setHours(h, m, 0, 0);
+            const newTs = baseDate.getTime();
+            applySetStartTimeToTask(targetTask, newTs);
         } else {
-            // MODE 2: Add Duration Logic
             if (addedMinutesBuffer === 0) { hideAdjustStartPopup(); return; }
             const msToAdd = addedMinutesBuffer * 60 * 1000;
-            if (active.isActive && active.lastStartMs) {
-                active.lastStartMs -= msToAdd;
+            const selection = getAdjustTargetSelection(true);
+            const targetTask = selection.effectiveTask || active;
+            if (!targetTask) { hideAdjustStartPopup(); return; }
+            if (targetTask.isActive && targetTask.lastStartMs) {
+                targetTask.lastStartMs -= msToAdd;
             } else {
-                active.totalMs = (active.totalMs || 0) + msToAdd;
+                targetTask.totalMs = (targetTask.totalMs || 0) + msToAdd;
             }
-            if (!active.isActive && active.totalMs < 0) active.totalMs = 0;
+            if (!targetTask.isActive && targetTask.totalMs < 0) targetTask.totalMs = 0;
         }
-        
+
         saveToStorage();
         updateUI();
         hideAdjustStartPopup();
@@ -9510,7 +10895,7 @@ groupedData.forEach((monthMap, monthKey) => {
         if (currentTaskCardEl) {
             currentTaskCardEl.classList.remove("card-active-mode", "card-active-mode-resumed");
             if (isGuardArchiveLock && !activeTask) {
-            startButtonEl.textContent = (selectedTaskId !== null) ? "Gjenoppta arbeid" : "Start arbeid";
+            startButtonEl.textContent = (selectedTaskId !== null && !selectedProjectDivisionTarget) ? "Gjenoppta arbeid" : "Start arbeid";
             startButtonEl.style.backgroundColor = "#4b5563";
             selectionInfoEl.textContent = isPrevDayArchiveRequired
                 ? "Gårsdagens timeføring må «Tøm og arkiver» før du kan starte eller gjenoppta arbeid."
@@ -9524,6 +10909,7 @@ groupedData.forEach((monthMap, monthKey) => {
             }
         }
         const taskCount = data.tasks.length;
+        const topLevelTaskCount = getTransferTopLevelTasks().length;
         if (taskCount > 1) endButtonEl.textContent = "Avslutt dagens arbeid";
         else endButtonEl.textContent = "Avslutt dagens arbeid";
         let totalDayMs = 0;
@@ -9550,13 +10936,14 @@ groupedData.forEach((monthMap, monthKey) => {
             currentTaskNameEl.textContent = activeTask.name;
             currentTaskNameEl.className = "current-task-title rainbow-text";
             endButtonEl.disabled = false;
-            const canTransfer = data.tasks.length >= 2 && data.tasks.some(t => getTaskElapsedMs(t) > 0);
+            const canTransfer = canUseTransferBetweenProjectsOrSubtasks();
             transferTimeButtonEl.disabled = !canTransfer;
             const canAdjust = canAdjustStartForActive();
             adjustStartButtonEl.disabled = !canAdjust;
             adjustStartButtonEl.classList.remove("btn-hover-blue", "btn-hover-green", "btn-delete-time");
-            if (taskCount > 1) {
+            if (topLevelTaskCount > 1 || hasAnyManualStartAdjustment()) {
                 adjustStartButtonEl.textContent = "Tilfør tid";
+                adjustStartButtonEl.title = "Legg til tid på valgt prosjekt eller prosjektoppgave";
                 adjustStartButtonEl.classList.add("btn-hover-green");
             } else {
                 adjustStartButtonEl.textContent = "Legg til starttid";
@@ -9572,7 +10959,7 @@ groupedData.forEach((monthMap, monthKey) => {
             currentTaskNameEl.textContent = "Ingen aktivt prosjekt";
             currentTaskNameEl.className = "current-task-title";
             endButtonEl.disabled = true;
-            const canTransfer = data.tasks.length >= 2 && data.tasks.some(t => getTaskElapsedMs(t) > 0);
+            const canTransfer = canUseTransferBetweenProjectsOrSubtasks();
             transferTimeButtonEl.disabled = !canTransfer;
             adjustStartButtonEl.classList.remove("btn-hover-blue", "btn-hover-green", "btn-delete-time");
             if (endDayPressedAtMs && data.tasks.length > 0) {
@@ -9620,35 +11007,38 @@ if (taskInputEl) {
     }
 }
         taskListEl.innerHTML = "";
+        if (!projectDivisionEnabled) {
+            expandedProjectDivisionTaskId = null;
+        } else if (expandedProjectDivisionTaskId !== null) {
+            const expandedTask = data.tasks.find(t => t.id === expandedProjectDivisionTaskId);
+            if (!taskHasWorkListProjectDivision(expandedTask)) expandedProjectDivisionTaskId = null;
+        }
         if (data.tasks.length === 0) {
             emptyListTextEl.style.display = "block";
         } else {
             emptyListTextEl.style.display = "none";
-            data.tasks.forEach(task => {
+            const topLevelTasks = data.tasks.filter(task => !isProjectDivisionSubTask(task));
+            const visibleTasks = expandedProjectDivisionTaskId !== null
+                ? topLevelTasks.filter(task => task.id === expandedProjectDivisionTaskId)
+                : topLevelTasks;
+            visibleTasks.forEach(task => {
                 const li = document.createElement("li");
                 li.className = "task-list-item";
                 li.dataset.id = task.id;
                 if (isFavoriteForName(task.name)) li.classList.add("task-favorite");
                 if (task.isActive) li.classList.add("task-active");
                 if (task.id === selectedTaskId) li.classList.add("task-selected");
+                const storedDivisionItems = getStoredProjectDivisionItemsForDisplay(task);
+                const divisionItems = getWorkListProjectDivisionItems(task);
+                const hasStoredProjectDivision = storedDivisionItems.length > 0;
+                const divisionOpen = projectDivisionEnabled && expandedProjectDivisionTaskId === task.id && divisionItems.length > 0;
+                li.dataset.projectName = task.name || '';
+                li.dataset.hasProjectDivision = hasStoredProjectDivision ? '1' : '0';
+                if (divisionOpen) li.classList.add("project-division-open");
                 const left = document.createElement("span");
                 left.className = "task-left";
                 const hasComment = typeof task.comment === "string" && task.comment.trim().length > 0;
-                const infoCol = document.createElement("div");
-                infoCol.className = "task-info-col";
-                const nameRow = document.createElement("div");
-                nameRow.className = "task-name-row";
-                const nameSpan = document.createElement("span");
-                nameSpan.className = "task-name";
-                nameSpan.textContent = task.name;
-                nameRow.appendChild(nameSpan);
-                infoCol.appendChild(nameRow);
-                if (task.projectNumber && task.projectNumber.trim().length > 0) {
-                    const pnDiv = document.createElement("div");
-                    pnDiv.className = "task-project-number";
-                    pnDiv.textContent = task.projectNumber;
-                    infoCol.appendChild(pnDiv);
-                }
+                const hasProjectDivision = shouldShowProjectDivisionArrow(task);
                 if (hasComment) {
                     const copyBtn = document.createElement("button");
                     copyBtn.className = "btn-comment-copy";
@@ -9656,7 +11046,7 @@ if (taskInputEl) {
                     let clickCount = 0;
                     let singleClickTimer = null;
                     copyBtn.addEventListener("click", (e) => {
-                        e.stopPropagation(); 
+                        e.stopPropagation();
                         clickCount++;
                         if (clickCount === 1) {
                             singleClickTimer = setTimeout(() => {
@@ -9665,7 +11055,7 @@ if (taskInputEl) {
                                     toggleCommentDropdown(task.id);
                                     updateUI();
                                 }
-                            }, 250); 
+                            }, 250);
                         } else if (clickCount === 2) {
                             clearTimeout(singleClickTimer);
                             clickCount = 0;
@@ -9677,7 +11067,7 @@ if (taskInputEl) {
                                             const nameEl = parentLi.querySelector('.task-name');
                                             if (nameEl) {
                                                 nameEl.classList.remove('text-flash-anim');
-                                                void nameEl.offsetWidth; 
+                                                void nameEl.offsetWidth;
                                                 nameEl.classList.add('text-flash-anim');
                                                 setTimeout(() => { nameEl.classList.remove('text-flash-anim'); }, 700);
                                             }
@@ -9688,6 +11078,33 @@ if (taskInputEl) {
                     });
                     copyBtn.addEventListener("dblclick", (e) => { e.stopPropagation(); });
                     left.appendChild(copyBtn);
+                }
+                if (hasProjectDivision) {
+                    const arrowSpan = document.createElement("span");
+                    arrowSpan.className = "project-division-arrow " + (divisionOpen ? "is-expanded" : "is-collapsed");
+                    arrowSpan.setAttribute('aria-hidden', 'true');
+                    arrowSpan.textContent = divisionOpen ? '▼' : '▶';
+                    if (!divisionOpen) arrowSpan.style.animationDelay = `-${Date.now() % 2000}ms`;
+                    left.appendChild(arrowSpan);
+                }
+                const infoCol = document.createElement("div");
+                infoCol.className = "task-info-col";
+                const nameRow = document.createElement("div");
+                nameRow.className = "task-name-row";
+                const nameSpan = document.createElement("span");
+                nameSpan.className = "task-name";
+                if (hasProjectDivision) {
+                    nameSpan.classList.add('is-project-division-parent');
+                    nameSpan.title = 'Dobbeltklikk for kommentar på prosjektet';
+                }
+                nameSpan.textContent = task.name;
+                nameRow.appendChild(nameSpan);
+                infoCol.appendChild(nameRow);
+                if (task.projectNumber && task.projectNumber.trim().length > 0) {
+                    const pnDiv = document.createElement("div");
+                    pnDiv.className = "task-project-number";
+                    pnDiv.textContent = task.projectNumber;
+                    infoCol.appendChild(pnDiv);
                 }
                 left.appendChild(infoCol);
                 const timeSpan = document.createElement("span");
@@ -9703,12 +11120,19 @@ if (taskInputEl) {
                     isRounded = true;
                 }
                 if (isRounded) timeSpan.classList.add('text-rounded');
-                if (task.isActive) {
-                    const showSec = false; 
-                    const elapsed = formatDuration(displayMs, showSec);
-                    timeSpan.textContent = `${startLabel} – ${elapsed}`;
+                if (hasProjectDivision) {
+                    const parentRawMs = getProjectDivisionParentDisplayRawMs(task.name);
+                    const parentDisplayMs = isRoundingEnabled ? getRoundedMs(parentRawMs) : parentRawMs;
+                    const showSeconds = !taskListEl.classList.contains('compact-mode')
+                        && !isRoundingEnabled
+                        && !projectDivisionEnabled
+                        && hasLiveProjectDivisionSeconds(task.name);
+                    timeSpan.textContent = formatDurationWorkList(parentDisplayMs, showSeconds);
+                } else if (task.isActive) {
+                    const elapsed = formatDurationWorkList(displayMs, shouldShowWorkListSecondsForTask(task));
+                    timeSpan.textContent = elapsed;
                 } else {
-                    const total = formatDuration(displayMs, false);
+                    const total = formatDurationWorkList(displayMs);
                     timeSpan.textContent = total;
                 }
                 li.appendChild(left);
@@ -9726,18 +11150,127 @@ if (taskInputEl) {
                     commentRow.appendChild(box);
                     taskListEl.appendChild(commentRow);
                 }
+                if (divisionOpen) {
+                    const divisionRow = document.createElement('div');
+                    divisionRow.className = 'project-division-row';
+                    const divisionList = document.createElement('ul');
+                    divisionList.className = 'project-division-list';
+                    divisionItems.forEach((item, idx) => {
+                        const divisionLi = document.createElement('li');
+                        divisionLi.className = 'project-division-item';
+                        divisionLi.dataset.parentTaskId = String(task.id);
+                        divisionLi.dataset.projectName = task.name;
+                        divisionLi.dataset.subTaskName = item;
+                        const subTask = resolveLiveProjectDivisionTask(task.name, item);
+                        divisionLi.dataset.taskId = subTask ? String(subTask.id) : '';
+                        if (subTask && subTask.isActive) divisionLi.classList.add('is-active');
+                        if (isSelectedProjectDivision(task.name, item)) divisionLi.classList.add('is-selected');
+                        if (subTask && typeof subTask.comment === 'string' && subTask.comment.trim().length > 0) {
+                            const copyBtn = document.createElement('button');
+                            copyBtn.className = 'btn-comment-copy';
+                            copyBtn.title = 'Enkeltklikk: Vis kommentar / Dobbeltklikk: Kopier';
+                            let clickCount = 0;
+                            let singleClickTimer = null;
+                            copyBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                clickCount++;
+                                if (clickCount === 1) {
+                                    singleClickTimer = setTimeout(() => {
+                                        clickCount = 0;
+                                        if (subTask.comment && !showAllComments) {
+                                            toggleCommentDropdown(subTask.id);
+                                            updateUI();
+                                        }
+                                    }, 250);
+                                } else if (clickCount === 2) {
+                                    clearTimeout(singleClickTimer);
+                                    clickCount = 0;
+                                    navigator.clipboard.writeText(subTask.comment || '')
+                                        .then(() => {
+                                            const nameEl = divisionLi.querySelector('.project-division-text');
+                                            if (nameEl) {
+                                                nameEl.classList.remove('text-flash-anim');
+                                                void nameEl.offsetWidth;
+                                                nameEl.classList.add('text-flash-anim');
+                                                setTimeout(() => { nameEl.classList.remove('text-flash-anim'); }, 700);
+                                            }
+                                        });
+                                }
+                            });
+                            copyBtn.addEventListener('dblclick', (e) => { e.stopPropagation(); });
+                            divisionLi.appendChild(copyBtn);
+                        }
+                        const idxSpan = document.createElement('span');
+                        idxSpan.className = 'project-division-index';
+                        idxSpan.textContent = String(idx + 1);
+                        const textSpan = document.createElement('span');
+                        textSpan.className = 'project-division-text';
+                        textSpan.textContent = item;
+                        textSpan.title = 'Dobbeltklikk for kommentar';
+                        const timeSpan = document.createElement('span');
+                        timeSpan.className = 'project-division-time';
+                        if (isRoundingEnabled) timeSpan.classList.add('text-rounded');
+                        const compactMode = taskListEl.classList.contains('compact-mode');
+                        timeSpan.textContent = subTask
+                            ? formatDurationWorkList(getProjectDivisionTaskDisplayMs(subTask), !compactMode && !isRoundingEnabled && shouldShowWorkListSecondsForTask(subTask))
+                            : (compactMode ? '00:00' : '00:00:00');
+                        divisionLi.appendChild(idxSpan);
+                        divisionLi.appendChild(textSpan);
+                        divisionLi.appendChild(timeSpan);
+                        const openProjectDivisionComment = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const ensuredSubTask = ensureProjectDivisionTask(task.name, item);
+                            selectedProjectDivisionTarget = makeProjectDivisionSelection(task.name, item);
+                            showCommentPopup(ensuredSubTask);
+                        };
+                        divisionLi.addEventListener('dblclick', openProjectDivisionComment);
+                        textSpan.addEventListener('dblclick', openProjectDivisionComment);
+                        idxSpan.addEventListener('dblclick', openProjectDivisionComment);
+                        timeSpan.addEventListener('dblclick', openProjectDivisionComment);
+                        divisionList.appendChild(divisionLi);
+                        const subTaskCommentText = (subTask && typeof subTask.comment === 'string') ? subTask.comment.trim() : '';
+                        const shouldShowSubTaskComment = subTaskCommentText.length > 0 && (showAllComments || (subTask && expandedCommentTaskId === subTask.id));
+                        if (shouldShowSubTaskComment) {
+                            const subCommentRow = document.createElement('li');
+                            subCommentRow.className = 'project-division-comment-row';
+                            const subCommentBox = document.createElement('div');
+                            subCommentBox.className = 'task-comment-box';
+                            subCommentBox.textContent = subTask.comment;
+                            subCommentRow.appendChild(subCommentBox);
+                            divisionList.appendChild(subCommentRow);
+                        }
+                    });
+                    divisionRow.appendChild(divisionList);
+                    taskListEl.appendChild(divisionRow);
+                }
             });
         }
         if (data.tasks.length > 0 && !activeTask) clearButtonEl.disabled = false;
         else clearButtonEl.disabled = true;
         const hasInput = taskInputEl.value.trim().length > 0;
+        const hasSelectedProjectDivision = !!selectedProjectDivisionTarget;
         startButtonEl.style.backgroundColor = "";
         startButtonEl.style.color = "";
-        if (activeTask) {
+        if (hasSelectedProjectDivision) {
+            const selectedDivisionIsActive = isActiveProjectDivisionSelection(selectedProjectDivisionTarget);
+            startButtonEl.textContent = selectedDivisionIsActive ? "Arbeid pågår" : "Start arbeid";
+            startButtonEl.style.backgroundColor = "#f472b6";
+            startButtonEl.style.color = "#111827";
+            selectionInfoEl.textContent = selectedDivisionIsActive
+                ? "Timeføring pågår på valgt prosjektoppgave."
+                : "Du har valgt en prosjektoppgave. Trykk for å føre tid på underoppgaven.";
+        } else if (activeTask) {
             if (selectedTaskId !== null) {
-                startButtonEl.textContent = "Gjenoppta arbeid";
-                startButtonEl.style.backgroundColor = "var(--dot-green)";
-                selectionInfoEl.textContent = "Du har valgt et prosjekt. Trykk for å bytte til dette.";
+                if (selectedTaskId === activeTask.id) {
+                    startButtonEl.textContent = "Arbeid pågår";
+                    startButtonEl.style.backgroundColor = "var(--dot-green)";
+                    selectionInfoEl.textContent = "Timeføring pågår på valgt prosjekt.";
+                } else {
+                    startButtonEl.textContent = "Gjenoppta arbeid";
+                    startButtonEl.style.backgroundColor = "var(--dot-green)";
+                    selectionInfoEl.textContent = "Du har valgt et prosjekt. Trykk for å bytte til dette.";
+                }
             } else if (hasInput) {
                 startButtonEl.textContent = "Start arbeid";
                 startButtonEl.style.backgroundColor = "var(--dot-green)";
@@ -9953,6 +11486,7 @@ if (taskInputEl) {
     }
     function autoResizeSplitter() {
         const items = document.querySelectorAll('#taskList .task-list-item');
+        const divisionItems = document.querySelectorAll('#taskList .project-division-item');
         let maxW = 0;
         const tmp = document.createElement('span');
         tmp.style.visibility = 'hidden';
@@ -9976,6 +11510,23 @@ if (taskInputEl) {
                 if (pW > rowW) rowW = pW; 
                 tmp.style.fontSize = '0.95rem'; 
             }
+            if (rowW > maxW) maxW = rowW;
+        });
+        divisionItems.forEach(row => {
+            const indexEl = row.querySelector('.project-division-index');
+            const textEl = row.querySelector('.project-division-text');
+            let rowW = 0;
+            if (indexEl) {
+                tmp.style.fontWeight = '700';
+                tmp.textContent = indexEl.textContent;
+                rowW += tmp.getBoundingClientRect().width + 10;
+            }
+            if (textEl) {
+                tmp.style.fontWeight = '400';
+                tmp.textContent = textEl.textContent;
+                rowW += tmp.getBoundingClientRect().width;
+            }
+            tmp.style.fontWeight = '400';
             if (rowW > maxW) maxW = rowW;
         });
         document.body.removeChild(tmp);
@@ -10055,6 +11606,8 @@ if (taskInputEl) {
         loadAutoSaveSetting();
         loadMidnightDoubleCountGuardSetting();
         loadNoHelpTextSetting();
+        loadProjectDivisionToggleSetting();
+    updateProjectTaskDivisionVisibility();
         loadOneNoteReminderSetting();
         loadPersonalCustomizationValues();
         loadPersonalCustomizationToggle();
@@ -10112,6 +11665,7 @@ if (taskInputEl) {
         loadControlPanelOpenSetting();
         loadUnderDevelopmentExpandedSetting();
         selectedTaskId = null;
+        selectedProjectDivisionTarget = null;
         taskInputEl.value = "";
         clearSuggestions();
         disableCompactMode();
@@ -10139,6 +11693,7 @@ if (taskInputEl) {
     function executeDeleteProfile() {
         const profileToDelete = currentProfile;
         if (profileToDelete === "Standard") return;
+        deletePersonalBgMediaFromDb(getPersonalBgMediaStorageKey(profileToDelete));
         const storageKey = STORAGE_KEY_PREFIX + profileToDelete;
         const timelineKey = TIMELINE_KEY_PREFIX + profileToDelete;
         localStorage.removeItem(storageKey);
@@ -10592,6 +12147,7 @@ if (taskInputEl) {
                     loadAutoSaveSetting();
                     loadMidnightDoubleCountGuardSetting();
                     loadNoHelpTextSetting();
+                    loadProjectDivisionToggleSetting();
                     loadOneNoteReminderSetting();
                     loadPersonalCustomizationValues();
                     loadPersonalCustomizationToggle();
@@ -10630,24 +12186,18 @@ if (taskInputEl) {
     themeToggleButtonEl.addEventListener("click", async () => {
         clearTimeout(themeResetTimer);
         themeClickCount++;
-        themeResetTimer = setTimeout(() => { themeClickCount = 0; }, 500); 
+        themeResetTimer = setTimeout(() => { themeClickCount = 0; }, 500);
+
         if (themeClickCount === 3) {
-            document.body.classList.add("theme-dark"); 
-            document.body.classList.add("theme-black"); 
-            saveTheme("black");
+            applyThemeMode('black');
             themeClickCount = 0;
             clearTimeout(themeResetTimer);
         } else {
-            if (document.body.classList.contains("theme-black")) {
-                document.body.classList.remove("theme-black");
-                document.body.classList.remove("theme-dark");
-                saveTheme("light");
-                themeClickCount = 0; 
-                clearTimeout(themeResetTimer);
+            const currentMode = getCurrentThemeMode();
+            if (currentMode === 'black' || currentMode === 'dark') {
+                applyThemeMode('light');
             } else {
-                const isDark = document.body.classList.toggle("theme-dark");
-                document.body.classList.remove("theme-black");
-                saveTheme(isDark ? "dark" : "light");
+                applyThemeMode('dark');
             }
         }
         drawTaskChart();
@@ -10795,23 +12345,117 @@ if (taskInputEl) {
             };
 
             const roundingOn = isRoundingEnabled || (toggleRoundingButtonEl && toggleRoundingButtonEl.classList.contains("btn-rounding-active"));
-            const plainText = tasksToCopy.map(t => {
-                let ms = t.isActive ? getTaskElapsedMs(t) : (t.totalMs || 0);
+            const getTaskCopyMs = (task) => {
+                if (!task) return 0;
+                let ms = task.isActive ? getTaskElapsedMs(task) : (task.totalMs || 0);
                 if (roundingOn) ms = getRoundedMs(ms);
-                const timeStr = formatDuration(ms, false);
-                const comment = t.comment || "";
-                return `${t.name}
-${timeStr}
-${comment}
--`;
+                return ms;
+            };
+            const formatCommentPlain = (comment) => {
+                const value = typeof comment === 'string' ? comment.trim() : '';
+                return value ? `Kommentar: ${value}` : '';
+            };
+            const formatCommentHtml = (comment) => {
+                const value = typeof comment === 'string' ? comment.trim() : '';
+                return value ? `<div>Kommentar: ${escapeHtml(value).replace(/\n/g, "<br>")}</div>` : '';
+            };
+            const projectDivisionMap = new Map();
+            tasksToCopy.forEach((task) => {
+                if (!task || !isProjectDivisionSubTask(task)) return;
+                const key = normalizeTaskName(task.parentProject || '');
+                if (!key) return;
+                if (!projectDivisionMap.has(key)) projectDivisionMap.set(key, []);
+                projectDivisionMap.get(key).push(task);
+            });
+            const topLevelTasksForCopy = tasksToCopy.filter(task => !isProjectDivisionSubTask(task));
+            const buildStructuredEntries = () => {
+                return topLevelTasksForCopy.map((task) => {
+                    const projectName = String(task && task.name || '').trim();
+                    const divisionOrder = getStoredProjectDivisionForName(projectName);
+                    const groupedSubTasks = projectDivisionMap.get(normalizeTaskName(projectName)) || [];
+                    if (!divisionOrder.length || !groupedSubTasks.length) {
+                        return {
+                            type: 'single',
+                            name: projectName,
+                            time: formatDuration(getTaskCopyMs(task), false),
+                            commentPlain: formatCommentPlain(task.comment),
+                            commentHtml: formatCommentHtml(task.comment)
+                        };
+                    }
+                    const groupedSubTaskLookup = new Map();
+                    groupedSubTasks.forEach((subTask) => {
+                        const key = normalizeTaskName(subTask.subTaskName || subTask.name || '');
+                        if (!key || groupedSubTaskLookup.has(key)) return;
+                        groupedSubTaskLookup.set(key, subTask);
+                    });
+                    const orderedSubEntries = [];
+                    let parentOnlyMs = getTaskCopyMs(task);
+                    let combinedTotalMs = parentOnlyMs;
+                    divisionOrder.forEach((subTaskName) => {
+                        const subTask = groupedSubTaskLookup.get(normalizeTaskName(subTaskName));
+                        const subTaskMs = getTaskCopyMs(subTask);
+                        orderedSubEntries.push({
+                            name: String(subTaskName || '').trim(),
+                            time: formatDuration(subTaskMs, false),
+                            commentPlain: formatCommentPlain(subTask && subTask.comment),
+                            commentHtml: formatCommentHtml(subTask && subTask.comment)
+                        });
+                        combinedTotalMs += subTaskMs;
+                        if (subTask) groupedSubTaskLookup.delete(normalizeTaskName(subTaskName));
+                    });
+                    groupedSubTaskLookup.forEach((subTask) => {
+                        const subTaskMs = getTaskCopyMs(subTask);
+                        orderedSubEntries.push({
+                            name: String(subTask.subTaskName || subTask.name || '').trim(),
+                            time: formatDuration(subTaskMs, false),
+                            commentPlain: formatCommentPlain(subTask.comment),
+                            commentHtml: formatCommentHtml(subTask.comment)
+                        });
+                        combinedTotalMs += subTaskMs;
+                    });
+                    const projectDisplayMs = projectDivisionEnabled ? parentOnlyMs : combinedTotalMs;
+                    if (!projectDivisionEnabled) {
+                        return {
+                            type: 'single',
+                            name: projectName,
+                            time: formatDuration(projectDisplayMs, false),
+                            commentPlain: formatCommentPlain(task.comment),
+                            commentHtml: formatCommentHtml(task.comment)
+                        };
+                    }
+                    return {
+                        type: 'project-division',
+                        name: projectName,
+                        time: formatDuration(projectDisplayMs, false),
+                        commentPlain: formatCommentPlain(task.comment),
+                        commentHtml: formatCommentHtml(task.comment),
+                        items: orderedSubEntries
+                    };
+                });
+            };
+            const structuredEntries = buildStructuredEntries();
+            const plainText = structuredEntries.map(entry => {
+                if (entry.type !== 'project-division') {
+                    return [entry.name, entry.time, entry.commentPlain, '-'].filter(Boolean).join('\n');
+                }
+                const lines = [entry.name, entry.time];
+                if (entry.commentPlain) lines.push(entry.commentPlain);
+                entry.items.forEach((item, idx) => {
+                    lines.push(`${idx + 1}. ${item.name}`);
+                    lines.push(`   ${item.time}`);
+                    if (item.commentPlain) lines.push(`   ${item.commentPlain}`);
+                });
+                lines.push('-');
+                return lines.join('\n');
             }).join("\n\n");
-            const htmlContent = tasksToCopy.map(t => {
-                let ms = t.isActive ? getTaskElapsedMs(t) : (t.totalMs || 0);
-                if (roundingOn) ms = getRoundedMs(ms);
-                const timeStr = formatDuration(ms, false);
-                const safeName = escapeHtml(t.name);
-                const safeComment = escapeHtml(t.comment || "").replace(/\n/g, "<br>"); 
-                return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>${safeComment}<br>-</div>`;
+            const htmlContent = structuredEntries.map(entry => {
+                if (entry.type !== 'project-division') {
+                    return `<div style="margin-bottom: 1em;"><b>${escapeHtml(entry.name)}</b><br><span style="color: #16a34a; font-weight: 600;">${entry.time}</span>${entry.commentHtml ? `<br>${entry.commentHtml}` : ''}<br>-</div>`;
+                }
+                const itemsHtml = entry.items.map((item, idx) => {
+                    return `<div style="margin-top: 0.4em; padding-left: 1.1em;"><b>${idx + 1}. ${escapeHtml(item.name)}</b><br><span style="color: #16a34a; font-weight: 600;">${item.time}</span>${item.commentHtml ? `<br>${item.commentHtml}` : ''}</div>`;
+                }).join('');
+                return `<div style="margin-bottom: 1em;"><b>${escapeHtml(entry.name)}</b><br><span style="color: #16a34a; font-weight: 600;">${entry.time}</span>${entry.commentHtml ? `<br>${entry.commentHtml}` : ''}${itemsHtml}<br>-</div>`;
             }).join("");
             try {
                 const ok = await copyToClipboard(htmlContent, plainText);
@@ -10828,6 +12472,10 @@ ${comment}
                     oneNoteReminderCurrentTasksCopySignature = buildOneNoteReminderSignatureForTasks(data.tasks);
                 }
                 alert("Kopierte som ren tekst (nettleseren støttet ikke rik formatering).");
+            } finally {
+                if (originalTasks) {
+                    data.tasks = originalTasks;
+                }
             }
         });
     }
@@ -10894,6 +12542,7 @@ ${comment}
         const stopResize = () => {
             if (isResizing) {
                 isResizing = false;
+                suppressProjectDivisionOutsideCloseUntil = Date.now() + 350;
                 resizeHandleEl.classList.remove('resizing');
                 resizeHandleEl.classList.add('handle-release-anim'); 
                 document.body.style.cursor = '';
@@ -10904,8 +12553,16 @@ ${comment}
     }
 
     startButtonEl.addEventListener("click", async () => {
-        if (selectedTaskId !== null) { resumeTask(selectedTaskId); } 
-        else {
+        if (selectedProjectDivisionTarget) {
+            startOrResumeProjectDivisionTask(selectedProjectDivisionTarget.projectName, selectedProjectDivisionTarget.subTaskName);
+        } else if (selectedTaskId !== null) {
+            const selectedTask = data.tasks.find(t => t.id === selectedTaskId);
+            if (selectedTask && selectedTask.isActive) {
+                updateUI();
+                return;
+            }
+            resumeTask(selectedTaskId);
+        } else {
             const name = taskInputEl.value.trim();
             if (!name) return;
             startOrResumeByName(name);
@@ -11058,6 +12715,30 @@ if (projectOutdatedCheckboxEl) {
         if (e.key === "Escape") { e.preventDefault(); hideProjectPopup(); }
             if (deleteTaskOverlayEl && deleteTaskOverlayEl.classList.contains("show")) { hideDeleteTaskPopup(); return; }
     });
+
+    if (projectTaskDivisionButtonEl) projectTaskDivisionButtonEl.addEventListener('click', openProjectTaskDivisionModal);
+    if (projectTaskDivisionTextareaEl) {
+        projectTaskDivisionTextareaEl.addEventListener('input', updateProjectTaskDivisionLineNumbers);
+        projectTaskDivisionTextareaEl.addEventListener('scroll', updateProjectTaskDivisionLineNumbers);
+        projectTaskDivisionTextareaEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                saveProjectTaskDivisionFromModal();
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeProjectTaskDivisionModal();
+            }
+        });
+    }
+    if (projectTaskDivisionCloseButtonEl) projectTaskDivisionCloseButtonEl.addEventListener('click', closeProjectTaskDivisionModal);
+    if (projectTaskDivisionCancelButtonEl) projectTaskDivisionCancelButtonEl.addEventListener('click', closeProjectTaskDivisionModal);
+    if (projectTaskDivisionOkButtonEl) projectTaskDivisionOkButtonEl.addEventListener('click', saveProjectTaskDivisionFromModal);
+    if (projectTaskDivisionOverlayEl) {
+        projectTaskDivisionOverlayEl.addEventListener('click', (e) => {
+            if (e.target === projectTaskDivisionOverlayEl) saveProjectTaskDivisionFromModal();
+        });
+    }
     commentCloseButtonEl.addEventListener("click", () => hideCommentPopup());
     commentCancelButtonEl.addEventListener("click", () => hideCommentPopup());
     commentSaveButtonEl.addEventListener("click", () => saveComment());
@@ -11086,6 +12767,7 @@ if (projectOutdatedCheckboxEl) {
                 startOrResumeByName(name);
             } else {
                 selectedTaskId = null;
+                selectedProjectDivisionTarget = null;
                 const name = taskInputEl.value.trim();
                 if (!name) return;
                 startOrResumeByName(name);
@@ -11096,6 +12778,7 @@ if (projectOutdatedCheckboxEl) {
     });
     taskInputEl.addEventListener("input", () => {
         if (selectedTaskId !== null) { selectedTaskId = null; }
+        if (selectedProjectDivisionTarget) { selectedProjectDivisionTarget = null; }
         if (tempTaskSelectionTimer) { clearTimeout(tempTaskSelectionTimer); tempTaskSelectionTimer = null; }
         document.body.classList.remove("temp-task-selection");
         updateUI();
@@ -11121,8 +12804,44 @@ suggestionIndex = -1;
 
 
     let taskClickTimer = null;
+    let projectDivisionClickTimer = null;
     taskListEl.addEventListener("click", (e) => {
         if (taskClickTimer) clearTimeout(taskClickTimer);
+        const divisionArrow = e.target.closest('.project-division-arrow');
+        if (divisionArrow) {
+            if (projectDivisionClickTimer) {
+                clearTimeout(projectDivisionClickTimer);
+                projectDivisionClickTimer = null;
+            }
+            const parentRow = divisionArrow.closest('.task-list-item');
+            const parentId = Number(parentRow && parentRow.dataset ? parentRow.dataset.id : 0);
+            if (parentId) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleWorkListProjectDivision(parentId);
+            }
+            taskClickTimer = null;
+            return;
+        }
+        const divisionLi = e.target.closest('.project-division-item');
+        if (divisionLi) {
+            if (projectDivisionClickTimer) clearTimeout(projectDivisionClickTimer);
+            const projectName = divisionLi.dataset.projectName || '';
+            const subTaskName = divisionLi.dataset.subTaskName || '';
+            projectDivisionClickTimer = setTimeout(() => {
+                const nextSelection = makeProjectDivisionSelection(projectName, subTaskName);
+                selectedProjectDivisionTarget = isSameProjectDivisionSelection(selectedProjectDivisionTarget, nextSelection) ? null : nextSelection;
+                selectedTaskId = null;
+                if (tempTaskSelectionTimer) {
+                    clearTimeout(tempTaskSelectionTimer);
+                    tempTaskSelectionTimer = null;
+                }
+                document.body.classList.remove("temp-task-selection");
+                updateUI();
+                projectDivisionClickTimer = null;
+            }, 220);
+            return;
+        }
         const li = e.target.closest(".task-list-item");
         if (!li) return;
         const id = Number(li.dataset.id);
@@ -11131,7 +12850,13 @@ suggestionIndex = -1;
         if (!task) return;
 
         taskClickTimer = setTimeout(() => {
+            selectedProjectDivisionTarget = null;
+
+            const isExpandedProjectDivisionParent = taskHasWorkListProjectDivision(task) && expandedProjectDivisionTaskId === id;
             selectedTaskId = (selectedTaskId === id) ? null : id;
+            if (isExpandedProjectDivisionParent) {
+                expandedProjectDivisionTaskId = id;
+            }
 
             if (tempTaskSelectionTimer) {
                 clearTimeout(tempTaskSelectionTimer);
@@ -11140,8 +12865,6 @@ suggestionIndex = -1;
 
             const active = getActiveTask();
 
-            // Temporary green selection (10s) both during normal day and after end day.
-            // When there is an active task and a different task is clicked, mute active green.
             if (selectedTaskId && ((!active) || (active && selectedTaskId !== active.id))) {
                 document.body.classList.add("temp-task-selection");
                 tempTaskSelectionTimer = setTimeout(() => {
@@ -11158,14 +12881,46 @@ suggestionIndex = -1;
             taskClickTimer = null;
         }, 220);
     });
+    document.addEventListener('click', (e) => {
+        if (expandedProjectDivisionTaskId === null) return;
+        if (Date.now() < suppressProjectDivisionOutsideCloseUntil) return;
+        const t = e.target;
+        const insideExpandedDivision = t.closest('.task-list-item, .project-division-row');
+        if (insideExpandedDivision) return;
+        if (t.closest('#resizeHandle') || t.closest('#commentOverlay .modal')) return;
+        const clickedInteractiveControl = !!t.closest('button, input, select, textarea, label, a, summary, details, [role="button"], .btn-secondary, .btn-primary, .btn-danger, .circle-btn, .archive-header-toggle, .modal, .popup-content, .timeline-seg, .adhd-strip, .helper-text');
+        if (clickedInteractiveControl) return;
+        expandedProjectDivisionTaskId = null;
+        updateUI();
+    });
+
     taskListEl.addEventListener("dblclick", (e) => {
         if (taskClickTimer) { clearTimeout(taskClickTimer); taskClickTimer = null; }
+        if (projectDivisionClickTimer) { clearTimeout(projectDivisionClickTimer); projectDivisionClickTimer = null; }
+        const divisionLi = e.target.closest('.project-division-item');
+        if (divisionLi) {
+            e.preventDefault();
+            e.stopPropagation();
+            const projectName = divisionLi.dataset.projectName || '';
+            const subTaskName = divisionLi.dataset.subTaskName || '';
+            const subTask = ensureProjectDivisionTask(projectName, subTaskName);
+            selectedProjectDivisionTarget = makeProjectDivisionSelection(projectName, subTaskName);
+            showCommentPopup(subTask);
+            return;
+        }
         const li = e.target.closest(".task-list-item");
         if (!li) return;
         const id = Number(li.dataset.id);
         if (!id) return;
         const task = data.tasks.find(t => t.id === id);
         if (!task) return;
+        selectedTaskId = id;
+        selectedProjectDivisionTarget = null;
+        if (projectDivisionEnabled && taskHasWorkListProjectDivision(task) && expandedProjectDivisionTaskId !== id) {
+            expandedProjectDivisionTaskId = id;
+            updateUI();
+            return;
+        }
         showCommentPopup(task);
     });
 
@@ -11734,7 +13489,6 @@ suggestionIndex = -1;
 
     function animateChart() {
         drawTaskChart();
-        requestAnimationFrame(animateChart);
     }
 
     if (cpAdhdModeEl) {
@@ -11945,12 +13699,48 @@ suggestionIndex = -1;
             setPersonalBgControlsOpen(true);
             setPersonalBgMediaHistoryOpen(false);
             setPersonalFruitigerArchiveOpen(false);
-            if (!personalBgMediaInputEl) return;
+
+            const openWithTemporaryInput = () => {
+                try {
+                    const tempInput = document.createElement('input');
+                    tempInput.type = 'file';
+                    tempInput.accept = 'image/*,video/*';
+                    tempInput.style.position = 'fixed';
+                    tempInput.style.left = '-99999px';
+                    tempInput.style.top = '0';
+                    tempInput.style.opacity = '0';
+                    tempInput.style.width = '1px';
+                    tempInput.style.height = '1px';
+                    document.body.appendChild(tempInput);
+                    tempInput.addEventListener('change', (e) => {
+                        const file = e.target && e.target.files ? e.target.files[0] : null;
+                        handlePersonalBgMediaFile(file);
+                        try { tempInput.remove(); } catch(_) {}
+                    }, { once: true });
+                    tempInput.click();
+                } catch(err) {
+                    console.warn('Kunne ikke åpne midlertidig filvelger for bakgrunnsmedia:', err);
+                }
+            };
+
+            if (!personalBgMediaInputEl) {
+                openWithTemporaryInput();
+                return;
+            }
+
+            try { personalBgMediaInputEl.value = ''; } catch(e) {}
             try {
-                if (typeof personalBgMediaInputEl.showPicker === 'function') personalBgMediaInputEl.showPicker();
-                else personalBgMediaInputEl.click();
+                if (typeof personalBgMediaInputEl.showPicker === 'function') {
+                    personalBgMediaInputEl.showPicker();
+                } else {
+                    personalBgMediaInputEl.click();
+                }
             } catch(e) {
-                personalBgMediaInputEl.click();
+                try {
+                    personalBgMediaInputEl.click();
+                } catch(err) {
+                    openWithTemporaryInput();
+                }
             }
         });
     }
@@ -12020,17 +13810,17 @@ suggestionIndex = -1;
         personalFruitigerArchiveIntervalRangeEl.addEventListener('change', () => {
             onArchiveIntervalInput();
             const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
-            const secLabel = sec <= 0 ? 'IR' : `${sec}s`;
+            const secLabel = sec <= 0 ? 'AV' : `${sec}s`;
             const selected = getPersonalFruitigerArchiveSelectedCategory();
 
             if (sec <= 0) {
                 stopPersonalFruitigerArchiveAutoRotation();
                 if (personalFruitigerArchiveHistoryMode) {
-                    setPersonalFruitigerArchiveStatus('Auto-bytte er deaktivert (IR): historikk.');
+                    setPersonalFruitigerArchiveStatus('Auto-bytte er deaktivert (AV): historikk.');
                 } else {
                     setPersonalFruitigerArchiveStatus(selected
-                        ? `Auto-bytte er deaktivert (IR): «${selected.label || 'Kategori'}».`
-                        : 'Auto-bytte er deaktivert (IR). Velg en kategori for manuelt bytte.');
+                        ? `Auto-bytte er deaktivert (AV): «${selected.label || 'Kategori'}».`
+                        : 'Auto-bytte er deaktivert (AV). Velg en kategori for manuelt bytte.');
                 }
                 return;
             }
@@ -12059,15 +13849,15 @@ suggestionIndex = -1;
 
             const selected = getPersonalFruitigerArchiveSelectedCategory();
             const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
-            const secLabel = sec <= 0 ? 'IR' : `${sec}s`;
+            const secLabel = sec <= 0 ? 'AV' : `${sec}s`;
 
             if (personalFruitigerArchiveHistoryMode) {
-                setPersonalFruitigerArchiveStatus(`Auto-bytte er ${sec <= 0 ? 'deaktivert (IR)' : 'aktivt'}: ${secLabel} (historikk).`);
+                setPersonalFruitigerArchiveStatus(`Auto-bytte er ${sec <= 0 ? 'deaktivert (AV)' : 'aktivt'}: ${secLabel} (historikk).`);
                 return;
             }
 
             setPersonalFruitigerArchiveStatus(selected
-                ? `Auto-bytte er ${sec <= 0 ? 'deaktivert (IR)' : 'aktivt'}: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `samme kategori: «${selected.label || 'Kategori'}»`}).`
+                ? `Auto-bytte er ${sec <= 0 ? 'deaktivert (AV)' : 'aktivt'}: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `samme kategori: «${selected.label || 'Kategori'}»`}).`
                 : `Velg en kategori. Auto-bytte bruker ${secLabel} (${personalFruitigerArchiveHistoryMode ? 'historikk' : (personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori')}).`);
         });
     }
@@ -12161,6 +13951,9 @@ suggestionIndex = -1;
         applyPersonalBackgroundState(s, { preview: true, forceOn: true });
     }
 
+    if (personalBgBlurOffButtonEl) {
+        personalBgBlurOffButtonEl.addEventListener('click', () => setPersonalBgGlassOff());
+    }
     if (personalBgBlurFastButtonEl) {
         personalBgBlurFastButtonEl.addEventListener('click', () => setPersonalBgGlassBlurPreset(1));
     }
@@ -12180,7 +13973,8 @@ suggestionIndex = -1;
             return s;
         };
         const onGlassOpacityInputPreviewOnly = () => {
-            updateGlassOpacityDraftValue();
+            const s = updateGlassOpacityDraftValue();
+            schedulePersonalGlassOpacityPreview(s);
         };
         const onGlassOpacityCommit = () => {
             const s = updateGlassOpacityDraftValue();
@@ -12192,6 +13986,7 @@ suggestionIndex = -1;
         personalBgGlassOpacityRangeEl.addEventListener('keyup', (e) => {
             if (!e || !e.key) return;
             if (e.key.startsWith('Arrow') || e.key === 'Home' || e.key === 'End' || e.key === 'PageUp' || e.key === 'PageDown') {
+                onGlassOpacityInputPreviewOnly();
                 onGlassOpacityCommit();
             }
         });
@@ -12356,7 +14151,8 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
         }
     });
 
-    window.addEventListener("resize", () => updateTimelineNowDot());
+    window.addEventListener("resize", () => scheduleCrossBrowserTimelineRefresh());
+    window.addEventListener("load", () => scheduleCrossBrowserTimelineRefresh(), { once: true });
 
     loadTheme();
     loadProfiles();
@@ -12370,15 +14166,18 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
     loadMidnightDoubleCountGuardSetting();
     applyMidnightGuardTemporaryVisualState();
     loadNoHelpTextSetting();
+    loadProjectDivisionToggleSetting();
+    updateProjectTaskDivisionVisibility();
     loadOneNoteReminderSetting();
     loadPersonalCustomizationValues();
     loadPersonalCustomizationToggle();
     syncAdhdToActiveProject();
     applyAdhdTimelineReplacement();
-    renderDayTimeline();
+    scheduleCrossBrowserTimelineRefresh();
     updateUI();
     applyPersonalCustomizationHeadings();
     try { document.dispatchEvent(new Event('profileLoaded')); } catch(e){}
+    scheduleCrossBrowserTimelineRefresh();
     updateCurrentTimeDisplay();
     updateProfileButton(); 
     
@@ -12413,6 +14212,15 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
         });
     }
 
+    if (cpProjectDivisionToggleEl) {
+        cpProjectDivisionToggleEl.addEventListener("change", (e) => {
+            projectDivisionEnabled = !!e.target.checked;
+            setProfileScopedSetting(PROJECT_DIVISION_TOGGLE_KEY, !!projectDivisionEnabled);
+            updateProjectTaskDivisionVisibility();
+            if (!projectDivisionEnabled) closeProjectTaskDivisionModal();
+        });
+    }
+
     if (cpOneNoteReminderToggleEl) {
         cpOneNoteReminderToggleEl.addEventListener("change", (e) => {
             oneNoteReminderEnabled = !!e.target.checked;
@@ -12420,7 +14228,82 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
         });
     }
 
-    requestAnimationFrame(animateChart);
+    drawTaskChart();
+
+    function refreshWorkListLiveTimes() {
+        const projectRows = Array.from(taskListEl.querySelectorAll('.task-list-item'));
+        projectRows.forEach((row) => {
+            const rowId = Number(row.dataset.id || 0);
+            const rowTimeSpan = row.querySelector('.task-time');
+            if (!rowTimeSpan) return;
+
+            const rowProjectName = String(row.dataset.projectName || '').trim();
+            const rowHasProjectDivision = row.dataset.hasProjectDivision === '1' || getStoredProjectDivisionItemsForDisplay(rowProjectName).length > 0;
+
+            if (rowHasProjectDivision && rowProjectName) {
+                const parentRawMs = getProjectDivisionParentDisplayRawMs(rowProjectName);
+                const parentDisplayMs = isRoundingEnabled ? getRoundedMs(parentRawMs) : parentRawMs;
+                const compactMode = taskListEl.classList.contains('compact-mode');
+                const showSeconds = !compactMode && !isRoundingEnabled && !projectDivisionEnabled && hasLiveProjectDivisionSeconds(rowProjectName);
+                rowTimeSpan.textContent = formatDurationWorkList(parentDisplayMs, showSeconds);
+                if (isRoundingEnabled) rowTimeSpan.classList.add('text-rounded');
+                else rowTimeSpan.classList.remove('text-rounded');
+                return;
+            }
+
+            const task = data.tasks.find(t => Number(t.id) === rowId)
+                || data.tasks.find(t => !isProjectDivisionSubTask(t) && normalizeTaskName(t.name || '') === normalizeTaskName(rowProjectName));
+            if (!task) return;
+
+            const rawMs = task.isActive ? getTaskElapsedMs(task) : (task.totalMs || 0);
+            const displayMs = isRoundingEnabled ? getRoundedMs(rawMs) : rawMs;
+            if (isRoundingEnabled) rowTimeSpan.classList.add('text-rounded');
+            else rowTimeSpan.classList.remove('text-rounded');
+
+            if (task.isActive) {
+                rowTimeSpan.textContent = formatDurationWorkList(displayMs, shouldShowWorkListSecondsForTask(task));
+            } else {
+                rowTimeSpan.textContent = formatDurationWorkList(displayMs, !isRoundingEnabled && shouldShowWorkListSecondsForTask(task));
+            }
+        });
+
+        const divisionItems = Array.from(taskListEl.querySelectorAll('.project-division-item'));
+        divisionItems.forEach((itemEl) => {
+            const projectName = itemEl.dataset.projectName || '';
+            const subTaskName = itemEl.dataset.subTaskName || '';
+            const taskId = Number(itemEl.dataset.taskId || 0);
+            const subTask = resolveLiveProjectDivisionTask(projectName, subTaskName, taskId);
+            if (subTask && Number(itemEl.dataset.taskId || 0) !== Number(subTask.id)) {
+                itemEl.dataset.taskId = String(subTask.id);
+            }
+            const timeEl = itemEl.querySelector('.project-division-time');
+            if (!timeEl) return;
+            if (subTask) {
+                const rawMs = subTask.isActive ? getTaskElapsedMs(subTask) : (subTask.totalMs || 0);
+                const displayMs = isRoundingEnabled ? getRoundedMs(rawMs) : rawMs;
+                const compactMode = taskListEl.classList.contains('compact-mode');
+                timeEl.textContent = formatDurationWorkList(displayMs, !compactMode && !isRoundingEnabled && shouldShowWorkListSecondsForTask(subTask));
+                if (isRoundingEnabled) timeEl.classList.add('text-rounded');
+                else timeEl.classList.remove('text-rounded');
+            } else {
+                timeEl.textContent = taskListEl.classList.contains('compact-mode') ? '00:00' : '00:00:00';
+                timeEl.classList.remove('text-rounded');
+            }
+            itemEl.classList.toggle('is-active', !!(subTask && subTask.isActive));
+        });
+    }
+
+
+    function refreshProjectDivisionArrowBlink() {
+        document.querySelectorAll('.project-division-arrow.is-collapsed').forEach(el => {
+            if (!el.style.animationDelay) el.style.animationDelay = `-${Date.now() % 2000}ms`;
+            el.classList.remove('is-blink-off');
+        });
+        document.querySelectorAll('.project-division-arrow.is-expanded').forEach(el => {
+            el.classList.remove('is-blink-off');
+            el.style.animationDelay = '0ms';
+        });
+    }
 
     function updateActiveTaskTimer() {
         let totalDayMs = 0;
@@ -12440,56 +14323,26 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
                 currentTaskTimeEl.innerHTML = `<span class="time-digit-neutral">00</span>:<span class="time-digit-neutral">00</span>:<span class="time-digit-neutral">00</span>`;
             }
         }
-        const activeTask = getActiveTask();
-        if (activeTask) {
-            const li = taskListEl.querySelector(`.task-list-item[data-id="${activeTask.id}"]`);
-            if (li) {
-                const timeSpan = li.querySelector(".task-time");
-                if (timeSpan) {
-                    const startLabel = formatTimeOfDay(activeTask.firstStartAt || activeTask.createdAt || activeTask.lastStartMs);
-                    let rawMs = getTaskElapsedMs(activeTask);
-                    let displayMs = rawMs;
-                    let isRounded = false;
-                    if (isRoundingEnabled) {
-                        displayMs = getRoundedMs(rawMs);
-                        isRounded = true;
-                    }
-                    if (isRounded) timeSpan.classList.add('text-rounded');
-                    else timeSpan.classList.remove('text-rounded');
-                    const elapsed = formatDuration(displayMs, false);
-                    timeSpan.textContent = `${startLabel} – ${elapsed}`;
-                }
-            }
-        }
+        refreshWorkListLiveTimes();
     }
 
     setInterval(() => {
         updateCurrentTimeDisplay();
-        updateActiveTaskTimer(); 
+        const activeTaskForLiveRefresh = getActiveTask();
+        if (activeTaskForLiveRefresh) {
+            updateUI();
+        }
+        updateActiveTaskTimer();
+        if (typeof requestAnimationFrame === 'function') {
+            requestAnimationFrame(refreshWorkListLiveTimes);
+        } else {
+            refreshWorkListLiveTimes();
+        }
+        refreshProjectDivisionArrowBlink();
         updateTimelineNowDot();
         checkOverdueActiveTask();
+        if (getActiveTask()) drawTaskChart();
     }, 1000);
-
-// Enable copy button when selecting a historical day
-if (archiveListEl && copyOneNoteButtonEl) {
-    archiveListEl.addEventListener("click", (e) => {
-        archiveListEl.querySelectorAll(".archive-summary").forEach(el => el.classList.remove("selected"));
-        const dayItem = e.target.closest(".archive-summary");
-        if (!dayItem) return;
-
-        selectedArchiveForCopy = dayItem.getAttribute("data-archive-id");
-        const archive = data.archives.find(a => a.id === selectedArchiveForCopy);
-        copyOverrideTasks = archive ? archive.tasks : null;
-
-        copyOneNoteButtonEl.disabled = false;
-        copyOneNoteButtonEl.classList.remove("copy-ready-blink");
-        void copyOneNoteButtonEl.offsetWidth;
-        copyOneNoteButtonEl.classList.add("copy-ready-blink");
-        setTimeout(() => {
-            copyOneNoteButtonEl.classList.remove("copy-ready-blink");
-        }, 1300);
-    });
-}
 
     // --- Group edit modal (dblclick on group)
     let editingGroupId = null;
@@ -12592,48 +14445,6 @@ if (archiveListEl && copyOneNoteButtonEl) {
 
 
 
-// Dedicated OneNote copy for history (day-level)
-if (El && archiveListEl) {
-    El.addEventListener("click", async () => {
-        const selectedDay = archiveListEl.querySelector(".archive-summary.selected");
-        if (!selectedDay) return;
-
-        const archiveId = selectedDay.getAttribute("data-archive-id");
-        const archive = data.archives.find(a => a.id === archiveId);
-        if (!archive || !Array.isArray(archive.tasks)) return;
-
-        const escapeHtml = (text) => {
-            if (!text) return "";
-            return text.replace(/&/g, "&amp;")
-                       .replace(/</g, "&lt;")
-                       .replace(/>/g, "&gt;")
-                       .replace(/"/g, "&quot;")
-                       .replace(/'/g, "&#039;");
-        };
-
-        const plainText = archive.tasks.map(t => {
-            let ms = t.totalMs || 0;
-            if (roundingOn) ms = getRoundedMs(ms);
-            const timeStr = formatDuration(ms, false);
-            const comment = t.comment || "";
-            return `${t.name}
-${timeStr}
-${comment}
--`;
-        }).join("\n\n");
-
-        const htmlContent = archive.tasks.map(t => {
-            let ms = t.totalMs || 0;
-            if (roundingOn) ms = getRoundedMs(ms);
-            const timeStr = formatDuration(ms, false);
-            const safeName = escapeHtml(t.name);
-            const safeComment = escapeHtml(t.comment || "").replace(/\n/g, "<br>");
-            return `<div style="margin-bottom: 1em;"><b>${safeName}</b><br><span style="color: #16a34a; font-weight: 600;">${timeStr}</span><br>${safeComment}<br>-</div>`;
-        }).join("");
-
-        await copyToClipboard(htmlContent, plainText);
-    });
-}
 </script>
 
 
