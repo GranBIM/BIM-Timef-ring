@@ -3096,7 +3096,7 @@ ${comment}
     <div class="header-right">
         <button id="themeToggleButton" class="btn-secondary" type="button" title="Bytt mellom lys, mørk og svart modus">Mørkmodus</button>
         <button id="profileButton" class="btn-secondary" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Profil og innstillinger</button>
-        <div style="margin-top:0.25rem;">Utviklet av:<br>Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 01.03.2026</div>
+        <div style="margin-top:0.25rem;">Utviklet av:<br>Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 02.03.2026</div>
     </div>
 </header>
 
@@ -7688,25 +7688,70 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
 
         if (s.type === 'image' && customPageBgImageEl && s.mediaDataUrl) {
             const nextImageSrc = String(s.mediaDataUrl || '');
+            const currentImgSrc = customPageBgImageEl.getAttribute('src') || '';
+            const sameImage = currentImgSrc === nextImageSrc;
+
+            const revealImage = (() => {
+                let done = false;
+                return () => {
+                    if (done || !isLatestApply()) return;
+                    done = true;
+                    clearImageHandlers();
+                    customPageBgImageEl.style.visibility = 'visible';
+                    if (customPageBgImageEl.style.display !== 'block') customPageBgImageEl.style.display = 'block';
+                };
+            })();
+
             const commitImage = () => {
                 if (!isLatestApply()) return;
                 hideVideo(true);
                 clearImageHandlers();
+                try { customPageBgImageEl.decoding = 'sync'; } catch(e){}
+
+                if (sameImage && customPageBgImageEl.complete) {
+                    revealImage();
+                    return;
+                }
+
+                customPageBgImageEl.style.visibility = 'hidden';
+                if (customPageBgImageEl.style.display !== 'block') customPageBgImageEl.style.display = 'block';
+                customPageBgImageEl.onload = revealImage;
+                customPageBgImageEl.onerror = revealImage;
+
                 if ((customPageBgImageEl.getAttribute('src') || '') !== nextImageSrc) {
                     customPageBgImageEl.src = nextImageSrc;
                 }
-                customPageBgImageEl.style.visibility = 'visible';
-                if (customPageBgImageEl.style.display !== 'block') customPageBgImageEl.style.display = 'block';
+
+                try {
+                    const decodePromise = (typeof customPageBgImageEl.decode === 'function') ? customPageBgImageEl.decode() : null;
+                    if (decodePromise && typeof decodePromise.then === 'function') {
+                        decodePromise.then(revealImage).catch(revealImage);
+                    }
+                } catch(e){}
             };
-            const currentImgSrc = customPageBgImageEl.getAttribute('src') || '';
-            if (currentImgSrc === nextImageSrc && customPageBgImageEl.complete) {
+
+            if (sameImage && customPageBgImageEl.complete) {
                 commitImage();
                 return;
             }
+
             const preloadImage = new Image();
-            try { preloadImage.decoding = 'async'; } catch(e){}
-            preloadImage.onload = commitImage;
-            preloadImage.onerror = commitImage;
+            try { preloadImage.decoding = 'sync'; } catch(e){}
+            const finalizePreload = () => {
+                if (!isLatestApply()) return;
+                commitImage();
+            };
+            preloadImage.onload = () => {
+                try {
+                    const decodePromise = (typeof preloadImage.decode === 'function') ? preloadImage.decode() : null;
+                    if (decodePromise && typeof decodePromise.then === 'function') {
+                        decodePromise.then(finalizePreload).catch(finalizePreload);
+                        return;
+                    }
+                } catch(e){}
+                finalizePreload();
+            };
+            preloadImage.onerror = finalizePreload;
             preloadImage.src = nextImageSrc;
             return;
         }
@@ -7748,14 +7793,17 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
     }
 
     function applyPersonalCustomizationBackground(){
-        const saved = readPersonalBackgroundStateFromValues(personalCustomizationValues);
+        const modalOpen = isPersonalCustomizeModalOpen();
+        const activeState = modalOpen
+            ? clonePersonalBackgroundState(personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues))
+            : readPersonalBackgroundStateFromValues(personalCustomizationValues);
         const expectsExternalMedia = valuesUseExternalPersonalBgMedia(personalCustomizationValues)
-            && (saved.type === 'image' || saved.type === 'video');
-        if (expectsExternalMedia && !saved.mediaDataUrl) {
+            && (activeState.type === 'image' || activeState.type === 'video');
+        if (expectsExternalMedia && !activeState.mediaDataUrl) {
             const activeImageSrc = customPageBgImageEl ? String(customPageBgImageEl.getAttribute('src') || '') : '';
             const activeVideoSrc = customPageBgVideoEl ? String(customPageBgVideoEl.getAttribute('src') || '') : '';
-            const hasVisibleImage = saved.type === 'image' && !!activeImageSrc;
-            const hasVisibleVideo = saved.type === 'video' && !!activeVideoSrc;
+            const hasVisibleImage = activeState.type === 'image' && !!activeImageSrc;
+            const hasVisibleVideo = activeState.type === 'video' && !!activeVideoSrc;
             if (hasVisibleImage || hasVisibleVideo) {
                 document.body.classList.add('custom-page-bg-active');
                 if (customPageBgFillEl) customPageBgFillEl.style.background = 'var(--bg)';
@@ -7776,7 +7824,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
             hydratePersonalBgMediaForCurrentProfile({ apply: true });
             return;
         }
-        applyPersonalBackgroundState(saved, { preview: false });
+        applyPersonalBackgroundState(activeState, modalOpen ? { preview: true, forceOn: true } : { preview: false });
     }
 
     function syncPersonalBgDraftFromSliderInputs(){
