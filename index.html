@@ -405,12 +405,40 @@
             margin:0 0 0.45rem 0;
             background: color-mix(in srgb, var(--card) 92%, transparent);
         }
-        .personal-bg-archive-toolbar .personal-bg-slider-row{
-            grid-template-columns: 58px 1fr 64px;
+        .personal-bg-interval-row{
+            display:grid;
+            grid-template-columns: 58px 1fr;
+            gap:0.45rem;
+            align-items:center;
             margin-bottom:0.35rem;
         }
-        .personal-bg-archive-toolbar .personal-bg-slider-row label{
+        .personal-bg-interval-label{
             font-size:0.78rem;
+            font-weight:700;
+        }
+        .personal-bg-interval-buttons{
+            display:flex;
+            gap:0.3rem;
+            flex-wrap:wrap;
+        }
+        .personal-bg-interval-buttons button{
+            position:relative;
+            isolation:isolate;
+            flex:0 0 auto;
+            min-width:44px;
+            padding:0.32rem 0.5rem;
+            font-size:0.78rem;
+        }
+        .personal-bg-interval-buttons button .btn-label{
+            position:relative;
+            z-index:1;
+            display:inline-block;
+        }
+        .personal-bg-interval-buttons button.active{
+            background: transparent;
+            color: var(--text);
+            border-color: color-mix(in srgb, var(--dot-green) 82%, #ffffff 18%);
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--dot-green) 42%, transparent), 0 0 10px color-mix(in srgb, var(--dot-green) 40%, transparent);
         }
         .personal-bg-archive-toolbar-buttons{
             display:flex;
@@ -642,6 +670,15 @@
         #appNotesButton:hover #appTitleText,
         #appNotesButton:focus-visible #appTitleText{
             color: var(--dot-orange);
+        }
+
+        @keyframes demoModeTitleBlink {
+            0%, 49.999% { opacity: 1; }
+            50%, 100% { opacity: 0.18; }
+        }
+
+        body.demo-profile-active #appTitleText{
+            animation: demoModeTitleBlink 2s steps(1, end) infinite;
         }
 
         /* Prosjektforslag: kun selve forslaglisten skal ligge foran andre kort */
@@ -1284,6 +1321,24 @@
             background: var(--danger);
             color: #ffffff;
             border-color: var(--danger-border);
+        }
+        @keyframes clearArchiveReminderBlink {
+            0%, 49.999% {
+                background: var(--danger) !important;
+                color: #ffffff !important;
+                border-color: var(--danger-border) !important;
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.00), 0 0 16px rgba(220, 38, 38, 0.35);
+            }
+            50%, 100% {
+                background: var(--btn-bg) !important;
+                color: var(--text) !important;
+                border-color: var(--danger-border) !important;
+                box-shadow: none;
+            }
+        }
+        #clearButton.archive-reminder-blink:not(:disabled) {
+            border-color: var(--danger-border) !important;
+            animation: clearArchiveReminderBlink 2s steps(1, end) infinite;
         }
         #exportButton:not(:disabled):hover {
             background: var(--excel);
@@ -3096,7 +3151,7 @@ ${comment}
     <div class="header-right">
         <button id="themeToggleButton" class="btn-secondary" type="button" title="Bytt mellom lys, mørk og svart modus">Mørkmodus</button>
         <button id="profileButton" class="btn-secondary" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Profil og innstillinger</button>
-        <div style="margin-top:0.25rem;">Utviklet av:<br>Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 02.03.2026</div>
+        <div style="margin-top:0.25rem;">Utviklet av:<br>Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 03.03.2026</div>
     </div>
 </header>
 
@@ -3333,10 +3388,15 @@ ${comment}
                 </div>
 
                 <div id="personalBgAutoSwapWrap" class="personal-bg-archive-toolbar" aria-hidden="true" style="margin-top:0.55rem; display:none;">
-                    <div class="personal-bg-slider-row">
-                        <label for="personalFruitigerArchiveIntervalRange">Intervall</label>
-                        <input id="personalFruitigerArchiveIntervalRange" type="range" min="0" max="600" step="5" value="45" />
-                        <span id="personalFruitigerArchiveIntervalValue">45s</span>
+                    <div class="personal-bg-interval-row">
+                        <div class="personal-bg-interval-label">Intervall</div>
+                        <div id="personalFruitigerArchiveIntervalButtons" class="personal-bg-interval-buttons" role="group" aria-label="Intervall for automatisk bytting av bilder">
+                            <button type="button" class="btn-secondary" data-seconds="0" aria-pressed="false"><span class="btn-label">AV</span></button>
+                            <button type="button" class="btn-secondary" data-seconds="10" aria-pressed="false"><span class="btn-label">10s</span></button>
+                            <button type="button" class="btn-secondary" data-seconds="60" aria-pressed="false"><span class="btn-label">1m</span></button>
+                            <button type="button" class="btn-secondary" data-seconds="600" aria-pressed="false"><span class="btn-label">10m</span></button>
+                            <button type="button" class="btn-secondary" data-seconds="3600" aria-pressed="false"><span class="btn-label">1t</span></button>
+                        </div>
                     </div>
                     <div class="personal-bg-archive-toolbar-buttons">
                         <button id="personalFruitigerArchiveModeToggle" type="button" class="btn-secondary" aria-pressed="false">Samme kategori</button>
@@ -3879,6 +3939,7 @@ ${comment}
 <script>
     const STORAGE_KEY_PREFIX = "taskTimeTracker_data_";
     const THEME_KEY = "taskTimeTracker_theme_v1";
+    const MEDIA_BG_FIRST_USE_DARKMODE_KEY = "taskTimeTracker_mediaBgFirstUseDarkDone_v1";
     const ADHD_THEME_RESTORE_KEY = "taskTimeTracker_adhd_prevTheme_v1";
     const TIMELINE_KEY_PREFIX = "taskTimeTracker_timeline_";
     const PROFILES_KEY = "taskTimeTracker_profiles_list";
@@ -3916,6 +3977,8 @@ ${comment}
     let tempTaskSelectionTimer = null;
     let overduePopupShown = false;
     let endDayPressedAtMs = null;
+    let clearArchiveReminderArmedAtMs = null;
+    let clearArchiveReminderDismissed = false;
     let midnightDoubleCountGuardEnabled = false;
     let overduePopupMode = "overdue10h";
 
@@ -4267,8 +4330,7 @@ const startButtonEl = document.getElementById("startButton");
     const personalFruitigerArchivePanelEl = document.getElementById("personalFruitigerArchivePanel");
     const personalFruitigerArchiveStatusEl = document.getElementById("personalFruitigerArchiveStatus");
     const personalFruitigerArchiveListEl = document.getElementById("personalFruitigerArchiveList");
-    const personalFruitigerArchiveIntervalRangeEl = document.getElementById("personalFruitigerArchiveIntervalRange");
-    const personalFruitigerArchiveIntervalValueEl = document.getElementById("personalFruitigerArchiveIntervalValue");
+    const personalFruitigerArchiveIntervalButtonsEls = Array.from(document.querySelectorAll('#personalFruitigerArchiveIntervalButtons [data-seconds]'));
     const personalFruitigerArchiveModeToggleEl = document.getElementById("personalFruitigerArchiveModeToggle");
     const personalBgMediaHistoryDropdownEl = document.getElementById("personalBgMediaHistoryDropdown");
     const customPageBackgroundLayerEl = document.getElementById("customPageBackgroundLayer");
@@ -4408,6 +4470,7 @@ const startButtonEl = document.getElementById("startButton");
     let personalBgMediaDbPromise = null;
     let personalBgMediaHydrationToken = 0;
     let personalBgVisualApplyToken = 0;
+    let personalBgMediaSelectionToken = 0;
 
     let frutigerMusicPlayerVisible = false;
     let frutigerMusicLoading = false;
@@ -4503,10 +4566,27 @@ const startButtonEl = document.getElementById("startButton");
         themeToggleButtonEl.classList.toggle('media-amoled-pulse', !!hasMediaBg);
     }
 
+    function hasCompletedMediaBackgroundFirstUseDarkmode(){
+        try {
+            return localStorage.getItem(MEDIA_BG_FIRST_USE_DARKMODE_KEY) === "true";
+        } catch(e) {
+            return false;
+        }
+    }
+
+    function markMediaBackgroundFirstUseDarkmodeCompleted(){
+        try { localStorage.setItem(MEDIA_BG_FIRST_USE_DARKMODE_KEY, "true"); } catch(e){}
+    }
+
     function enforceAmoledThemeForMediaBackground(hasMediaBg){
-        // Mediebakgrunn skal ikke lenger tvinge mørk modus.
-        // Behold kun visuell indikator på knapp dersom det brukes bilde/video.
         syncThemeButtonMediaPulse(!!hasMediaBg);
+        if (!hasMediaBg) return;
+        if (hasCompletedMediaBackgroundFirstUseDarkmode()) return;
+        markMediaBackgroundFirstUseDarkmodeCompleted();
+        if (getCurrentThemeMode() === "light") {
+            applyThemeMode('dark');
+            refreshThemeDependentVisuals();
+        }
     }
 
     function rememberThemeBeforeAdhd(){
@@ -4744,6 +4824,173 @@ function initSuggestionsResizePersistence() {
     ro.observe(taskSuggestionsEl);
 }
 
+
+    function enforceDemoProfileKsLimit(profileData) {
+        if (!profileData || typeof profileData !== "object") return false;
+
+        const ksName = "Kvalitetssikring (KS)";
+        const ksKey = normalizeTaskName(ksName);
+        const oneHourMs = 60 * 60 * 1000;
+        const maxKsHours = 8;
+        const fallbackName = (Array.isArray(profileData.taskNames) ? profileData.taskNames : []).find(name => normalizeTaskName(name) !== ksKey) || "Dokumentasjon FDV";
+        const fallbackKey = normalizeTaskName(fallbackName);
+        const projectNumbers = (profileData.projectNumbers && typeof profileData.projectNumbers === "object") ? profileData.projectNumbers : {};
+        const ksProjectNumber = (typeof projectNumbers[ksKey] === "string" && projectNumbers[ksKey].trim())
+            ? projectNumbers[ksKey].trim()
+            : "";
+        const fallbackProjectNumber = (typeof projectNumbers[fallbackKey] === "string" && projectNumbers[fallbackKey].trim())
+            ? projectNumbers[fallbackKey].trim()
+            : "";
+
+        let changed = false;
+
+        const isKsRelatedTask = (task) => {
+            if (!task || typeof task !== "object") return false;
+            return normalizeTaskName(task.name || "") === ksKey
+                || normalizeTaskName(task.parentProject || "") === ksKey;
+        };
+
+        const moveAwayFromKs = (task) => {
+            if (!isKsRelatedTask(task)) return;
+            task.name = fallbackName;
+            task.parentProject = "";
+            task.subTaskName = "";
+            task.isActive = false;
+            task.lastStartMs = null;
+            task.lastEndAt = Number(task.lastEndAt || task.firstStartAt || task.createdAt || Date.now());
+            if (fallbackProjectNumber) task.projectNumber = fallbackProjectNumber;
+            changed = true;
+        };
+
+        (Array.isArray(profileData.tasks) ? profileData.tasks : []).forEach(moveAwayFromKs);
+        (Array.isArray(profileData.archives) ? profileData.archives : []).forEach((archive) => {
+            if (!archive || !Array.isArray(archive.tasks)) return;
+            archive.tasks.forEach(moveAwayFromKs);
+        });
+
+        if (profileData.projectDivisions && typeof profileData.projectDivisions === "object") {
+            Object.keys(profileData.projectDivisions).forEach((key) => {
+                if (normalizeTaskName(key) === ksKey) {
+                    delete profileData.projectDivisions[key];
+                    changed = true;
+                }
+            });
+        }
+
+        const eligibleArchives = (Array.isArray(profileData.archives) ? profileData.archives : []).filter(archive => archive && Array.isArray(archive.tasks) && archive.tasks.length > 0);
+        const injectCount = Math.min(maxKsHours, eligibleArchives.length);
+
+        for (let i = 0; i < injectCount; i++) {
+            const archive = eligibleArchives[i];
+            const existingTask = archive.tasks[0] || {};
+            const startAt = Number(existingTask.createdAt || existingTask.firstStartAt || existingTask.lastEndAt || archive.id || Date.now());
+            archive.tasks[0] = {
+                ...existingTask,
+                id: Number(existingTask.id) || (startAt + i),
+                name: ksName,
+                totalMs: oneHourMs,
+                isActive: false,
+                resumed: false,
+                createdAt: startAt,
+                firstStartAt: startAt,
+                lastEndAt: startAt + oneHourMs,
+                lastStartMs: null,
+                resumeCount: 0,
+                projectNumber: ksProjectNumber,
+                parentProject: "",
+                subTaskName: "",
+                comment: (typeof existingTask.comment === "string" && existingTask.comment.trim())
+                    ? existingTask.comment
+                    : "Utført kvalitetssikring og kontroll av leveranse."
+            };
+            changed = true;
+        }
+
+        let ksHoursUsed = 0;
+        const hardCapKsHours = (task) => {
+            if (!isKsRelatedTask(task)) return;
+            if (ksHoursUsed >= maxKsHours) {
+                moveAwayFromKs(task);
+                return;
+            }
+            task.name = ksName;
+            task.parentProject = "";
+            task.subTaskName = "";
+            task.isActive = false;
+            task.lastStartMs = null;
+            task.totalMs = oneHourMs;
+            const startAt = Number(task.createdAt || task.firstStartAt || task.lastEndAt || Date.now());
+            task.createdAt = startAt;
+            task.firstStartAt = startAt;
+            task.lastEndAt = startAt + oneHourMs;
+            task.resumeCount = 0;
+            task.projectNumber = ksProjectNumber;
+            ksHoursUsed += 1;
+            changed = true;
+        };
+
+        (Array.isArray(profileData.archives) ? profileData.archives : []).forEach((archive) => {
+            if (!archive || !Array.isArray(archive.tasks)) return;
+            archive.tasks.forEach(hardCapKsHours);
+        });
+        (Array.isArray(profileData.tasks) ? profileData.tasks : []).forEach(hardCapKsHours);
+
+        return changed;
+    }
+
+
+    function enforceDemoProfileTodayHourRules(profileData) {
+        if (!profileData || typeof profileData !== "object") return false;
+        if (!Array.isArray(profileData.tasks)) return false;
+
+        const oneHourMs = 60 * 60 * 1000;
+        const nowTs = Date.now();
+        let changed = false;
+        let activeTask = null;
+        const completedTasks = [];
+
+        profileData.tasks.forEach((task) => {
+            if (!task || typeof task !== "object") return;
+            if (task.isActive && !activeTask) {
+                activeTask = task;
+                return;
+            }
+            const startAt = Number(task.createdAt || task.firstStartAt || task.lastEndAt || nowTs);
+            task.isActive = false;
+            task.lastStartMs = null;
+            task.resumed = false;
+            task.totalMs = oneHourMs;
+            task.createdAt = startAt;
+            task.firstStartAt = startAt;
+            task.lastEndAt = startAt + oneHourMs;
+            task.resumeCount = 0;
+            completedTasks.push(task);
+        });
+
+        const maxCompleted = activeTask ? 7 : 8;
+        if (completedTasks.length > maxCompleted) changed = true;
+        const trimmedCompletedTasks = completedTasks.slice(0, maxCompleted);
+
+        if (activeTask) {
+            const activeStartTs = nowTs - oneHourMs;
+            activeTask.totalMs = 0;
+            activeTask.isActive = true;
+            activeTask.lastStartMs = activeStartTs;
+            activeTask.resumed = false;
+            activeTask.createdAt = activeStartTs;
+            activeTask.firstStartAt = activeStartTs;
+            activeTask.lastEndAt = null;
+            activeTask.resumeCount = 0;
+        }
+
+        const nextTasks = activeTask ? [activeTask, ...trimmedCompletedTasks] : trimmedCompletedTasks;
+        if (profileData.tasks.length !== nextTasks.length || profileData.tasks.some((task, index) => task !== nextTasks[index])) {
+            changed = true;
+        }
+        profileData.tasks = nextTasks;
+        return changed;
+    }
+
     function updateProfileButton() {
         if (!profileButtonEl) return;
         profileButtonEl.style.backgroundColor = "";
@@ -4831,6 +5078,14 @@ function initSuggestionsResizePersistence() {
                             if (a && Array.isArray(a.tasks)) a.tasks.forEach(t => { if (t && t.name) nameSet.add(t.name); });
                         });
                         data.taskNames = Array.from(nameSet);
+                    }
+
+                    if (currentProfile === DEMO_PROFILE_NAME) {
+                        const demoKsAdjusted = enforceDemoProfileKsLimit(data);
+                        const demoTodayAdjusted = enforceDemoProfileTodayHourRules(data);
+                        if (demoKsAdjusted || demoTodayAdjusted) {
+                            try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+                        }
                     }
                 }
             } catch (e) {}
@@ -5356,6 +5611,15 @@ function setPersonalCustomizationUiState(isOn){
         return true;
     }
 
+    function invalidatePendingPersonalBgMediaSelection(){
+        personalBgMediaSelectionToken += 1;
+        return personalBgMediaSelectionToken;
+    }
+
+    function isPersonalBgMediaSelectionCurrent(token){
+        return Number(token || 0) === personalBgMediaSelectionToken;
+    }
+
     function hydratePersonalBgMediaForCurrentProfile(opts = {}){
         const token = ++personalBgMediaHydrationToken;
         const profileAtStart = String(currentProfile || 'Standard');
@@ -5536,6 +5800,27 @@ function setPersonalCustomizationUiState(isOn){
         return custom || base;
     }
 
+    function isDemoProfileActive(){
+        return (currentProfile || '') === DEMO_PROFILE_NAME;
+    }
+
+    function updateDemoModeHeadingState(){
+        const isDemo = isDemoProfileActive();
+        document.body.classList.toggle('demo-profile-active', isDemo);
+
+        const titleEl = document.getElementById('appTitleText');
+        if (!titleEl) return;
+
+        if (isDemo) {
+            titleEl.textContent = 'DEMOMODUS';
+            return;
+        }
+
+        const appTitleDef = PERSONAL_CUSTOMIZATION_FIELD_DEFS.find(def => def.key === 'appTitle');
+        if (!appTitleDef) return;
+        titleEl.textContent = getPersonalCustomizationDisplayText(appTitleDef);
+    }
+
     function applyPersonalCustomizationHeadings(){
         capturePersonalCustomizationDefaults();
         PERSONAL_CUSTOMIZATION_FIELD_DEFS.forEach(def => {
@@ -5543,6 +5828,7 @@ function setPersonalCustomizationUiState(isOn){
             setPersonalCustomizationFieldText(def, nextText);
         });
         applyPersonalCustomizationBackground();
+        updateDemoModeHeadingState();
     }
 
     function buildPersonalCustomizeRow(def){
@@ -5647,6 +5933,7 @@ function setPersonalCustomizationUiState(isOn){
             light: 96,
             mediaDataUrl: '',
             mediaKind: '',
+            archiveControlsEnabled: false,
             glassEnabled: false,
             glassOpacity: 30,
             glassBlurPx: 1,
@@ -5667,6 +5954,7 @@ function setPersonalCustomizationUiState(isOn){
             light: Math.max(0, Math.min(100, Number.isFinite(Number(src.light)) ? Number(src.light) : 96)),
             mediaDataUrl: typeof src.mediaDataUrl === 'string' ? src.mediaDataUrl : '',
             mediaKind: (src.mediaKind === 'image' || src.mediaKind === 'video') ? src.mediaKind : '',
+            archiveControlsEnabled: !!src.archiveControlsEnabled,
             glassEnabled: !!src.glassEnabled,
             glassOpacity: Math.max(0, Math.min(100, Number.isFinite(Number(src.glassOpacity)) ? Number(src.glassOpacity) : 30)),
             glassBlurPx: normalizePersonalGlassBlurPx(src.glassBlurPx),
@@ -5745,6 +6033,7 @@ function setPersonalCustomizationUiState(isOn){
             light: values.pageBgLight,
             mediaDataUrl: values.pageBgMediaDataUrl || '',
             mediaKind: values.pageBgMediaKind || '',
+            archiveControlsEnabled: values.pageBgArchiveControlsEnabled === true || values.pageBgArchiveControlsEnabled === 'true',
             glassEnabled: values.pageBgGlassEnabled === true || values.pageBgGlassEnabled === 'true',
             glassOpacity: values.pageBgGlassOpacity,
             glassBlurPx: values.pageBgGlassBlurPx,
@@ -5773,6 +6062,7 @@ function setPersonalCustomizationUiState(isOn){
         valuesObj.pageBgLight = String(Math.round(s.light));
         valuesObj.pageBgMediaKind = (s.type === 'image' || s.type === 'video') ? s.mediaKind || s.type : '';
         valuesObj.pageBgMediaDataUrl = (s.type === 'image' || s.type === 'video') ? (s.mediaDataUrl || '') : '';
+        valuesObj.pageBgArchiveControlsEnabled = s.archiveControlsEnabled ? 'true' : 'false';
         if (s.type === 'image' || s.type === 'video') {
             valuesObj.pageBgMediaExternal = 'false';
             valuesObj.pageBgMediaStorageKey = getPersonalBgMediaStorageKey();
@@ -6032,17 +6322,16 @@ function setPersonalCustomizationUiState(isOn){
             btn.appendChild(thumb);
 
             btn.addEventListener('click', () => {
+                invalidatePendingPersonalBgMediaSelection();
                 const d = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
                 d.type = normalized.kind;
                 d.mediaKind = normalized.kind;
                 d.mediaDataUrl = normalized.dataUrl;
+                d.archiveControlsEnabled = false;
+                stopPersonalFruitigerArchiveAutoRotation({ clearSelection: false });
                 const nextRaw = [normalized].concat((d.mediaHistory || []).filter(h => !(h && h.dataUrl === normalized.dataUrl && h.kind === normalized.kind)));
                 d.mediaHistory = limitPersonalBgMediaHistoryList(nextRaw);
-                d.glassEnabled = true;
-                d.glassOpacity = 20;
-                d.glassBlurPx = 1;
                 personalCustomizeBackgroundDraft = d;
-                try { applyThemeMode('dark'); } catch(e){}
                 setPersonalBgControlsOpen(true);
                 renderPersonalBackgroundUiFromDraft();
                 applyPersonalBackgroundState(d, { preview: true, forceOn: true });
@@ -6095,6 +6384,17 @@ function setPersonalCustomizationUiState(isOn){
             personalBgTextColorButtonEl.setAttribute('aria-pressed', String(!!s.textOverrideEnabled));
         }
         setPersonalBgTextColorControlsOpen(!!s.textOverrideEnabled);
+    }
+
+    function persistPersonalBackgroundDraftIfModalClosed(state){
+        if (isPersonalCustomizeModalOpen()) return;
+        const s = clonePersonalBackgroundState(state || personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues));
+        if (!personalCustomizationValues || typeof personalCustomizationValues !== 'object' || Array.isArray(personalCustomizationValues)) {
+            personalCustomizationValues = {};
+        }
+        writePersonalBackgroundStateToValues(personalCustomizationValues, s);
+        savePersonalCustomizationValues();
+        personalCustomizeBackgroundSavedSnapshot = readPersonalBackgroundStateFromValues(personalCustomizationValues);
     }
 
     function renderPersonalBackgroundUiFromDraft(){
@@ -6183,7 +6483,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         setPersonalBgGlassControlsOpen(!!personalBgGlassControlsOpen);
         setPersonalBgTextColorControlsOpen(!!s.textOverrideEnabled);
         setPersonalFruitigerArchiveOpen(!!personalFruitigerArchiveOpen);
-        const showAutoSwap = (s.type === 'image' && !!s.mediaDataUrl);
+        const showAutoSwap = (!!s.archiveControlsEnabled && s.type === 'image' && !!s.mediaDataUrl);
         if (personalBgAutoSwapWrapEl) {
             personalBgAutoSwapWrapEl.style.display = showAutoSwap ? '' : 'none';
             personalBgAutoSwapWrapEl.setAttribute('aria-hidden', String(!showAutoSwap));
@@ -6238,18 +6538,72 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         personalFruitigerArchiveStatusEl.innerHTML = `Bakgrunn satt fra «<span class="status-category">${safeCat}</span>». ${safeSuffix}`;
     }
 
-    function updatePersonalFruitigerArchiveIntervalUi(){
-        const secRaw = Number(personalFruitigerArchiveAutoIntervalSec || 0);
-        const sec = Math.max(0, Math.min(600, Number.isFinite(secRaw) ? secRaw : 45));
-        if (personalFruitigerArchiveIntervalValueEl) {
-            let display = 'AV';
-            if (sec > 0) {
-                display = sec >= 60 ? `${(sec / 60).toFixed(sec % 60 === 0 ? 0 : 1)}m` : `${sec}s`;
+    const PERSONAL_FRUTIGER_ARCHIVE_ALLOWED_INTERVALS = [0, 10, 60, 600, 3600];
+
+    function normalizePersonalFruitigerArchiveIntervalSec(value){
+        const raw = Number(value);
+        if (!Number.isFinite(raw)) return 60;
+        let best = PERSONAL_FRUTIGER_ARCHIVE_ALLOWED_INTERVALS[0];
+        let bestDiff = Math.abs(raw - best);
+        for (let i = 1; i < PERSONAL_FRUTIGER_ARCHIVE_ALLOWED_INTERVALS.length; i += 1) {
+            const candidate = PERSONAL_FRUTIGER_ARCHIVE_ALLOWED_INTERVALS[i];
+            const diff = Math.abs(raw - candidate);
+            if (diff < bestDiff) {
+                best = candidate;
+                bestDiff = diff;
             }
-            personalFruitigerArchiveIntervalValueEl.textContent = display;
         }
-        if (personalFruitigerArchiveIntervalRangeEl) {
-            personalFruitigerArchiveIntervalRangeEl.value = String(sec);
+        return best;
+    }
+
+    function formatPersonalFruitigerArchiveIntervalLabel(value){
+        const sec = normalizePersonalFruitigerArchiveIntervalSec(value);
+        if (sec <= 0) return 'AV';
+        if (sec === 3600) return '1t';
+        if (sec >= 60) return `${Math.round(sec / 60)}m`;
+        return `${sec}s`;
+    }
+
+    function updatePersonalFruitigerArchiveIntervalUi(){
+        const sec = normalizePersonalFruitigerArchiveIntervalSec(personalFruitigerArchiveAutoIntervalSec);
+        personalFruitigerArchiveIntervalButtonsEls.forEach(btn => {
+            const btnSec = normalizePersonalFruitigerArchiveIntervalSec(btn && btn.dataset ? btn.dataset.seconds : 0);
+            const isActive = btnSec === sec;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-pressed', String(isActive));
+        });
+    }
+
+    function commitPersonalFruitigerArchiveIntervalChange(){
+        personalFruitigerArchiveAutoIntervalSec = normalizePersonalFruitigerArchiveIntervalSec(personalFruitigerArchiveAutoIntervalSec);
+        updatePersonalFruitigerArchiveIntervalUi();
+        const sec = normalizePersonalFruitigerArchiveIntervalSec(personalFruitigerArchiveAutoIntervalSec);
+        const secLabel = formatPersonalFruitigerArchiveIntervalLabel(sec);
+        const selected = getPersonalFruitigerArchiveSelectedCategory();
+
+        if (sec <= 0) {
+            stopPersonalFruitigerArchiveAutoRotation();
+            if (personalFruitigerArchiveHistoryMode) {
+                setPersonalFruitigerArchiveStatus('Auto-bytte er deaktivert (AV): historikk.');
+            } else {
+                setPersonalFruitigerArchiveStatus(selected
+                    ? `Auto-bytte er deaktivert (AV): «${selected.label || 'Kategori'}».`
+                    : 'Auto-bytte er deaktivert (AV). Velg en kategori for manuelt bytte.');
+            }
+            return;
+        }
+
+        const canRun = personalFruitigerArchiveHistoryMode || personalFruitigerArchiveRandomCategoryMode || !!selected;
+        if (canRun) {
+            personalFruitigerArchiveAutoRunning = true;
+            schedulePersonalFruitigerArchiveAutoRotation();
+            if (personalFruitigerArchiveHistoryMode) {
+                setPersonalFruitigerArchiveStatus(`Auto-bytte er aktivt: ${secLabel} (historikk).`);
+            } else {
+                setPersonalFruitigerArchiveStatus(selected
+                    ? `Auto-bytte er aktivt: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `samme kategori: «${selected.label || 'Kategori'}»`}).`
+                    : `Auto-bytte er aktivt: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori'}).`);
+            }
         }
     }
 
@@ -6310,19 +6664,22 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
     function applyPersonalBgHistoryAutoImage(dataUrl){
         const url = String(dataUrl || '').trim();
         if (!url) return;
+        invalidatePendingPersonalBgMediaSelection();
         const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues));
         s.type = 'image';
         s.mediaKind = 'image';
         s.mediaDataUrl = url;
+        s.archiveControlsEnabled = true;
         personalCustomizeBackgroundDraft = s;
         renderPersonalBackgroundUiFromDraft();
         applyPersonalBackgroundState(s, { preview: true, forceOn: true });
+        persistPersonalBackgroundDraftIfModalClosed(s);
     }
 
     function schedulePersonalFruitigerArchiveAutoRotation(){
         clearPersonalFruitigerArchiveAutoTimer();
         if (!personalFruitigerArchiveAutoRunning) return;
-        const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+        const sec = normalizePersonalFruitigerArchiveIntervalSec(personalFruitigerArchiveAutoIntervalSec);
         if (sec <= 0) return;
         const delay = sec * 1000;
         const runToken = personalFruitigerArchiveAutoRunToken;
@@ -6378,7 +6735,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
             const list = getPersonalBgHistoryImagesForAuto();
             if (!list.length) return;
         } else if (!personalFruitigerArchiveSelectedCategoryHref && !personalFruitigerArchiveRandomCategoryMode) return;
-        const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+        const sec = normalizePersonalFruitigerArchiveIntervalSec(personalFruitigerArchiveAutoIntervalSec);
         if (sec <= 0) {
             stopPersonalFruitigerArchiveAutoRotation();
             return;
@@ -6434,7 +6791,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         if (!target || !target.href) return;
 
         personalFruitigerArchiveSelectedCategoryHref = target.href;
-        const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
+        const sec = normalizePersonalFruitigerArchiveIntervalSec(personalFruitigerArchiveAutoIntervalSec);
         if (sec <= 0) {
             setPersonalFruitigerArchiveStatus(`Standardkategori valgt: «${target.label || 'Asadal Stock Images'}». Auto-bytte er av.`);
             return;
@@ -7559,27 +7916,32 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         updateFrutigerMusicPlayerUi();
     }
 
-    function applyFruitigerArchiveImageUrl(imageUrl, categoryLabel){
+    function applyFruitigerArchiveImageUrl(imageUrl, categoryLabel, opts = {}){
         const cleanUrl = String(imageUrl || '').trim();
         if (!cleanUrl) return;
+        const resetGlassDefaults = !!(opts && opts.resetGlassDefaults);
         let s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
         s.type = 'image';
         s.mediaKind = 'image';
         s.mediaDataUrl = cleanUrl;
-        s.glassEnabled = true;
-        s.glassOpacity = 20;
-        s.glassBlurPx = 1;
+        s.archiveControlsEnabled = true;
+        if (resetGlassDefaults) {
+            s.glassEnabled = true;
+            s.glassOpacity = 20;
+            s.glassBlurPx = 1;
+        }
         personalCustomizeBackgroundDraft = s;
         s = upsertMediaHistoryInDraft('image', cleanUrl, categoryLabel ? `FEA – ${categoryLabel}` : 'FEA bilde');
-        try { applyThemeMode('dark'); } catch(e){}
         setPersonalBgControlsOpen(true);
         setPersonalBgMediaHistoryOpen(false);
         renderPersonalBackgroundUiFromDraft();
         applyPersonalBackgroundState(s, { preview: true, forceOn: true });
+        persistPersonalBackgroundDraftIfModalClosed(s);
     }
 
     async function applyRandomFruitigerArchiveImage(category, opts = {}){
         if (!category || !category.href) return;
+        const selectionToken = invalidatePendingPersonalBgMediaSelection();
         const categoryUrl = String(category.href);
         const categoryLabel = category.label || 'Kategori';
         const fromAuto = !!(opts && opts.fromAuto);
@@ -7588,6 +7950,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         try {
             const targetNoHash = (() => { try { const u = new URL(categoryUrl); u.hash = ''; return u.toString(); } catch(e){ return categoryUrl; } })();
             const cached = await getCachedFruitigerDocument(targetNoHash);
+            if (!isPersonalBgMediaSelectionCurrent(selectionToken)) return;
             let scopedCandidates = [];
             if (category.hash) {
                 const scopedRoot = findScopedRootForHash(cached.doc, category.hash);
@@ -7603,11 +7966,12 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
                 if (filteredPool.length) pool = filteredPool;
             }
             const pick = pool[Math.floor(Math.random() * pool.length)];
+            if (!isPersonalBgMediaSelectionCurrent(selectionToken)) return;
             if (fromAuto && runToken && runToken !== personalFruitigerArchiveAutoRunToken) return;
             personalFruitigerArchiveLastImageUrl = String(pick && pick.url || '');
-            applyFruitigerArchiveImageUrl(pick.url, categoryLabel);
-            const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
-            const secLabel = sec <= 0 ? 'AV' : `${sec}s`;
+            applyFruitigerArchiveImageUrl(pick.url, categoryLabel, { resetGlassDefaults: !fromAuto });
+            const sec = normalizePersonalFruitigerArchiveIntervalSec(personalFruitigerArchiveAutoIntervalSec);
+            const secLabel = formatPersonalFruitigerArchiveIntervalLabel(sec);
             setPersonalFruitigerArchiveStatusWithCategory(categoryLabel, `Auto-bytte: ${secLabel} (${personalFruitigerArchiveHistoryMode ? 'historikk' : (personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori')}). Trykk igjen for nytt bilde nå.`);
             if (personalBgMediaStatusEl) personalBgMediaStatusEl.textContent = `FEA: «${categoryLabel}» valgt og klart for lagring`;
         } catch (err) {
@@ -7833,6 +8197,8 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         if (personalBgSatRangeEl) s.sat = Number(personalBgSatRangeEl.value || s.sat);
         if (personalBgLightRangeEl) s.light = Number(personalBgLightRangeEl.value || s.light);
         s.type = 'color';
+        s.archiveControlsEnabled = false;
+        stopPersonalFruitigerArchiveAutoRotation({ clearSelection: false });
         personalCustomizeBackgroundDraft = s;
         renderPersonalBackgroundUiFromDraft();
         applyPersonalBackgroundState(s, { preview: true, forceOn: true });
@@ -7840,6 +8206,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
 
     function handlePersonalBgMediaFile(file){
         if (!file) return;
+        const selectionToken = invalidatePendingPersonalBgMediaSelection();
         const isImage = /^image\//i.test(file.type || '');
         const isVideo = /^video\//i.test(file.type || '');
         if (!isImage && !isVideo) {
@@ -7856,18 +8223,20 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
         }
         const reader = new FileReader();
         reader.onload = () => {
+            if (!isPersonalBgMediaSelectionCurrent(selectionToken)) return;
             const dataUrl = typeof reader.result === 'string' ? reader.result : '';
             if (!dataUrl) return;
             let s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
             s.type = isVideo ? 'video' : 'image';
             s.mediaKind = s.type;
             s.mediaDataUrl = dataUrl;
+            s.archiveControlsEnabled = false;
+            stopPersonalFruitigerArchiveAutoRotation({ clearSelection: false });
             s.glassEnabled = true;
             s.glassOpacity = 20;
             s.glassBlurPx = 1;
             personalCustomizeBackgroundDraft = s;
             s = upsertMediaHistoryInDraft(s.type, dataUrl, file && file.name ? file.name : '');
-            try { applyThemeMode('dark'); } catch(e){}
             setPersonalBgControlsOpen(true);
             setPersonalBgMediaHistoryOpen(false);
             setPersonalFruitigerArchiveOpen(false);
@@ -7875,6 +8244,7 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
             applyPersonalBackgroundState(s, { preview: true, forceOn: true });
         };
         reader.onerror = () => {
+            if (!isPersonalBgMediaSelectionCurrent(selectionToken)) return;
             if (personalBgMediaStatusEl) personalBgMediaStatusEl.textContent = 'Kunne ikke lese filen.';
         };
         reader.readAsDataURL(file);
@@ -9651,6 +10021,8 @@ function clampInt(v, min, max) {
 
     function clearAndArchiveTasks(archiveBaseTs = null) {
         overduePopupShown = false;
+        clearArchiveReminderArmedAtMs = null;
+        clearArchiveReminderDismissed = false;
         finalizeTemporaryMidnightGuardSuspend();
         const tasksToCopy = copySourceTasks || data.tasks;
             if (tasksToCopy.length === 0) return;
@@ -10327,6 +10699,20 @@ startNewTask(pendingNewTaskName, projectNo);
         const m = addedMinutesBuffer % 60;
         adjustAddTimeDisplayEl.textContent = `${h}t ${m}min`;
     }
+
+    function shouldBlinkClearArchiveButton(nowMs = Date.now()) {
+        if (!clearArchiveReminderArmedAtMs) return false;
+        if (clearArchiveReminderDismissed) return false;
+        if (!clearButtonEl || clearButtonEl.disabled) return false;
+        if (getActiveTask()) return false;
+        if (!Array.isArray(data.tasks) || data.tasks.length === 0) return false;
+        return (nowMs - clearArchiveReminderArmedAtMs) >= 60000;
+    }
+
+    function applyClearArchiveReminderBlinkState(nowMs = Date.now()) {
+        if (!clearButtonEl) return;
+        clearButtonEl.classList.toggle('archive-reminder-blink', shouldBlinkClearArchiveButton(nowMs));
+    }
     function showAdjustStartPopup() {
         const active = getActiveTask();
 
@@ -10928,6 +11314,7 @@ groupedData.forEach((monthMap, monthKey) => {
         syncAdhdToActiveProject();
         applyMidnightGuardTemporaryVisualState();
         normalizeActivePosition();
+        updateDemoModeHeadingState();
         const isPrevDayArchiveRequired = hasUnarchivedPreviousDayTasks();
         const isGuardArchiveLock = isPrevDayArchiveRequired || hasGuardArchiveLockAfterStop();
         const activeTask = getActiveTask();
@@ -11296,6 +11683,7 @@ if (taskInputEl) {
         }
         if (data.tasks.length > 0 && !activeTask) clearButtonEl.disabled = false;
         else clearButtonEl.disabled = true;
+        applyClearArchiveReminderBlinkState();
         const hasInput = taskInputEl.value.trim().length > 0;
         const hasSelectedProjectDivision = !!selectedProjectDivisionTarget;
         startButtonEl.style.backgroundColor = "";
@@ -11919,10 +12307,12 @@ if (taskInputEl) {
         
         // Archives are sorted by Date descending (Newest date first)
         demoData.archives.sort((a,b) => b.id - a.id);
+        enforceDemoProfileKsLimit(demoData);
 
         // Sørg for at testprofilen ser realistisk ut ved oppstart:
-        // - minst 8 prosjekter i arbeidslisten med 1 time hver (generiske kommentarer)
-        // - ett ekstra aktivt prosjekt som ser ut til å ha startet for 8 timer siden
+        // - maks 8 timer totalt i dagens arbeidsliste
+        // - maks 1 time registrert per prosjekt
+        // - ett aktivt prosjekt kan vises, men det begrenses også til 1 time
         const nowTs = Date.now();
         const oneHourMs = 60 * 60 * 1000;
 
@@ -11943,14 +12333,14 @@ if (taskInputEl) {
             return d.getTime();
         })();
 
-        const uniqueNames = [...demoData.taskNames];
+        const uniqueNames = demoData.taskNames.filter(name => normalizeTaskName(name) !== normalizeTaskName("Kvalitetssikring (KS)"));
         for (let k = uniqueNames.length - 1; k > 0; k--) {
             const r = Math.floor(Math.random() * (k + 1));
             [uniqueNames[k], uniqueNames[r]] = [uniqueNames[r], uniqueNames[k]];
         }
 
         const completedTodayTasks = [];
-        const completedCount = Math.min(8, uniqueNames.length);
+        const completedCount = Math.min(7, uniqueNames.length);
 
         for (let idx = 0; idx < completedCount; idx++) {
             const taskName = uniqueNames[idx];
@@ -11975,7 +12365,7 @@ if (taskInputEl) {
             });
         }
 
-        const activeStartTs = nowTs - (8 * oneHourMs);
+        const activeStartTs = nowTs - oneHourMs;
         const activeCandidateName = uniqueNames[completedCount] || demoData.taskNames[0] || "Prosjektarbeid";
         const activeTaskKey = normalizeTaskName(activeCandidateName);
         const activeProjectNumber = (demoData.projectNumbers && demoData.projectNumbers[activeTaskKey]) ? demoData.projectNumbers[activeTaskKey] : "";
@@ -11998,6 +12388,7 @@ if (taskInputEl) {
 
         // I dagens arbeidsliste vises nyere elementer øverst. Legg aktiv oppgave først.
         demoData.tasks = [activeTask, ...completedTodayTasks.reverse()];
+        enforceDemoProfileTodayHourRules(demoData);
 
         // Eksempelnotater for dagen (vises i Notater-vinduet)
         demoData.appNotes = [
@@ -12618,6 +13009,8 @@ if (taskInputEl) {
     });
     endButtonEl.addEventListener("click", async () => {
         endDayPressedAtMs = Date.now();
+        clearArchiveReminderArmedAtMs = endDayPressedAtMs;
+        clearArchiveReminderDismissed = false;
         finalizeActiveTask();
         finalizeTemporaryMidnightGuardSuspend();
         saveToStorage();
@@ -12642,6 +13035,8 @@ if (taskInputEl) {
     adjustStartConfirmButtonEl.addEventListener("click", () => adjustStartConfirm());
     clearButtonEl.addEventListener("click", async () => {
         if (clearButtonEl.disabled) return;
+        clearArchiveReminderDismissed = true;
+        applyClearArchiveReminderBlinkState();
         if (shouldBlockClearArchiveForOneNoteReminder()) { showOneNoteReminderPopup(); return; }
         showClearTodayPopup();
     });
@@ -13735,6 +14130,8 @@ suggestionIndex = -1;
             }
             const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
             s.type = 'color';
+            s.archiveControlsEnabled = false;
+            stopPersonalFruitigerArchiveAutoRotation({ clearSelection: false });
             personalCustomizeBackgroundDraft = s;
             setPersonalBgMediaHistoryOpen(false);
             setPersonalFruitigerArchiveOpen(false);
@@ -13848,45 +14245,15 @@ suggestionIndex = -1;
             }
         });
     }
-    if (personalFruitigerArchiveIntervalRangeEl) {
-        const onArchiveIntervalInput = () => {
-            const raw = Number(personalFruitigerArchiveIntervalRangeEl.value || 0);
-            personalFruitigerArchiveAutoIntervalSec = Math.max(0, Math.min(600, Number.isFinite(raw) ? raw : 45));
-            updatePersonalFruitigerArchiveIntervalUi();
-        };
-        personalFruitigerArchiveIntervalRangeEl.addEventListener('input', onArchiveIntervalInput);
-        personalFruitigerArchiveIntervalRangeEl.addEventListener('change', () => {
-            onArchiveIntervalInput();
-            const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
-            const secLabel = sec <= 0 ? 'AV' : `${sec}s`;
-            const selected = getPersonalFruitigerArchiveSelectedCategory();
-
-            if (sec <= 0) {
-                stopPersonalFruitigerArchiveAutoRotation();
-                if (personalFruitigerArchiveHistoryMode) {
-                    setPersonalFruitigerArchiveStatus('Auto-bytte er deaktivert (AV): historikk.');
-                } else {
-                    setPersonalFruitigerArchiveStatus(selected
-                        ? `Auto-bytte er deaktivert (AV): «${selected.label || 'Kategori'}».`
-                        : 'Auto-bytte er deaktivert (AV). Velg en kategori for manuelt bytte.');
-                }
-                return;
-            }
-
-            const canRun = personalFruitigerArchiveHistoryMode || personalFruitigerArchiveRandomCategoryMode || !!selected;
-            if (canRun) {
-                personalFruitigerArchiveAutoRunning = true;
-                schedulePersonalFruitigerArchiveAutoRotation();
-                if (personalFruitigerArchiveHistoryMode) {
-                    setPersonalFruitigerArchiveStatus(`Auto-bytte er aktivt: ${secLabel} (historikk).`);
-                } else {
-                    setPersonalFruitigerArchiveStatus(selected
-                        ? `Auto-bytte er aktivt: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : `samme kategori: «${selected.label || 'Kategori'}»`}).`
-                        : `Auto-bytte er aktivt: ${secLabel} (${personalFruitigerArchiveRandomCategoryMode ? 'tilfeldig kategori' : 'samme kategori'}).`);
-                }
-            }
+    if (personalFruitigerArchiveIntervalButtonsEls.length) {
+        personalFruitigerArchiveIntervalButtonsEls.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const raw = Number(btn && btn.dataset ? btn.dataset.seconds : 0);
+                personalFruitigerArchiveAutoIntervalSec = normalizePersonalFruitigerArchiveIntervalSec(raw);
+                commitPersonalFruitigerArchiveIntervalChange();
+            });
         });
-        }
+    }
     if (personalFruitigerArchiveModeToggleEl) {
         personalFruitigerArchiveModeToggleEl.addEventListener('click', () => {
             const nextMode = personalFruitigerArchiveHistoryMode ? 'same'
@@ -13896,8 +14263,8 @@ suggestionIndex = -1;
             if (personalFruitigerArchiveAutoRunning) schedulePersonalFruitigerArchiveAutoRotation();
 
             const selected = getPersonalFruitigerArchiveSelectedCategory();
-            const sec = Math.max(0, Math.min(600, Number(personalFruitigerArchiveAutoIntervalSec || 0)));
-            const secLabel = sec <= 0 ? 'AV' : `${sec}s`;
+            const sec = normalizePersonalFruitigerArchiveIntervalSec(personalFruitigerArchiveAutoIntervalSec);
+            const secLabel = formatPersonalFruitigerArchiveIntervalLabel(sec);
 
             if (personalFruitigerArchiveHistoryMode) {
                 setPersonalFruitigerArchiveStatus(`Auto-bytte er ${sec <= 0 ? 'deaktivert (AV)' : 'aktivt'}: ${secLabel} (historikk).`);
@@ -14389,6 +14756,7 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
         refreshProjectDivisionArrowBlink();
         updateTimelineNowDot();
         checkOverdueActiveTask();
+        applyClearArchiveReminderBlinkState();
         if (getActiveTask()) drawTaskChart();
     }, 1000);
 
