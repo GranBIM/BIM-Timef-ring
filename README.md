@@ -1,7 +1,7 @@
 # BIM-Timef-ring
 Timeføring kan være enkelt!
 
-Copyright (c) 2025 Mathias Weiseth Gran
+Copyright (c) 2026 Mathias Weiseth Gran
 
 All rights reserved.
 
