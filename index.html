@@ -3437,36 +3437,36 @@ ${comment}
                     <div id="personalBgColorControls" class="personal-bg-color-controls">
                         <div class="personal-bg-slider-row">
                             <label for="personalBgHueRange">Fargetone</label>
-                            <input id="personalBgHueRange" type="range" min="0" max="360" step="1" value="210" />
-                            <span id="personalBgHueValue">210</span>
+                            <input id="personalBgHueRange" type="range" min="0" max="100" step="1" value="66" />
+                            <span id="personalBgHueValue">66</span>
                         </div>
                         <div class="personal-bg-slider-row">
                             <label for="personalBgSatRange">Metning</label>
-                            <input id="personalBgSatRange" type="range" min="0" max="100" step="1" value="35" />
-                            <span id="personalBgSatValue">35%</span>
+                            <input id="personalBgSatRange" type="range" min="0" max="100" step="1" value="19" />
+                            <span id="personalBgSatValue">19%</span>
                         </div>
                         <div class="personal-bg-slider-row">
                             <label for="personalBgLightRange">Lyshet</label>
-                            <input id="personalBgLightRange" type="range" min="0" max="100" step="1" value="96" />
-                            <span id="personalBgLightValue">96%</span>
+                            <input id="personalBgLightRange" type="range" min="0" max="100" step="1" value="92" />
+                            <span id="personalBgLightValue">92%</span>
                         </div>
                         <div id="personalBgPreviewChip" class="personal-bg-preview-chip">Forhåndsvisning</div>
                     </div>
                     <div id="personalBgTextColorControls" class="personal-bg-color-controls" aria-hidden="true">
                         <div class="personal-bg-slider-row">
                             <label for="personalTextHueRange">Fargetone</label>
-                            <input id="personalTextHueRange" type="range" min="0" max="360" step="1" value="220" />
-                            <span id="personalTextHueValue">220</span>
+                            <input id="personalTextHueRange" type="range" min="0" max="100" step="1" value="69" />
+                            <span id="personalTextHueValue">69</span>
                         </div>
                         <div class="personal-bg-slider-row">
                             <label for="personalTextSatRange">Metning</label>
-                            <input id="personalTextSatRange" type="range" min="0" max="100" step="1" value="12" />
-                            <span id="personalTextSatValue">12%</span>
+                            <input id="personalTextSatRange" type="range" min="0" max="100" step="1" value="0" />
+                            <span id="personalTextSatValue">0%</span>
                         </div>
                         <div class="personal-bg-slider-row">
                             <label for="personalTextLightRange">Lyshet</label>
-                            <input id="personalTextLightRange" type="range" min="0" max="100" step="1" value="18" />
-                            <span id="personalTextLightValue">18%</span>
+                            <input id="personalTextLightRange" type="range" min="0" max="100" step="1" value="0" />
+                            <span id="personalTextLightValue">0%</span>
                         </div>
                         <div id="personalTextPreviewChip" class="personal-bg-preview-chip">Tekstfarge forhåndsvisning</div>
                     </div>
@@ -4453,6 +4453,7 @@ const startButtonEl = document.getElementById("startButton");
     let personalFruitigerArchiveLoading = false;
     let personalFruitigerArchiveCategories = [];
     let personalFruitigerArchiveDocsCache = new Map();
+    let lastUsedPersonalPanel = null; // Sporer hvilket panel (bgColor eller textColor) som var sist brukt
     let personalFruitigerArchiveAutoTimer = null;
     let personalFruitigerArchiveAutoRunning = false;
     let personalFruitigerArchiveAutoBusy = false;
@@ -5899,6 +5900,30 @@ function setPersonalCustomizationUiState(isOn){
         applyPersonalCustomizationHeadings();
     }
 
+    function resetPersonalBackgroundColorOnly(){
+        // Tilbakestill kun bakgrunnsfargen
+        const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
+        s.hue = 210;
+        s.sat = 35;
+        s.light = 75;
+        s.type = 'none';
+        personalCustomizeBackgroundDraft = s;
+        renderPersonalBackgroundUiFromDraft();
+        applyPersonalBackgroundState(s, { preview: true, forceOn: true });
+    }
+
+    function resetPersonalTextColorOnly(){
+        // Tilbakestill kun tekstfargen
+        const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
+        s.textHue = 220;
+        s.textSat = 20;
+        s.textLight = 20;
+        s.textOverrideEnabled = false;
+        personalCustomizeBackgroundDraft = s;
+        renderPersonalBackgroundUiFromDraft();
+        applyPersonalBackgroundState(s, { preview: true, forceOn: true });
+    }
+
     function resetPersonalCustomizationValues(){
         deletePersonalBgMediaFromDb(getPersonalBgMediaStorageKey());
         personalCustomizationValues = {};
@@ -5925,12 +5950,80 @@ function setPersonalCustomizationUiState(isOn){
         return 24;
     }
 
+    // Konverteringsfunksjoner for bakgrunnsfargeslidere
+    function convertDisplayHueToActual(displayValue) {
+        // Display: 0-100 -> Actual: 0-320
+        return (Number(displayValue) || 0) * 3.2;
+    }
+    function convertActualHueToDisplay(actualValue) {
+        // Actual: 0-320 -> Display: 0-100
+        return Math.round((Number(actualValue) || 0) / 3.2);
+    }
+    function convertDisplaySatToActual(displayValue) {
+        // Display: 0-100 -> Actual: 20-100
+        // 0% display = 20% actual, 100% display = 100% actual
+        const displayNum = Math.max(0, Math.min(100, Number(displayValue) || 0));
+        return 20 + (displayNum * 0.8);
+    }
+    function convertActualSatToDisplay(actualValue) {
+        // Actual: 20-100 -> Display: 0-100
+        // 20% actual = 0% display, 100% actual = 100% display
+        const actualNum = Math.max(20, Math.min(100, Number(actualValue) || 20));
+        return Math.round((actualNum - 20) / 0.8);
+    }
+    function convertDisplayLightToActual(displayValue) {
+        // Display: 0-100 -> Actual: 20-80
+        // 0% display = 20% actual, 100% display = 80% actual
+        const displayNum = Math.max(0, Math.min(100, Number(displayValue) || 0));
+        return 20 + (displayNum * 0.6);
+    }
+    function convertActualLightToDisplay(actualValue) {
+        // Actual: 20-80 -> Display: 0-100
+        // 20% actual = 0% display, 80% actual = 100% display
+        const actualNum = Math.max(20, Math.min(80, Number(actualValue) || 20));
+        return Math.round((actualNum - 20) / 0.6);
+    }
+
+    // Konverteringsfunksjoner for tekstfargeslidere (samme som bakgrunnsfargen)
+    function convertDisplayTextHueToActual(displayValue) {
+        // Display: 0-100 -> Actual: 0-320
+        return (Number(displayValue) || 0) * 3.2;
+    }
+    function convertActualTextHueToDisplay(actualValue) {
+        // Actual: 0-320 -> Display: 0-100
+        return Math.round((Number(actualValue) || 0) / 3.2);
+    }
+    function convertDisplayTextSatToActual(displayValue) {
+        // Display: 0-100 -> Actual: 20-100
+        // 0% display = 20% actual, 100% display = 100% actual
+        const displayNum = Math.max(0, Math.min(100, Number(displayValue) || 0));
+        return 20 + (displayNum * 0.8);
+    }
+    function convertActualTextSatToDisplay(actualValue) {
+        // Actual: 20-100 -> Display: 0-100
+        // 20% actual = 0% display, 100% actual = 100% display
+        const actualNum = Math.max(20, Math.min(100, Number(actualValue) || 20));
+        return Math.round((actualNum - 20) / 0.8);
+    }
+    function convertDisplayTextLightToActual(displayValue) {
+        // Display: 0-100 -> Actual: 20-80
+        // 0% display = 20% actual, 100% display = 80% actual
+        const displayNum = Math.max(0, Math.min(100, Number(displayValue) || 0));
+        return 20 + (displayNum * 0.6);
+    }
+    function convertActualTextLightToDisplay(actualValue) {
+        // Actual: 20-80 -> Display: 0-100
+        // 20% actual = 0% display, 80% actual = 100% display
+        const actualNum = Math.max(20, Math.min(80, Number(actualValue) || 20));
+        return Math.round((actualNum - 20) / 0.6);
+    }
+
     function getDefaultPersonalBackgroundState(){
         return {
             type: 'none',
             hue: 210,
             sat: 35,
-            light: 96,
+            light: 75,
             mediaDataUrl: '',
             mediaKind: '',
             archiveControlsEnabled: false,
@@ -5939,8 +6032,8 @@ function setPersonalCustomizationUiState(isOn){
             glassBlurPx: 1,
             textOverrideEnabled: false,
             textHue: 220,
-            textSat: 12,
-            textLight: 18,
+            textSat: 20,
+            textLight: 20,
             mediaHistory: []
         };
     }
@@ -6365,16 +6458,16 @@ function setPersonalCustomizationUiState(isOn){
     function renderPersonalTextUiFromDraftFast(){
         const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues));
         personalCustomizeBackgroundDraft = s;
-        if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.textHue));
-        if (personalTextSatRangeEl) personalTextSatRangeEl.value = String(Math.round(s.textSat));
-        if (personalTextLightRangeEl) personalTextLightRangeEl.value = String(Math.round(s.textLight));
-        if (personalTextHueValueEl) personalTextHueValueEl.textContent = String(Math.round(s.textHue));
-        if (personalTextSatValueEl) personalTextSatValueEl.textContent = `${Math.round(s.textSat)}%`;
-        if (personalTextLightValueEl) personalTextLightValueEl.textContent = `${Math.round(s.textLight)}%`;
+        if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(convertActualTextHueToDisplay(s.textHue));
+        if (personalTextSatRangeEl) personalTextSatRangeEl.value = String(convertActualTextSatToDisplay(s.textSat));
+        if (personalTextLightRangeEl) personalTextLightRangeEl.value = String(convertActualTextLightToDisplay(s.textLight));
+        if (personalTextHueValueEl) personalTextHueValueEl.textContent = String(convertActualTextHueToDisplay(s.textHue));
+        if (personalTextSatValueEl) personalTextSatValueEl.textContent = `${convertActualTextSatToDisplay(s.textSat)}%`;
+        if (personalTextLightValueEl) personalTextLightValueEl.textContent = `${convertActualTextLightToDisplay(s.textLight)}%`;
         if (personalTextPreviewChipEl) {
             const tc = personalTextColorToCssColor(s);
             personalTextPreviewChipEl.style.background = tc;
-            personalTextPreviewChipEl.style.color = (Math.round(s.textLight) > 55) ? '#111827' : '#f9fafb';
+            personalTextPreviewChipEl.style.color = (s.textLight > 55) ? '#111827' : '#f9fafb';
             personalTextPreviewChipEl.textContent = s.textOverrideEnabled
                 ? `Tekstfarge (${Math.round(s.textHue)}° / ${Math.round(s.textSat)}% / ${Math.round(s.textLight)}%)`
                 : 'Tekstfarge overstyring er av';
@@ -6400,12 +6493,12 @@ function setPersonalCustomizationUiState(isOn){
     function renderPersonalBackgroundUiFromDraft(){
         const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || readPersonalBackgroundStateFromValues(personalCustomizationValues));
         personalCustomizeBackgroundDraft = s;
-        if (personalBgHueRangeEl) personalBgHueRangeEl.value = String(Math.round(s.hue));
-        if (personalBgSatRangeEl) personalBgSatRangeEl.value = String(Math.round(s.sat));
-        if (personalBgLightRangeEl) personalBgLightRangeEl.value = String(Math.round(s.light));
-        if (personalBgHueValueEl) personalBgHueValueEl.textContent = String(Math.round(s.hue));
-        if (personalBgSatValueEl) personalBgSatValueEl.textContent = `${Math.round(s.sat)}%`;
-        if (personalBgLightValueEl) personalBgLightValueEl.textContent = `${Math.round(s.light)}%`;
+        if (personalBgHueRangeEl) personalBgHueRangeEl.value = String(convertActualHueToDisplay(s.hue));
+        if (personalBgSatRangeEl) personalBgSatRangeEl.value = String(convertActualSatToDisplay(s.sat));
+        if (personalBgLightRangeEl) personalBgLightRangeEl.value = String(convertActualLightToDisplay(s.light));
+        if (personalBgHueValueEl) personalBgHueValueEl.textContent = String(convertActualHueToDisplay(s.hue));
+        if (personalBgSatValueEl) personalBgSatValueEl.textContent = `${convertActualSatToDisplay(s.sat)}%`;
+        if (personalBgLightValueEl) personalBgLightValueEl.textContent = `${convertActualLightToDisplay(s.light)}%`;
         if (personalBgMediaStatusEl) {
             if (s.type === 'image' && s.mediaDataUrl) personalBgMediaStatusEl.textContent = 'Bilde valgt og klart for lagring';
             else if (s.type === 'video' && s.mediaDataUrl) personalBgMediaStatusEl.textContent = 'Video valgt og klart for lagring';
@@ -6446,12 +6539,12 @@ function setPersonalCustomizationUiState(isOn){
             personalBgGlassOpacityValueEl.textContent = glassOn ? `${Math.round(s.glassOpacity)}%` : 'AV';
         }
 
-if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.textHue));
-        if (personalTextSatRangeEl) personalTextSatRangeEl.value = String(Math.round(s.textSat));
-        if (personalTextLightRangeEl) personalTextLightRangeEl.value = String(Math.round(s.textLight));
-        if (personalTextHueValueEl) personalTextHueValueEl.textContent = String(Math.round(s.textHue));
-        if (personalTextSatValueEl) personalTextSatValueEl.textContent = `${Math.round(s.textSat)}%`;
-        if (personalTextLightValueEl) personalTextLightValueEl.textContent = `${Math.round(s.textLight)}%`;
+if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(convertActualTextHueToDisplay(s.textHue));
+        if (personalTextSatRangeEl) personalTextSatRangeEl.value = String(convertActualTextSatToDisplay(s.textSat));
+        if (personalTextLightRangeEl) personalTextLightRangeEl.value = String(convertActualTextLightToDisplay(s.textLight));
+        if (personalTextHueValueEl) personalTextHueValueEl.textContent = String(convertActualTextHueToDisplay(s.textHue));
+        if (personalTextSatValueEl) personalTextSatValueEl.textContent = `${convertActualTextSatToDisplay(s.textSat)}%`;
+        if (personalTextLightValueEl) personalTextLightValueEl.textContent = `${convertActualTextLightToDisplay(s.textLight)}%`;
         if (personalTextPreviewChipEl) {
             const tc = personalTextColorToCssColor(s);
             personalTextPreviewChipEl.style.background = tc;
@@ -8193,9 +8286,9 @@ if (personalTextHueRangeEl) personalTextHueRangeEl.value = String(Math.round(s.t
 
     function syncPersonalBgDraftFromSliderInputs(){
         const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
-        if (personalBgHueRangeEl) s.hue = Number(personalBgHueRangeEl.value || s.hue);
-        if (personalBgSatRangeEl) s.sat = Number(personalBgSatRangeEl.value || s.sat);
-        if (personalBgLightRangeEl) s.light = Number(personalBgLightRangeEl.value || s.light);
+        if (personalBgHueRangeEl) s.hue = convertDisplayHueToActual(personalBgHueRangeEl.value);
+        if (personalBgSatRangeEl) s.sat = convertDisplaySatToActual(personalBgSatRangeEl.value);
+        if (personalBgLightRangeEl) s.light = convertDisplayLightToActual(personalBgLightRangeEl.value);
         s.type = 'color';
         s.archiveControlsEnabled = false;
         stopPersonalFruitigerArchiveAutoRotation({ clearSelection: false });
@@ -12622,7 +12715,17 @@ if (taskInputEl) {
 
     let themeClickCount = 0;
     let themeResetTimer = null;
-    themeToggleButtonEl.addEventListener("click", async () => {
+    themeToggleButtonEl.addEventListener("click", async (e) => {
+        // Hurtigtast: når Personlig tilpasning er aktiv -> CTRL + klikk på Mørkmodus åpner Personlig tilpasning direkte
+        const wantsPersonal = !!(e && e.ctrlKey && (typeof isPersonalCustomizationEnabled === 'function') && isPersonalCustomizationEnabled());
+        if (wantsPersonal) {
+            try { e.preventDefault(); e.stopPropagation(); } catch(_) {}
+            try { reopenSettingsAfterPersonalCustomizeClose = false; } catch(_) {}
+            if (typeof closeSettingsModal === 'function') closeSettingsModal();
+            requestAnimationFrame(() => openPersonalCustomizeModal());
+            return;
+        }
+
         clearTimeout(themeResetTimer);
         themeClickCount++;
         themeResetTimer = setTimeout(() => { themeClickCount = 0; }, 500);
@@ -13185,8 +13288,12 @@ if (projectOutdatedCheckboxEl) {
     commentCloseButtonEl.addEventListener("click", () => hideCommentPopup());
     commentCancelButtonEl.addEventListener("click", () => hideCommentPopup());
     commentSaveButtonEl.addEventListener("click", () => saveComment());
+    commentOverlayEl.addEventListener("click", (e) => {
+        if (e.target === commentOverlayEl) saveComment();
+    });
     commentTextareaEl.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveComment(); }
+        if (e.key === "Escape" || e.key === "Esc") { e.preventDefault(); saveComment(); }
     });
     restoreDayCancelButtonEl.addEventListener("click", () => hideRestoreDayPopup());
     restoreDayConfirmButtonEl.addEventListener("click", () => restoreDayConfirm());
@@ -14096,7 +14203,22 @@ suggestionIndex = -1;
                 personalResetHoldTriggered = false;
                 return;
             }
-            resetPersonalCustomizationValues();
+            // Hvis historikk-panelet er åpent -> slett historikken
+            if (personalBgMediaHistoryOpen) {
+                clearPersonalBgMediaHistoryEverywhere();
+            }
+            // Hvis kun bakgrunnsfargen er brukt (panel åpen) -> tilbakestill kun bakgrunnsfargen
+            else if (personalBgColorControlsOpen && !personalBgTextColorControlsOpen) {
+                resetPersonalBackgroundColorOnly();
+            }
+            // Hvis kun tekstfargen er brukt (panel åpen) -> tilbakestill kun tekstfargen
+            else if (personalBgTextColorControlsOpen && !personalBgColorControlsOpen) {
+                resetPersonalTextColorOnly();
+            }
+            // Hvis begge paneler er åpne, eller ingen er åpne -> tilbakestill alt
+            else {
+                resetPersonalCustomizationValues();
+            }
         });
     }
     if (personalCustomizeOkButtonEl) {
@@ -14199,7 +14321,14 @@ suggestionIndex = -1;
         });
     }
     if (personalBgGlassButtonEl) {
-        personalBgGlassButtonEl.addEventListener('click', () => {
+        personalBgGlassButtonEl.addEventListener('click', (e) => {
+            // Shift + klikk: skjul verktøy uten å aktivere glassmodus
+            if (e.shiftKey) {
+                personalBgGlassControlsOpen = false;
+                renderPersonalBackgroundUiFromDraft();
+                return;
+            }
+
             setPersonalBgControlsOpen(true);
             const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
 
@@ -14288,7 +14417,7 @@ suggestionIndex = -1;
     }
     function syncPersonalBgDraftFromSliderInputsWithHueAssist(source){
         if (source === personalBgHueRangeEl && personalBgLightRangeEl) {
-            personalBgLightRangeEl.value = '60';
+            personalBgLightRangeEl.value = '50';
         }
         syncPersonalBgDraftFromSliderInputs();
     }
@@ -14303,11 +14432,11 @@ suggestionIndex = -1;
         const s = clonePersonalBackgroundState(personalCustomizeBackgroundDraft || getDefaultPersonalBackgroundState());
         const fastPreview = !!opts.fastPreview;
         if (source === personalTextHueRangeEl && personalTextLightRangeEl) {
-            personalTextLightRangeEl.value = '60';
+            personalTextLightRangeEl.value = '50';
         }
-        if (personalTextHueRangeEl) s.textHue = Number(personalTextHueRangeEl.value || s.textHue);
-        if (personalTextSatRangeEl) s.textSat = Number(personalTextSatRangeEl.value || s.textSat);
-        if (personalTextLightRangeEl) s.textLight = Number(personalTextLightRangeEl.value || s.textLight);
+        if (personalTextHueRangeEl) s.textHue = convertDisplayTextHueToActual(personalTextHueRangeEl.value);
+        if (personalTextSatRangeEl) s.textSat = convertDisplayTextSatToActual(personalTextSatRangeEl.value);
+        if (personalTextLightRangeEl) s.textLight = convertDisplayTextLightToActual(personalTextLightRangeEl.value);
         s.textOverrideEnabled = true;
         personalCustomizeBackgroundDraft = s;
 
