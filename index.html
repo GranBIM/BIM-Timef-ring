@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="nb">
-<head>
+<html lang="nb"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="UTF-8">
     <title>BIMføring tidsregistrering</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="file:///C:/Users/GranW/Downloads/favicon.ico">
     <style>
         * { box-sizing: border-box; }
 
@@ -2799,6 +2799,355 @@ body.theme-dark #profileButton.profile-temp-guard-indicator {
         #cpToggle3:checked + .slider {
             background-color: #f59e0b !important;
         }
+
+        /* Under utvikling: Påminnelser = turkis */
+        #cpRemindersToggle:checked + .slider {
+            background-color: #38D5BE !important;
+        }
+
+        /* Ukekalender – Påminnelser-widget */
+        #remindersCalendarWidget {
+            display: none;
+            width: 100%;
+            position: relative;
+        }
+        body.reminders-enabled #remindersCalendarWidget {
+            display: block;
+        }
+        body.reminders-enabled #chartCardTitle { display: none; }
+        body.reminders-enabled .chart-wrapper,
+        body.reminders-enabled #chartLegend { display: none; }
+        body.reminders-enabled #remindersCalendarWidget .card-header,
+        body.reminders-enabled section.card:has(#remindersCalendarWidget) > .card-header { display: none; }
+
+        /* Inner: collapsed = 0px (ingenting vises), expanded = lagret høyde */
+        .reminders-calendar-inner {
+            overflow: hidden;
+            height: 0px;
+            transition: height 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+        #remindersCalendarWidget.is-expanded .reminders-calendar-inner {
+            height: var(--reminders-expanded-h, 200px);
+        }
+
+        /* Ukedag-tekst vises alltid (utenfor inner) */
+        .reminders-week-headers {
+            display: grid;
+            grid-template-columns: repeat(var(--reminders-cols, 7), 1fr);
+            gap: 4px;
+            width: 100%;
+            padding-bottom: 2px;
+        }
+
+        /* Dødsone – dekker siste kolonne og hele høyre kant av skjerm */
+        .reminders-dead-zone {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: var(--reminders-deadzone-w, 14.3%);
+            height: 100vh;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        /* Rutenett */
+        .reminders-week-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--reminders-cols, 7), 1fr);
+            gap: 4px;
+            width: 100%;
+            padding-bottom: 4px;
+        }
+        .reminders-day-col {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        /* Ukedag-overskrifter */
+        .reminders-day-header {
+            text-align: center;
+            font-size: 1.0rem;
+            font-weight: 700;
+            color: #000000;
+            padding: 3px 2px 4px;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            user-select: none;
+        }
+        body.theme-dark .reminders-day-header,
+        body.theme-black .reminders-day-header { color: #ffffff; }
+
+        /* Celler – lys: sort ramme, mørk: hvit ramme */
+        .reminders-day-cell {
+            background: transparent;
+            border: 2px solid rgba(0,0,0,0.4);
+            border-radius: 5px;
+            height: 28px;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            color: var(--muted);
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            position: relative;
+            overflow: visible;
+        }
+        .reminders-day-cell:hover { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.8); }
+        .reminders-day-cell.has-reminder { border-color: #000; background: rgba(0,0,0,0.08); }
+        body.theme-dark .reminders-day-cell,
+        body.theme-black .reminders-day-cell { border-color: rgba(255,255,255,0.4); }
+        body.theme-dark .reminders-day-cell:hover,
+        body.theme-black .reminders-day-cell:hover { background: rgba(255,255,255,0.08); border-color: #fff; }
+        body.theme-dark .reminders-day-cell.has-reminder,
+        body.theme-black .reminders-day-cell.has-reminder { border-color: #fff; background: rgba(255,255,255,0.12); }
+
+        .reminders-cell-text {
+            font-size: 0.6rem;
+            line-height: 1.1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+            padding: 0 2px;
+            pointer-events: none;
+        }
+
+        /* Aktiv tekst under kalender – alltid synlig */
+        #remindersActiveText {
+            padding: 4px 2px 3px;
+            font-size: 0.88rem;
+            min-height: 0;
+        }
+        #remindersActiveText:empty { display: none; }
+
+        .reminders-active-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .reminders-active-item {
+            display: flex;
+            align-items: baseline;
+            gap: 0.45rem;
+            font-size: 0.88rem;
+            color: var(--text);
+            line-height: 1.45;
+            cursor: pointer;
+        }
+        .reminders-active-item:hover { opacity: 0.75; }
+        .reminders-active-num {
+            font-size: 0.75rem;
+            color: var(--muted);
+            min-width: 14px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .reminders-active-time {
+            font-size: 0.76rem;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+        .reminders-active-text {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Ukedag-header med oppgaver → rød */
+        .reminders-day-header.has-timed-tasks { color: #e74c3c !important; }
+
+        /* Sakte blinking for første aktive oppgave (2s) */
+        @keyframes reminder-slow-blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.15; }
+        }
+        .reminders-active-item.is-first-blink {
+            animation: reminder-slow-blink 2s ease-in-out infinite;
+        }
+        .reminders-day-cell.is-blinking {
+            animation: reminder-slow-blink 2s ease-in-out infinite;
+        }
+
+        /* Resize-håndtak */
+        .reminders-resize-handle {
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 16px; height: 16px;
+            cursor: ns-resize;
+            z-index: 10;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+        .reminders-resize-handle svg { opacity: 0.45; transition: opacity 0.15s; }
+        .reminders-resize-handle:hover svg,
+        .reminders-resize-handle.resizing svg { opacity: 1; }
+
+        /* Dag-innstillinger popup */
+        .reminders-day-settings-popup {
+            position: fixed;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+            padding: 0.9rem 1rem;
+            z-index: 3100;
+            min-width: 240px;
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+        .reminders-day-settings-popup h4 {
+            margin: 0 0 0.2rem;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .reminders-day-settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            color: var(--text);
+        }
+        .reminders-day-settings-row input[type=number] {
+            width: 56px;
+            padding: 3px 6px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--btn-bg);
+            color: var(--text);
+            font-size: 0.82rem;
+            text-align: center;
+        }
+        .reminders-day-settings-btns {
+            display: flex;
+            gap: 0.4rem;
+            justify-content: flex-end;
+            margin-top: 0.2rem;
+        }
+
+        /* Kommentarvindu for celler */
+        .reminders-comment-popup {
+            position: fixed;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            padding: 0.6rem 0.75rem;
+            z-index: 3000;
+            min-width: 240px;
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+        .reminders-comment-popup textarea {
+            width: 100%;
+            min-height: 60px;
+            resize: vertical;
+            border: 1px solid var(--border);
+            border-radius: 0.35rem;
+            padding: 0.4rem 0.5rem;
+            font-size: 0.82rem;
+            background: var(--btn-bg);
+            color: var(--text);
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .reminders-comment-popup textarea:focus { outline: 2px solid var(--dot-blue); outline-offset: -1px; }
+        .reminders-comment-popup-row { display: flex; gap: 0.4rem; justify-content: flex-end; }
+        .reminders-comment-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+
+        /* Popup feature-rader */
+        .rcp-feature-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            color: var(--text);
+            min-height: 26px;
+        }
+        .rcp-feature-label { flex: 1; font-size: 0.78rem; }
+        .rcp-color-swatches {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+            margin-top: 2px;
+            padding: 4px 0 2px;
+        }
+        .rcp-swatch {
+            width: 18px; height: 18px;
+            border-radius: 3px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.1s;
+            flex-shrink: 0;
+        }
+        .rcp-swatch:hover { transform: scale(1.2); }
+        .rcp-swatch.selected { border-color: var(--text); transform: scale(1.15); }
+        .rcp-time-row {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.78rem;
+            color: var(--text);
+            margin-top: 1px;
+        }
+        .rcp-time-row select {
+            padding: 2px 4px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--btn-bg);
+            color: var(--text);
+            font-size: 0.76rem;
+            cursor: pointer;
+        }
+        .rcp-time-row select:focus { outline: 2px solid var(--dot-blue); outline-offset: -1px; }
+        .rcp-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 1px 0;
+        }
+
+        @keyframes rcp-rainbow {
+            0%   { background: #e74c3c; }
+            15%  { background: #e67e22; }
+            30%  { background: #f1c40f; }
+            45%  { background: #2ecc71; }
+            60%  { background: #3498db; }
+            75%  { background: #9b59b6; }
+            90%  { background: #e91e63; }
+            100% { background: #e74c3c; }
+        }
+        .rcp-swatch.rainbow {
+            animation: rcp-rainbow 2s linear infinite;
+            border-color: transparent;
+        }
+        @keyframes cell-rainbow {
+            0%   { border-color: #e74c3c; background: rgba(231,76,60,0.25); }
+            15%  { border-color: #e67e22; background: rgba(230,126,34,0.25); }
+            30%  { border-color: #f1c40f; background: rgba(241,196,15,0.25); }
+            45%  { border-color: #2ecc71; background: rgba(46,204,113,0.25); }
+            60%  { border-color: #3498db; background: rgba(52,152,219,0.25); }
+            75%  { border-color: #9b59b6; background: rgba(155,89,182,0.25); }
+            90%  { border-color: #e91e63; background: rgba(233,30,99,0.25); }
+            100% { border-color: #e74c3c; background: rgba(231,76,60,0.25); }
+        }
+        .reminders-day-cell.color-rainbow {
+            animation: cell-rainbow 2s linear infinite;
+        }
         .adhd-mode-toggle-label.is-active {
             color: #f59e0b !important;
             font-weight: 600;
@@ -2994,15 +3343,9 @@ button:not([disabled]):hover {
             width:100%;
             margin-left:2.1rem !important;
         }
-        #personalCustomizationRow > #personalCustomizeActionWrap{
-            order:3;
-            flex:1 1 100%;
-            width:100%;
-            margin-left:2.1rem !important;
-            margin-top:0.25rem;
-        }
-        #personalCustomizationRow > #personalCustomizeActionWrap > div{
-            justify-content:flex-start !important;
+        #personalCustomizationRow > .control-panel-left > #personalCustomizeActionWrap{
+            display:inline-flex;
+            align-items:center;
         }
 
         #underDevelopmentItems{
@@ -3136,21 +3479,21 @@ ${comment}
 }
 </script>
 </head>
-<body>
+<body class="reminders-enabled">
 <div id="customPageBackgroundLayer" aria-hidden="true">
-    <div id="customPageBgFill" class="custom-page-bg-fill"></div>
-    <img id="customPageBgImage" class="custom-page-bg-media" alt="" />
-    <video id="customPageBgVideo" class="custom-page-bg-media" muted loop playsinline preload="metadata"></video>
+    <div id="customPageBgFill" class="custom-page-bg-fill" style="background: var(--bg);"></div>
+    <img id="customPageBgImage" class="custom-page-bg-media" alt="" style="visibility: hidden; display: none;">
+    <video id="customPageBgVideo" class="custom-page-bg-media" muted="muted" loop="" playsinline="" preload="metadata" style="visibility: hidden; display: none;"></video>
 </div>
 
 <header class="header-bar">
     <div class="header-left">
-        <h1 id="appNotesButton" style="cursor:pointer;" title="trykk for å åpne notater"><span id="appNotesIndicator" aria-hidden="true"></span><span id="appTitleText">BIMføring tidsregistrering</span></h1>
-        <div class="time-now" id="timeNow"></div>
+        <h1 id="appNotesButton" style="cursor:pointer;" title="trykk for å åpne notater"><span id="appNotesIndicator" aria-hidden="true" style="display: none;"></span><span id="appTitleText">BIMføring tidsregistrering</span></h1>
+        <div class="time-now" id="timeNow">Torsdag 12. mars 2026 kl. 23:54:45</div>
     </div>
     <div class="header-right">
         <button id="themeToggleButton" class="btn-secondary" type="button" title="Bytt mellom lys, mørk og svart modus">Mørkmodus</button>
-        <button id="profileButton" class="btn-secondary" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Profil og innstillinger</button>
+        <button id="profileButton" class="btn-secondary btn-profile-active" type="button" style="margin-top: 0.25rem;" title="Administrer profiler og data">Kalender_testprofil</button>
         <div style="margin-top:0.25rem;">Utviklet av:<br>Mathias Weiseth Gran, BIM Tekniker<br>siste endring: 03.03.2026</div>
     </div>
 </header>
@@ -3163,27 +3506,16 @@ ${comment}
         </div>
         <div class="frutiger-music-row frutiger-music-row-controls">
             <button id="frutigerMusicStartStopButton" class="btn-secondary" type="button">Start</button>
-            <button id="frutigerMusicPauseButton" class="btn-secondary" type="button">Pause</button>
-            <button id="frutigerMusicPrevButton" class="btn-secondary" type="button">Forrige</button>
-            <button id="frutigerMusicNextButton" class="btn-secondary" type="button">Neste</button>
+            <button id="frutigerMusicPauseButton" class="btn-secondary" type="button" disabled="disabled">Pause</button>
+            <button id="frutigerMusicPrevButton" class="btn-secondary" type="button" disabled="disabled">Forrige</button>
+            <button id="frutigerMusicNextButton" class="btn-secondary" type="button" disabled="disabled">Neste</button>
         </div>
         <div id="frutigerMusicTrackName" class="frutiger-music-track">Ingen sang valgt</div>
-        <audio id="frutigerMusicAudio" preload="none"></audio>
+        <audio id="frutigerMusicAudio" preload="metadata" crossorigin="anonymous"></audio>
     </div>
 </div>
 
-<div id="adhdStripWrap" class="adhd-strip-wrap" title="Klikk for å legge inn eller endre oppgavelisten">
-    <div id="adhdStrip" class="adhd-strip">
-        <div class="adhd-strip-line" aria-hidden="true"></div>
-        <div class="helptext-container" data-helptext-container="true"><div class="adhd-strip-hint helper-text">Klikk linjen for å legge inn eller endre oppgaver</div></div>
-        <div id="adhdCurrentTask" class="adhd-current-task">
-            <div id="adhdCurrentTaskEmpty" class="adhd-empty">Ingen oppgaver lagt inn</div>
-            <span id="adhdCurrentTaskText" class="adhd-current-text" style="display:none;"></span>
-            <input id="adhdCurrentTaskCheck" class="adhd-current-check" type="checkbox" style="display:none;" aria-label="Marker oppgave som fullført">
-        </div>
-        <div id="adhdSummaryPill" class="adhd-summary-pill" style="display:none;"></div>
-    </div>
-</div>
+
 
 <section class="card" id="timelineCard">
     <div class="card-header">
@@ -3192,17 +3524,28 @@ ${comment}
         </div>
     </div>
 
-    <div id="adhdTimelineHost"></div>
+    <div id="adhdTimelineHost" style="display: none;"><div id="adhdStripWrap" class="adhd-strip-wrap" title="Klikk for å legge inn eller endre oppgavelisten">
+    <div id="adhdStrip" class="adhd-strip">
+        <div class="adhd-strip-line" aria-hidden="true" title="Klikk for å legge inn eller endre oppgavene"><span class="adhd-strip-seg is-placeholder"></span></div>
+        <div class="helptext-container" data-helptext-container="true"><div class="adhd-strip-hint helper-text">Klikk linjen for å legge inn eller endre oppgaver</div></div>
+        <div id="adhdCurrentTask" class="adhd-current-task">
+            <div id="adhdCurrentTaskEmpty" class="adhd-empty">Ingen oppgaver lagt inn</div>
+            <span id="adhdCurrentTaskText" class="adhd-current-text" style="display:none;"></span>
+            <input id="adhdCurrentTaskCheck" class="adhd-current-check" type="checkbox" style="display:none;" aria-label="Marker oppgave som fullført">
+        </div>
+        <div id="adhdSummaryPill" class="adhd-summary-pill" style="display:none;"></div>
+    </div>
+</div><div id="adhdMergedChartHost" class="adhd-merged-chart-host" style="display: none;"></div></div>
     <div class="timeline-wrap" id="timelineWrap">
         <!-- Main Bar - Content generated by JS -->
-        <div id="dayTimelineBar" class="timeline-bar" title="Viser arbeidsfordeling."></div>
+        <div id="dayTimelineBar" class="timeline-bar" title="Dobbeltklikk på en farge for å justere tid." style="cursor: default;"><div class="timeline-seg clickable blue" title="Juster arbeidsdag" style="left: 0%; width: 100%;"></div><div class="timeline-seg clickable orange" title="Juster kjernetid" style="left: 20%; width: 60%;"></div><div class="timeline-seg clickable green" title="Juster lunsj" style="left: 45%; width: 5%;"></div></div>
 
         <!-- Rainbow dot layer -->
         <div class="timeline-now-layer">
-            <div id="timelineNowDot" class="timeline-now-dot" aria-hidden="true"></div>
+            <div id="timelineNowDot" class="timeline-now-dot" aria-hidden="true" style="left: 100%;" title="23:54:45"></div>
         </div>
 
-        <div id="dayTimelineTicks" class="timeline-ticks"></div>
+        <div id="dayTimelineTicks" class="timeline-ticks"><div class="timeline-tick" style="left: 0%;"></div><div class="timeline-label" style="left: 0%;">07.00</div><div class="timeline-tick" style="left: 10%;"></div><div class="timeline-tick" style="left: 20%;"></div><div class="timeline-label" style="left: 20%;">09.00</div><div class="timeline-tick" style="left: 30%;"></div><div class="timeline-tick" style="left: 40%;"></div><div class="timeline-tick" style="left: 50%;"></div><div class="timeline-label" style="left: 50%;">12.00</div><div class="timeline-tick" style="left: 60%;"></div><div class="timeline-tick" style="left: 70%;"></div><div class="timeline-tick" style="left: 80%;"></div><div class="timeline-label" style="left: 80%;">15.00</div><div class="timeline-tick" style="left: 90%;"></div><div class="timeline-tick" style="left: 100%;"></div><div class="timeline-label" style="left: 100%;">17.00</div><div class="timeline-tick" style="left: 45%; height: 14px;"></div><div class="timeline-label" style="left: 45%;">11.30</div></div>
 
         <div id="dayTimelineCurtain" class="timeline-curtain">
             <div class="timeline-curtain-header">
@@ -3224,7 +3567,7 @@ ${comment}
                 <label id="dayTimelineToLabel" for="dayTimelineTo">Til:</label>
                 <select id="dayTimelineTo" class="modal-select"></select>
 
-                <span class="helper-text" id="dayTimelineCurtainHint"></span>
+                <div class="helptext-container" data-helptext-container="true"><span class="helper-text" id="dayTimelineCurtainHint"></span></div>
             </div>
         </div>
     </div>
@@ -3233,13 +3576,24 @@ ${comment}
 <section class="card">
     <div class="card-header">
         <span><strong id="chartCardTitle">Fordeling av prosjekter (tid)</strong></span>
+        <span id="remindersCardTitle" style="display:none;"><strong style="color:#38D5BE;">Påminnelser</strong></span>
+    </div>
+
+    <div id="remindersCalendarWidget" style="--reminders-deadzone-w: 159.5999755859375px; --reminders-cols: 7; --reminders-expanded-h: 200px;" class="">
+        <div class="reminders-week-headers" id="remindersWeekHeaders" style="grid-template-columns: repeat(7, 1fr);"><div class="reminders-day-header" data-day="Man" title="Dobbeltklikk for innstillinger">Man</div><div class="reminders-day-header" data-day="Tir" title="Dobbeltklikk for innstillinger">Tir</div><div class="reminders-day-header" data-day="Ons" title="Dobbeltklikk for innstillinger">Ons</div><div class="reminders-day-header is-today has-timed-tasks" data-day="Tor" title="Dobbeltklikk for innstillinger">Tor</div><div class="reminders-day-header" data-day="Fre" title="Dobbeltklikk for innstillinger">Fre</div><div class="reminders-day-header" data-day="Lør" title="Dobbeltklikk for innstillinger">Lør</div><div class="reminders-day-header" data-day="Søn" title="Dobbeltklikk for innstillinger">Søn</div></div>
+        <div class="reminders-calendar-inner" id="remindersCalendarInner">
+            <div class="reminders-week-grid" id="remindersWeekGrid" style="grid-template-columns: repeat(7, 1fr);"><div class="reminders-day-col"><div class="reminders-day-cell has-reminder" data-day="Man" data-row="0" style="background: rgba(231, 76, 60, 0.333); border-color: rgb(231, 76, 60);"><span class="reminders-cell-text">IFC eksport NORA</span></div><div class="reminders-day-cell has-reminder" data-day="Man" data-row="1" style="background: rgba(230, 126, 34, 0.333); border-color: rgb(230, 126, 34);"><span class="reminders-cell-text">IFC eksport NORA</span></div><div class="reminders-day-cell" data-day="Man" data-row="2"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Man" data-row="3"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Man" data-row="4"><span class="reminders-cell-text"></span></div></div><div class="reminders-day-col"><div class="reminders-day-cell has-reminder" data-day="Tir" data-row="0" style="background: rgba(241, 196, 15, 0.333); border-color: rgb(241, 196, 15);"><span class="reminders-cell-text">IFC eksport NORA</span></div><div class="reminders-day-cell" data-day="Tir" data-row="1"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Tir" data-row="2"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Tir" data-row="3"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Tir" data-row="4"><span class="reminders-cell-text"></span></div></div><div class="reminders-day-col"><div class="reminders-day-cell has-reminder" data-day="Ons" data-row="0" style="background: rgba(233, 30, 99, 0.333); border-color: rgb(233, 30, 99);"><span class="reminders-cell-text">IFC eksport NORA</span></div><div class="reminders-day-cell" data-day="Ons" data-row="1"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Ons" data-row="2"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Ons" data-row="3"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Ons" data-row="4"><span class="reminders-cell-text"></span></div></div><div class="reminders-day-col"><div class="reminders-day-cell has-reminder color-rainbow" data-day="Tor" data-row="0"><span class="reminders-cell-text">IFC eksport NORA</span></div><div class="reminders-day-cell has-reminder" data-day="Tor" data-row="1" style="background: rgba(26, 188, 156, 0.333); border-color: rgb(26, 188, 156);"><span class="reminders-cell-text">IFC eksport Brøset</span></div><div class="reminders-day-cell has-reminder" data-day="Tor" data-row="2" style="background: rgba(26, 188, 156, 0.333); border-color: rgb(26, 188, 156);"><span class="reminders-cell-text">IFC eksport fornebubanen</span></div><div class="reminders-day-cell" data-day="Tor" data-row="3"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Tor" data-row="4"><span class="reminders-cell-text"></span></div></div><div class="reminders-day-col"><div class="reminders-day-cell" data-day="Fre" data-row="0"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell has-reminder" data-day="Fre" data-row="1"><span class="reminders-cell-text">qfsddsd</span></div><div class="reminders-day-cell" data-day="Fre" data-row="2"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Fre" data-row="3"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Fre" data-row="4"><span class="reminders-cell-text"></span></div></div><div class="reminders-day-col"><div class="reminders-day-cell" data-day="Lør" data-row="0"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Lør" data-row="1"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Lør" data-row="2"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Lør" data-row="3"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Lør" data-row="4"><span class="reminders-cell-text"></span></div></div><div class="reminders-day-col"><div class="reminders-day-cell" data-day="Søn" data-row="0"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Søn" data-row="1"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Søn" data-row="2"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Søn" data-row="3"><span class="reminders-cell-text"></span></div><div class="reminders-day-cell" data-day="Søn" data-row="4"><span class="reminders-cell-text"></span></div></div></div>
+        </div>
+        <div id="remindersActiveText"></div>
+        <div class="reminders-dead-zone" id="remindersDeadZone"></div>
+        <div class="reminders-resize-handle" id="remindersResizeHandle" title="Dra for å justere høyde – dobbeltklikk for å tilbakestille"><svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><line x1="12" y1="2" x2="2" y2="12" stroke="#888" stroke-width="1.5" stroke-linecap="round"></line><line x1="12" y1="6" x2="6" y2="12" stroke="#888" stroke-width="1.5" stroke-linecap="round"></line><line x1="12" y1="10" x2="10" y2="12" stroke="#888" stroke-width="1.5" stroke-linecap="round"></line></svg></div>
     </div>
 
     <div class="chart-wrapper">
-        <div id="taskChartGifOverlay" class="chart-gif-overlay">
-            <img src="din-animasjon.gif" alt="Start et prosjekt for å se fordelingen" />
+        <div id="taskChartGifOverlay" class="chart-gif-overlay" style="display: none;">
+            <img src="BIMf%C3%B8ring%20tidsregistrering_files/din-animasjon.gif" alt="Start et prosjekt for å se fordelingen">
         </div>
-        <canvas id="taskChart" width="900" height="110"></canvas>
+        <canvas id="taskChart" width="0" height="0"></canvas>
     </div>
 
     <div id="chartLegend" class="chart-legend"></div>
@@ -3249,14 +3603,12 @@ ${comment}
     <div><strong id="projectCardTitle">Prosjekt</strong></div>
     <div class="task-input-row">
         <div class="task-input-wrapper">
-            <input type="text" id="taskInput" placeholder="Skriv inn prosjektnavn …" />
-            <div id="taskSuggestions"></div>
+            <input type="text" id="taskInput" placeholder="Skriv inn prosjektnavn …" data-default-placeholder="Skriv inn prosjektnavn …">
+            <div id="taskSuggestions" style="display: none;"></div>
         </div>
-        <button id="startButton" title="Start tidsur for valgt prosjekt">Start arbeid</button>
+        <button id="startButton" title="Start tidsur for valgt prosjekt" style="background-color: var(--dot-green);">Start arbeid</button>
     </div>
-    <div class="helper-text" id="selectionInfo">
-        Skriv inn et prosjekt og trykk Enter eller «Start arbeid».
-    </div>
+    <div class="helptext-container" data-helptext-container="true"><div class="helper-text" id="selectionInfo">Skriv inn et prosjekt og trykk Enter eller «Start arbeid».</div></div>
 </section>
 
 <section class="card" id="currentTaskCard">
@@ -3267,14 +3619,14 @@ ${comment}
             </div>
             <div id="currentTaskName" class="current-task-title">Ingen aktivt prosjekt</div>
             <div class="current-task-actions">
-                <button id="transferTimeButton" class="btn-secondary" disabled title="Flytt tid mellom prosjekter">Overfør tid mellom</button>
-                <button id="adjustStartButton" class="btn-secondary" disabled title="Legg til tid på aktivt prosjekt">Tilfør tid</button>
+                <button id="transferTimeButton" class="btn-secondary" disabled="disabled" title="Flytt tid mellom prosjekter">Overfør tid mellom</button>
+                <button id="adjustStartButton" class="btn-secondary" disabled="disabled" title="">Legg til starttid</button>
             </div>
-            <div class="inline-note" id="currentTaskHint"></div>
+            <div class="helptext-container" data-helptext-container="true"><div class="inline-note" id="currentTaskHint"></div></div>
         </div>
         <div style="text-align:right;">
-            <div id="currentTaskTime" class="current-task-time">00:00:00</div>
-            <button id="endButton" class="btn-secondary" disabled title="Stopp tid og avslutt dagen">Avslutt arbeid</button>
+            <div id="currentTaskTime" class="current-task-time"><span class="time-digit-neutral">00</span>:<span class="time-digit-neutral">00</span>:<span class="time-digit-neutral">00</span></div>
+            <button id="endButton" class="btn-secondary" disabled="disabled" title="Stopp tid og avslutt dagen">Avslutt dagens arbeid</button>
         </div>
     </div>
 </section>
@@ -3283,22 +3635,22 @@ ${comment}
     <div class="card-header">
         <div class="card-header-left">
             <span><strong id="taskListCardTitle">Arbeidsliste (dagens)</strong></span>
-            <button id="copyOneNoteButton" class="btn-secondary" type="button" disabled title="Kopier sammendrag til utklippstavle">Kopier for Onenote</button>
-            <button id="toggleAllCommentsButton" class="btn-secondary" type="button" disabled title="Vis/skjul alle kommentarer">Vis kommentarer</button>
-            <button id="toggleListHeightButton" class="btn-secondary" type="button" disabled title="Endre høyde på oppgaveliste">Utvid liste</button>
+            <button id="copyOneNoteButton" class="btn-secondary" type="button" disabled="disabled" title="Kopier sammendrag til utklippstavle">Kopier for Onenote</button>
+            <button id="toggleAllCommentsButton" class="btn-secondary" type="button" disabled="disabled" title="Vis/skjul alle kommentarer">Vis kommentarer</button>
+            <button id="toggleListHeightButton" class="btn-secondary" type="button" disabled="disabled" title="Endre høyde på oppgaveliste">Utvid liste</button>
             <button id="toggleRoundingButton" class="btn-secondary" type="button" title="Runder tid til nærmeste 30min/1t">Avrund tid</button>
         </div>
-        <button id="clearButton" class="btn-secondary" disabled title="Tøm listen og arkiver til historikk">Tøm og arkiver</button>
+        <button id="clearButton" class="btn-secondary" disabled="disabled" title="Tøm listen og arkiver til historikk">Tøm og arkiver</button>
     </div>
-    <p class="helper-text" id="taskListHelper">
+    <div class="helptext-container" data-helptext-container="true"><p class="helper-text" id="taskListHelper">
         Klikk på et prosjekt i listen for å velge det. Knappen over feltet blir da «Gjenoppta arbeid».
         Dobbeltklikk på den rosa sirkelen for å legge til eller vise kommentar.
-    </p>
+    </p></div>
     <div class="task-list-wrapper">
         <div id="resizeHandle" title="Dra for å justere kolonnebredde"></div>
         <ul id="taskList" class="task-list"></ul>
     </div>
-    <div id="emptyListText" class="empty-text helper-text">Ingen prosjekter registrert ennå.</div>
+    <div class="helptext-container" data-helptext-container="true"><div id="emptyListText" class="empty-text helper-text" style="display: block;">Ingen prosjekter registrert ennå.</div></div>
 </section>
 
 <section class="card">
@@ -3309,31 +3661,31 @@ ${comment}
         </div>
         <div class="card-header-buttons">
 
-            <button id="exportButton" class="btn-secondary" title="Last ned all historikk som CSV">Eksporter til Excel</button>
-            <button id="clearArchivesButton" class="btn-secondary" title="Slett all historikk permanent">Slett historikk</button>
+            <button id="exportButton" class="btn-secondary" title="Last ned all historikk som CSV" disabled="disabled">Eksporter til Excel</button>
+            <button id="clearArchivesButton" class="btn-secondary" title="Slett all historikk permanent" disabled="disabled">Slett historikk</button>
         </div>
     </div>
 
     <div id="archiveContentWrap">
-        <p class="helper-text" id="archiveHelper">
+        <div class="helptext-container" data-helptext-container="true"><p class="helper-text" id="archiveHelper">
             Når du tømmer listen, blir prosjektene flyttet hit, gruppert på dag, måned og år.
             Du kan gjenoppta et arkivert prosjekt kun dersom det er samme dato.
-        </p>
-        <div id="archiveList"></div>
+        </p></div>
+        <div id="archiveList"><div class="empty-text helper-text">Ingen arkiverte prosjekter ennå.</div></div>
     </div>
 </section>
 
 <!-- Settings Modal -->
 <div id="adhdTasksOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="adhdTasksCloseButton">&times;</button>
+        <button class="modal-close" id="adhdTasksCloseButton">×</button>
         <h2>Sekvensmodus – oppgaveliste</h2>
-        <p class="helper-text">Legg inn én oppgave per linje. Rekkefølgen brukes i visningen øverst på nettsiden.</p>
+        <div class="helptext-container" data-helptext-container="true"><p class="helper-text">Legg inn én oppgave per linje. Rekkefølgen brukes i visningen øverst på nettsiden.</p></div>
         <div class="adhd-modal-grid">
             <div id="adhdLineNumbers" class="adhd-line-numbers">1</div>
             <textarea id="adhdTasksTextarea" class="modal-textarea adhd-textarea" spellcheck="false" placeholder="SHIFT + ENTER for linjeskift"></textarea>
         </div>
-        <div class="adhd-modal-footnote helper-text">Tomme linjer ignoreres. Dobbeltklikk den fargede linjen øverst for å åpne denne dialogen igjen.</div>
+        <div class="helptext-container" data-helptext-container="true"><div class="adhd-modal-footnote helper-text">Tomme linjer ignoreres. Dobbeltklikk den fargede linjen øverst for å åpne denne dialogen igjen.</div></div>
         <div class="modal-actions" style="margin-top:0.9rem;">
             <button id="adhdTasksCancelButton" type="button" class="btn-secondary">Avbryt</button>
             <button id="adhdTasksOkButton" type="button" class="btn-secondary">OK</button>
@@ -3343,9 +3695,9 @@ ${comment}
 
 <div id="projectTaskDivisionOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="projectTaskDivisionCloseButton">&times;</button>
+        <button class="modal-close" id="projectTaskDivisionCloseButton">×</button>
         <h2>Prosjektoppgaver</h2>
-        <p class="helper-text">Legg inn én oppgave per linje. Listen er knyttet til valgt prosjekt.</p>
+        <div class="helptext-container" data-helptext-container="true"><p class="helper-text">Legg inn én oppgave per linje. Listen er knyttet til valgt prosjekt.</p></div>
         <div class="adhd-modal-grid">
             <div id="projectTaskDivisionLineNumbers" class="adhd-line-numbers">1</div>
             <textarea id="projectTaskDivisionTextarea" class="modal-textarea adhd-textarea" spellcheck="false" placeholder="SHIFT + ENTER for linjeskift"></textarea>
@@ -3365,13 +3717,13 @@ ${comment}
             <button id="adhdDiscardCancelButton" class="btn-secondary" type="button">Avbryt</button>
             <button id="adhdDiscardConfirmButton" class="modal-button-primary" type="button" style="background: var(--danger);">Deaktiver</button>
         </div>
-        <div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC eller klikk utenfor = angre</div>
+        <div class="helptext-container" data-helptext-container="true"><div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC eller klikk utenfor = angre</div></div>
     </div>
 </div>
 
 <div id="personalCustomizeOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="personalCustomizeCloseButton">&times;</button>
+        <button class="modal-close" id="personalCustomizeCloseButton">×</button>
         <h2>Personlig tilpasning</h2>
         <div class="helptext-container" data-helptext-container="true" style="margin-bottom:0.6rem;">
             <div class="helper-text">Her kan du tilpasse det visuelle slik du selv ønsker, NB! Tekst og menyer kan bli vanskelig å lese. <span class="ctrl-hint-orange">Hold nede CTRL tasten hvis du ikke klarer se ellr lese tekst</span></div>
@@ -3393,7 +3745,7 @@ ${comment}
                         <div id="personalFruitigerArchiveIntervalButtons" class="personal-bg-interval-buttons" role="group" aria-label="Intervall for automatisk bytting av bilder">
                             <button type="button" class="btn-secondary" data-seconds="0" aria-pressed="false"><span class="btn-label">AV</span></button>
                             <button type="button" class="btn-secondary" data-seconds="10" aria-pressed="false"><span class="btn-label">10s</span></button>
-                            <button type="button" class="btn-secondary" data-seconds="60" aria-pressed="false"><span class="btn-label">1m</span></button>
+                            <button type="button" class="btn-secondary active" data-seconds="60" aria-pressed="true"><span class="btn-label">1m</span></button>
                             <button type="button" class="btn-secondary" data-seconds="600" aria-pressed="false"><span class="btn-label">10m</span></button>
                             <button type="button" class="btn-secondary" data-seconds="3600" aria-pressed="false"><span class="btn-label">1t</span></button>
                         </div>
@@ -3416,12 +3768,12 @@ ${comment}
                         <button id="personalBgMediaHistoryButton" type="button" class="btn-secondary">Historikk bilder / video</button>
                         <button id="personalBgGlassButton" type="button" class="btn-secondary" aria-pressed="false">Glassmodus</button>
                         <button id="personalFruitigerArchiveButton" type="button" class="btn-secondary" aria-pressed="false">The Frutiger Aero Archive</button>
-                        <input id="personalBgMediaInput" type="file" accept="image/*,video/*" style="position:fixed; left:-99999px; top:0; opacity:0; width:1px; height:1px; pointer-events:none;" />
+                        <input id="personalBgMediaInput" type="file" accept="image/*,video/*" style="position:fixed; left:-99999px; top:0; opacity:0; width:1px; height:1px; pointer-events:none;">
                     </div>
                     <div id="personalBgGlassControls" class="personal-bg-glass-controls" aria-hidden="true">
                         <div class="personal-bg-slider-row" style="margin-bottom:0;">
                             <label for="personalBgGlassOpacityRange">Gjennomsiktighet</label>
-                            <input id="personalBgGlassOpacityRange" type="range" min="0" max="100" step="1" value="28" />
+                            <input id="personalBgGlassOpacityRange" type="range" min="0" max="100" step="1" value="28">
                             <span id="personalBgGlassOpacityValue">28%</span>
                         </div>
                         <div class="personal-bg-blur-presets" role="group" aria-label="Blurvalg">
@@ -3430,24 +3782,24 @@ ${comment}
                             <button id="personalBgBlurPrettyButton" type="button" class="btn-secondary" aria-pressed="false">Uskarp</button>
                             <button id="personalBgBlurHeavyButton" type="button" class="btn-secondary" aria-pressed="false">Tåkete</button>
                         </div>
-                        <div class="helper-text" style="margin-top:0.45rem;">Blur: Klar = 1px, Uskarp = 12px, Tåkete = 24px</div>
-                        <div class="helper-text" style="margin-top:0.2rem;">Mer blur = tyngere for maskinen</div>
-                        <div class="helper-text" style="margin-top:0.2rem;">0% = solid bakgrunn, 100% = mest gjennomsiktig (glass)</div>
+                        <div class="helptext-container" data-helptext-container="true"><div class="helper-text" style="margin-top:0.45rem;">Blur: Klar = 1px, Uskarp = 12px, Tåkete = 24px</div></div>
+                        <div class="helptext-container" data-helptext-container="true"><div class="helper-text" style="margin-top:0.2rem;">Mer blur = tyngere for maskinen</div></div>
+                        <div class="helptext-container" data-helptext-container="true"><div class="helper-text" style="margin-top:0.2rem;">0% = solid bakgrunn, 100% = mest gjennomsiktig (glass)</div></div>
                     </div>
                     <div id="personalBgColorControls" class="personal-bg-color-controls">
                         <div class="personal-bg-slider-row">
                             <label for="personalBgHueRange">Fargetone</label>
-                            <input id="personalBgHueRange" type="range" min="0" max="100" step="1" value="66" />
+                            <input id="personalBgHueRange" type="range" min="0" max="100" step="1" value="66">
                             <span id="personalBgHueValue">66</span>
                         </div>
                         <div class="personal-bg-slider-row">
                             <label for="personalBgSatRange">Metning</label>
-                            <input id="personalBgSatRange" type="range" min="0" max="100" step="1" value="19" />
+                            <input id="personalBgSatRange" type="range" min="0" max="100" step="1" value="19">
                             <span id="personalBgSatValue">19%</span>
                         </div>
                         <div class="personal-bg-slider-row">
                             <label for="personalBgLightRange">Lyshet</label>
-                            <input id="personalBgLightRange" type="range" min="0" max="100" step="1" value="92" />
+                            <input id="personalBgLightRange" type="range" min="0" max="100" step="1" value="92">
                             <span id="personalBgLightValue">92%</span>
                         </div>
                         <div id="personalBgPreviewChip" class="personal-bg-preview-chip">Forhåndsvisning</div>
@@ -3455,17 +3807,17 @@ ${comment}
                     <div id="personalBgTextColorControls" class="personal-bg-color-controls" aria-hidden="true">
                         <div class="personal-bg-slider-row">
                             <label for="personalTextHueRange">Fargetone</label>
-                            <input id="personalTextHueRange" type="range" min="0" max="100" step="1" value="69" />
+                            <input id="personalTextHueRange" type="range" min="0" max="100" step="1" value="69">
                             <span id="personalTextHueValue">69</span>
                         </div>
                         <div class="personal-bg-slider-row">
                             <label for="personalTextSatRange">Metning</label>
-                            <input id="personalTextSatRange" type="range" min="0" max="100" step="1" value="0" />
+                            <input id="personalTextSatRange" type="range" min="0" max="100" step="1" value="0">
                             <span id="personalTextSatValue">0%</span>
                         </div>
                         <div class="personal-bg-slider-row">
                             <label for="personalTextLightRange">Lyshet</label>
-                            <input id="personalTextLightRange" type="range" min="0" max="100" step="1" value="0" />
+                            <input id="personalTextLightRange" type="range" min="0" max="100" step="1" value="0">
                             <span id="personalTextLightValue">0%</span>
                         </div>
                         <div id="personalTextPreviewChip" class="personal-bg-preview-chip">Tekstfarge forhåndsvisning</div>
@@ -3474,7 +3826,7 @@ ${comment}
                         <div class="personal-bg-archive-status" id="personalFruitigerArchiveStatus">Trykk på knappen for å hente kategorier fra Frutiger Aero Archive.</div>
                         <div id="personalFruitigerArchiveList" class="personal-bg-archive-list"></div>
                     </div>
-                    <div id="personalBgMediaStatus" class="helper-text" style="margin-top:0.55rem;">Ingen bilde/video valgt</div>
+                    <div class="helptext-container" data-helptext-container="true"><div id="personalBgMediaStatus" class="helper-text" style="margin-top:0.55rem;">Ingen bilde/video valgt</div></div>
                     <div id="personalBgMediaHistoryDropdown" class="personal-bg-media-history" aria-hidden="true"></div>
                 </div>
             </div>
@@ -3494,12 +3846,12 @@ ${comment}
 
 <div id="settingsOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="settingsCloseButton">&times;</button>
+        <button class="modal-close" id="settingsCloseButton">×</button>
         <h2 id="settingsModalTitle">Profil og Innstillinger</h2>
         
         <div class="settings-section">
             <h3 id="settingsProfilesTitle">Profiler</h3>
-            <p class="helper-text">Brukerprofiler kan lages for å holde data separert</p>
+            <div class="helptext-container" data-helptext-container="true" data-helptext-scope="settings"><p class="helper-text">Brukerprofiler kan lages for å holde data separert</p></div>
             
             <div class="modal-row" style="margin-top:0.5rem; border-top: 1px solid var(--border-soft); padding-top: 1rem;">
                 <label for="newProfileName" style="min-width: 80px;">Ny profil:</label>
@@ -3512,17 +3864,17 @@ ${comment}
             
             <div class="modal-row">
                 <label for="profileSelect" style="min-width: 80px;">Aktiv profil:</label>
-                <select id="profileSelect" class="modal-select" style="flex:1; margin-right: 0.5rem;"></select>
-                <button id="deleteProfileButton" type="button" class="btn-secondary" style="color: var(--danger);">Slett valgt</button>
+                <select id="profileSelect" class="modal-select" style="flex:1; margin-right: 0.5rem;"><option value="Standard">Standard</option><option value="Kalender_testprofil" selected="selected">Kalender_testprofil</option></select>
+                <button id="deleteProfileButton" type="button" class="btn-secondary" style="color: var(--danger); display: inline-block;">Slett valgt</button>
             </div>
-            <p class="helper-text" id="profileHelperText"></p>
+            <div class="helptext-container" data-helptext-container="true" data-helptext-scope="settings"><p class="helper-text" id="profileHelperText"></p></div>
         </div>
 
         <div style="margin-top: 1rem; border-top: 1px solid var(--border-soft); padding-top: 1rem; text-align: center;">
-            <button id="youtubeButton" class="btn-secondary" style="width: 100%;">Se Dokumentasjon</button>
+            <button id="youtubeButton" class="btn-secondary" style="width: 100%; opacity: 1; cursor: pointer;" title="Åpne dokumentasjon i ny fane">Se Dokumentasjon</button>
         </div>
     
-        <div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC = lukk og lagre</div>
+        <div class="helptext-container" data-helptext-container="true" data-helptext-scope="settings"><div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC = lukk og lagre</div></div>
 
         <!-- Tilleggsfunksjoner (placeholder buttons; no actions attached yet) -->
         <div class="settings-section" id="controlPanelSection">
@@ -3530,13 +3882,13 @@ ${comment}
 
             <div class="modal-row" style="margin-top: 0.25rem;">
                 <label class="switch">
-                    <input type="checkbox" id="controlPanelToggle">
+                    <input type="checkbox" id="controlPanelToggle" checked="checked">
                     <span class="slider"></span>
                 </label>
-                <label id="controlPanelToggleLabel" for="controlPanelToggle" style="cursor:pointer; font-size: 0.9rem;">Åpne tilleggsfunksjoner</label>
+                <label id="controlPanelToggleLabel" for="controlPanelToggle" style="cursor:pointer; font-size: 0.9rem;">Skjul tilleggsfunksjoner</label>
             </div>
 
-            <div id="controlPanelButtons" class="control-panel-buttons" aria-hidden="true">
+            <div id="controlPanelButtons" class="control-panel-buttons open" aria-hidden="false">
                 <!-- HJELPETEKST: Legg all ny hjelpetekst i egen wrapper:
                      <div class="helptext-container" data-helptext-container="true"><span class="helper-text">...</span></div>
                      Da vil "Ingen hjelpetekst" fortsatt virke automatisk. -->
@@ -3545,13 +3897,18 @@ ${comment}
                 <div class="control-panel-row">
                     <div class="control-panel-left">
                         <label class="switch">
-                            <input type="checkbox" id="cpToggle2" checked>
+                            <input type="checkbox" id="cpToggle2" checked="checked" aria-disabled="false">
                             <span class="slider"></span>
                         </label>
                         <label for="cpToggle2" style="cursor:pointer; font-size: 0.9rem;">Hindre dobbeltelling</label>
                     </div>
                     <div class="helptext-container" data-helptext-container="true">
-                        <span class="helper-text control-panel-help">Når aktivert vil nettsiden automatisk stoppe løpende telling ved midnatt. Deretter deaktiveres knappen «Gjenoppta arbeid». Hvis en telling har stått for lenge, vil du neste dag bli møtt med et vindu som spør når du avsluttet arbeidet. Dette korrigerer timeføringen, og du blir vist oversikten som normalt for overføring til Maconomy.</span>
+                        <span class="helper-text control-panel-help" data-default-text="Når aktivert vil nettsiden automatisk stoppe løpende telling ved midnatt. Deretter deaktiveres knappen «Gjenoppta arbeid». Hvis en telling har stått for lenge, vil du neste dag bli møtt med et vindu som spør når du avsluttet arbeidet. Dette korrigerer timeføringen, og du blir vist oversikten som normalt for overføring til Maconomy.">Når
+ aktivert vil nettsiden automatisk stoppe løpende telling ved midnatt. 
+Deretter deaktiveres knappen «Gjenoppta arbeid». Hvis en telling har 
+stått for lenge, vil du neste dag bli møtt med et vindu som spør når du 
+avsluttet arbeidet. Dette korrigerer timeføringen, og du blir vist 
+oversikten som normalt for overføring til Maconomy.</span>
                     </div>
                 </div>
                 <div class="control-panel-storage-chapter" style="border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); margin: 0.15rem 0 0.35rem; padding: 0.4rem 0;">
@@ -3559,7 +3916,7 @@ ${comment}
                     <div class="control-panel-row" style="margin-top: 0;">
                         <div class="control-panel-left">
                             <label class="switch">
-                                <input type="checkbox" id="autoSaveToggle" checked>
+                                <input type="checkbox" id="autoSaveToggle" checked="checked">
                                 <span class="slider"></span>
                             </label>
                             <label for="autoSaveToggle" style="cursor:pointer; font-size: 0.9rem;">Lagre profil automatisk ved «Avslutt arbeid»</label>
@@ -3579,8 +3936,37 @@ ${comment}
                         <div style="margin-left: auto;">
                             <button id="downloadBackupButton" class="btn-secondary" style="margin-right: 0.35rem;">Lagre profil manuelt</button>
                             <button id="uploadBackupButton" class="btn-secondary">Gjenopprett profil</button>
-                            <input type="file" id="backupFileInput" style="position: fixed; left: -99999px; top: 0; opacity: 0; width: 1px; height: 1px; pointer-events: none;" />
+                            <input type="file" id="backupFileInput" style="position: fixed; left: -99999px; top: 0; opacity: 0; width: 1px; height: 1px; pointer-events: none;">
                         </div>
+                    </div>
+                </div>
+                <!-- Personlig tilpasning og OneNote -->
+                <div class="control-panel-row" id="personalCustomizationRow" style="margin-top:0.25rem;">
+                    <div class="control-panel-left">
+                        <label class="switch">
+                            <input type="checkbox" id="cpPersonalCustomizationToggle" checked="checked">
+                            <span class="slider"></span>
+                        </label>
+                        <label for="cpPersonalCustomizationToggle" style="cursor:pointer; font-size: 0.9rem;">Personlig tilpasning</label>
+                        <div id="personalCustomizeActionWrap" style="margin-left: 0.5rem;">
+                            <button id="openPersonalCustomizeButton" class="btn-secondary" type="button">Tilpass</button>
+                            <button id="toggleFrutigerMusicPlayerButton" class="btn-secondary" type="button" aria-pressed="false" style="display:none;">The Frutiger Aero Archive, Music player</button>
+                        </div>
+                    </div>
+                    <div class="helptext-container" data-helptext-container="true" style="margin-left:auto;">
+                        <span class="helper-text control-panel-help">Her kan du tilpasse det visuelle slik du selv ønsker, NB! Tekst og menyer kan bli vanskelig å lese. <span class="ctrl-hint-orange">Hold nede CTRL tasten hvis du ikke klarer se ellr lese tekst</span></span>
+                    </div>
+                </div>
+                <div class="control-panel-row" id="oneNoteReminderRow" style="margin-top:0.25rem;">
+                    <div class="control-panel-left">
+                        <label class="switch">
+                            <input type="checkbox" id="cpOneNoteReminderToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <label for="cpOneNoteReminderToggle" style="cursor:pointer; font-size: 0.9rem;">Onenote påminnelse</label>
+                    </div>
+                    <div class="helptext-container" data-helptext-container="true">
+                        <span class="helper-text control-panel-help">Krever «Kopier for Onenote» før «Tøm og arkiver» kan brukes</span>
                     </div>
                 </div>
 <div class="control-panel-row" id="testDataControlRow">
@@ -3605,10 +3991,10 @@ ${comment}
                     </div>
                     <div class="control-panel-row" id="underDevelopmentVisibilityRow" style="margin-top:0.25rem;">
                         <div class="control-panel-left" style="max-width:none; flex: 1 1 auto;">
-                            <button id="underDevelopmentVisibilityButton" class="btn-secondary" type="button">Vis alt</button>
+                            <button id="underDevelopmentVisibilityButton" class="btn-secondary" type="button" aria-pressed="true">Skjul alt</button>
                         </div>
                     </div>
-                    <div id="underDevelopmentItems" aria-hidden="true">
+                    <div id="underDevelopmentItems" aria-hidden="false" class="open">
                     <div class="control-panel-row under-development">
                         <div class="control-panel-left">
                             <label class="switch">
@@ -3618,37 +4004,10 @@ ${comment}
                             <label for="cpProjectDivisionToggle" style="cursor:pointer; font-size: 0.9rem;">Prosjektinndeling</label>
                         </div>
                         <div class="helptext-container" data-helptext-container="true">
-                            <span class="helper-text control-panel-help">Når denne er aktivert blir det mulig å dele inn et prosjekt i prosjektoppgaver, tid føres separat per oppgave, men alle oppgavene ligger under det samme prosjektet</span>
-                        </div>
-                    </div>
-                    <div class="control-panel-row under-development">
-                        <div class="control-panel-left">
-                            <label class="switch">
-                                <input type="checkbox" id="cpOneNoteReminderToggle">
-                                <span class="slider"></span>
-                            </label>
-                            <label for="cpOneNoteReminderToggle" style="cursor:pointer; font-size: 0.9rem;">Onenote påminnelse</label>
-                        </div>
-                        <div class="helptext-container" data-helptext-container="true">
-                            <span class="helper-text control-panel-help">Krever «Kopier for Onenote» før «Tøm og arkiver» kan brukes</span>
-                        </div>
-                    </div>
-                    <div class="control-panel-row under-development" id="personalCustomizationRow">
-                        <div class="control-panel-left">
-                            <label class="switch">
-                                <input type="checkbox" id="cpPersonalCustomizationToggle">
-                                <span class="slider"></span>
-                            </label>
-                            <label for="cpPersonalCustomizationToggle" style="cursor:pointer; font-size: 0.9rem;">Personlig tilpasning</label>
-                        </div>
-                        <div class="helptext-container" data-helptext-container="true" style="margin-left:auto;">
-                            <span class="helper-text control-panel-help">Her kan du tilpasse det visuelle slik du selv ønsker, NB! Tekst og menyer kan bli vanskelig å lese. <span class="ctrl-hint-orange">Hold nede CTRL tasten hvis du ikke klarer se ellr lese tekst</span></span>
-                        </div>
-                        <div id="personalCustomizeActionWrap" style="display:none; margin-left:0.5rem;">
-                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; justify-content:flex-end;">
-                                <button id="openPersonalCustomizeButton" class="btn-secondary" type="button">Tilpass</button>
-                                <button id="toggleFrutigerMusicPlayerButton" class="btn-secondary" type="button" aria-pressed="false">The Frutiger Aero Archive, Music player</button>
-                            </div>
+                            <span class="helper-text control-panel-help">Når
+ denne er aktivert blir det mulig å dele inn et prosjekt i 
+prosjektoppgaver, tid føres separat per oppgave, men alle oppgavene 
+ligger under det samme prosjektet</span>
                         </div>
                     </div>
                     <div class="control-panel-row under-development">
@@ -3660,7 +4019,23 @@ ${comment}
                             <label id="cpToggle3Label" class="adhd-mode-toggle-label" for="cpToggle3" style="cursor:pointer; font-size: 0.9rem;">Sekvensmodus</label>
                         </div>
                         <div class="helptext-container" data-helptext-container="true">
-                            <span class="helper-text control-panel-help">Aktiverer Sekvensmodus som funksjon. Når denne er aktiv, kan du trykke og holde på kakediagrammet for å starte eller avslutte Sekvensmodus og oppgavelisten. For å kunne aktivere denne modusen må du først starte timeføring på et prosjekt.</span>
+                            <span class="helper-text control-panel-help">Aktiverer
+ Sekvensmodus som funksjon. Når denne er aktiv, kan du trykke og holde 
+på kakediagrammet for å starte eller avslutte Sekvensmodus og 
+oppgavelisten. For å kunne aktivere denne modusen må du først starte 
+timeføring på et prosjekt.</span>
+                        </div>
+                    </div>
+                    <div class="control-panel-row under-development">
+                        <div class="control-panel-left">
+                            <label class="switch">
+                                <input type="checkbox" id="cpRemindersToggle" checked="checked">
+                                <span class="slider"></span>
+                            </label>
+                            <label for="cpRemindersToggle" style="cursor:pointer; font-size: 0.9rem;">Påminnelser</label>
+                        </div>
+                        <div class="helptext-container" data-helptext-container="true">
+                            <span class="helper-text control-panel-help">La nettsiden passe på dine rutiner og frister</span>
                         </div>
                     </div>
                     </div>
@@ -3670,7 +4045,7 @@ ${comment}
         </div>
 
 </div>
-</div>
+
 
 <div id="deleteProfileOverlay" class="overlay">
     <div class="modal">
@@ -3681,7 +4056,7 @@ ${comment}
         <div class="modal-footer" style="justify-content: space-between;">
             <button id="deleteProfileCancelBtn" class="btn-secondary">Avbryt</button>
             <div style="display:flex; gap:0.5rem;">
-                <button id="deleteProfileSaveDeleteBtn" class="btn-secondary">Lagre profil & Slett</button>
+                <button id="deleteProfileSaveDeleteBtn" class="btn-secondary">Lagre profil &amp; Slett</button>
                 <button id="deleteProfileConfirmBtn" class="modal-button-primary" style="background: var(--danger);">Slett profil</button>
             </div>
         </div>
@@ -3693,29 +4068,36 @@ ${comment}
     <div class="modal">
         <h2>Slett prosjekt</h2>
         <p>Er du sikker på at du vil slette <strong id="deleteTaskNameDisplay"></strong> fra historikk?</p>
-        <p class="helper-text" style="margin-top:0.25rem;">Ved å slette så fjernes prosjektet og tilhørende prosjektnummer fra historikken. Dersom prosjektet kan bli benyttet igjen ved en senere anledning, anbefales det i stedet å markere det som «utgått». Dette gjøres ved å trykke på blyantknappen til høyre for prosjektet. Utgåtte prosjekter bevares nederst i listen.</p>
+        <div class="helptext-container" data-helptext-container="true"><p class="helper-text" style="margin-top:0.25rem;">Ved
+ å slette så fjernes prosjektet og tilhørende prosjektnummer fra 
+historikken. Dersom prosjektet kan bli benyttet igjen ved en senere 
+anledning, anbefales det i stedet å markere det som «utgått». Dette 
+gjøres ved å trykke på blyantknappen til høyre for prosjektet. Utgåtte 
+prosjekter bevares nederst i listen.</p></div>
         <div class="modal-footer" style="justify-content: space-between;">
             <button id="deleteTaskCancelBtn" class="btn-secondary" type="button">Angre</button>
             <button id="deleteTaskConfirmBtn" class="modal-button-primary" type="button" style="background: var(--danger);">Bekreft</button>
         </div>
-        <div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC eller klikk utenfor = angre</div>
+        <div class="helptext-container" data-helptext-container="true"><div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC eller klikk utenfor = angre</div></div>
     </div>
 </div>
 
 <div id="projectOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="projectCloseButton">&times;</button>
+        <button class="modal-close" id="projectCloseButton">×</button>
         <h2>Prosjektnummer</h2>
-        <p class="helper-text">Legg inn prosjektnummer for prosjektet:</p>
-        <p class="helper-text" style="margin-top:0.25rem;">Prosjektnummeret kan stå tomt, men da får du en påminnelse neste gang det brukes. Du kan legge det inn senere, eller redigere det med blyantknappen.</p>
+        <div class="helptext-container" data-helptext-container="true"><p class="helper-text">Legg inn prosjektnummer for prosjektet:</p></div>
+        <div class="helptext-container" data-helptext-container="true"><p class="helper-text" style="margin-top:0.25rem;">Prosjektnummeret
+ kan stå tomt, men da får du en påminnelse neste gang det brukes. Du kan
+ legge det inn senere, eller redigere det med blyantknappen.</p></div>
         <p><strong id="projectTaskName"></strong></p>
 
         <div class="modal-row" id="projectNameEditRow" style="width:100%; display:none;">
-            <input id="projectNameEditInput" class="modal-input" type="text" placeholder="Prosjektnavn …" />
+            <input id="projectNameEditInput" class="modal-input" type="text" placeholder="Prosjektnavn …">
         </div>
 
         <div class="modal-row" style="width:100%;">
-            <input id="projectNumberInput" class="modal-input" type="text" placeholder="Prosjektnummer …" />
+            <input id="projectNumberInput" class="modal-input" type="text" placeholder="Prosjektnummer …">
         </div>
 
         <div class="modal-row" id="projectTaskDivisionButtonRow" style="width:100%; justify-content:flex-start; display:none;">
@@ -3724,7 +4106,7 @@ ${comment}
 
         <div id="projectOutdatedWrap" class="project-outdated-wrap" style="display:none;">
             <label class="outdated-label" title="Marker prosjektet som utgått">
-                <input id="projectOutdatedCheckbox" class="outdated-checkbox" type="checkbox" />
+                <input id="projectOutdatedCheckbox" class="outdated-checkbox" type="checkbox">
                 <span>Utgått</span>
             </label>
         </div>
@@ -3732,7 +4114,7 @@ ${comment}
             <button id="projectCancelButton" class="btn-secondary" type="button">Avbryt</button>
             <button id="projectConfirmButton" class="modal-button-primary" type="button">Start arbeid</button>
         </div>
-        <div class="helper-text">Enter = start. Prosjektnummer lagres per prosjektnavn til du sletter det fra historikk (X i forslaglisten).</div>
+        <div class="helptext-container" data-helptext-container="true"><div class="helper-text">Enter = start. Prosjektnummer lagres per prosjektnavn til du sletter det fra historikk (X i forslaglisten).</div></div>
     </div>
 </div>
 
@@ -3749,7 +4131,7 @@ ${comment}
             <span>:</span>
             <select id="overdueMinute" class="modal-select"></select>
         </div>
-        <p class="helper-text">Valgt tidspunkt brukes til å beregne total tid for prosjektet.</p>
+        <div class="helptext-container" data-helptext-container="true"><p class="helper-text">Valgt tidspunkt brukes til å beregne total tid for prosjektet.</p></div>
         <div class="modal-footer">
             <button id="overdueConfirmButton" class="modal-button-primary">
                 Fullfør prosjekt til angitt tid og tøm og arkiver listen
@@ -3760,7 +4142,7 @@ ${comment}
 
 <div id="clearArchivesOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="clearArchivesCloseButton">&times;</button>
+        <button class="modal-close" id="clearArchivesCloseButton">×</button>
         <h2>Slette historikk</h2>
         <p>Du er i ferd med å slette all «Historikk».</p>
         <p>Velg om du vil kun slette, eller først eksportere til Excel og deretter slette.</p>
@@ -3786,10 +4168,10 @@ ${comment}
 
 <div id="oneNoteReminderOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="oneNoteReminderCloseButton">&times;</button>
+        <button class="modal-close" id="oneNoteReminderCloseButton">×</button>
         <h2>Onenote påminnelse</h2>
         <p>Husk å oppdatere loggen for timeføring!</p>
-        <p class="helper-text">Trykk «Kopier for Onenote» før du bruker «Tøm og arkiver».</p>
+        <div class="helptext-container" data-helptext-container="true"><p class="helper-text">Trykk «Kopier for Onenote» før du bruker «Tøm og arkiver».</p></div>
         <div class="modal-footer">
             <button id="oneNoteReminderOkButton" class="modal-button-primary" type="button">OK</button>
         </div>
@@ -3798,7 +4180,7 @@ ${comment}
 
 <div id="commentOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="commentCloseButton">&times;</button>
+        <button class="modal-close" id="commentCloseButton">×</button>
         <h2>Kommentar</h2>
         <p><strong id="commentTaskName"></strong></p>
         <textarea id="commentTextarea" class="modal-textarea" placeholder="Skriv kommentar … (Enter = lagre)"></textarea>
@@ -3806,13 +4188,13 @@ ${comment}
             <button id="commentCancelButton" class="btn-secondary">Avbryt</button>
             <button id="commentSaveButton" class="modal-button-primary">Lagre</button>
         </div>
-        <div class="helper-text">Tips: Enter lagrer. Shift+Enter gir linjeskift.</div>
+        <div class="helptext-container" data-helptext-container="true"><div class="helper-text">Tips: Enter lagrer. Shift+Enter gir linjeskift.</div></div>
     </div>
 </div>
 
 <div id="transferOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="transferCloseButton">&times;</button>
+        <button class="modal-close" id="transferCloseButton">×</button>
         <h2>Overfør tid mellom</h2>
         <p id="transferHelpDesc">
             Velg «Fra prosjekt» og «Til prosjekt». Det er ikke mulig å overføre mer tid enn det som er registrert på «Fra».
@@ -3844,7 +4226,7 @@ ${comment}
             <span>min</span>
         </div>
 
-        <div class="helper-text" id="transferMaxHint"></div>
+        <div class="helptext-container" data-helptext-container="true"><div class="helper-text" id="transferMaxHint"></div></div>
 
         <div class="modal-footer">
             <button id="transferCancelButton" class="btn-secondary">Avbryt</button>
@@ -3855,7 +4237,7 @@ ${comment}
 
 <div id="adjustStartOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="adjustStartCloseButton">&times;</button>
+        <button class="modal-close" id="adjustStartCloseButton">×</button>
         <h2 id="adjustStartTitle">Tilfør tid</h2>
         <p id="adjustStartDesc">
             Juster tid på det aktive prosjektet.
@@ -3886,9 +4268,9 @@ ${comment}
                     +15 min
                 </button>
             </div>
-            <div id="adjustStepperHelp" class="helper-text" style="text-align:center; margin-top:0.5rem;">
+            <div class="helptext-container" data-helptext-container="true"><div id="adjustStepperHelp" class="helper-text" style="text-align:center; margin-top:0.5rem;">
                 Enkeltrykk = +15 min<br>Dobbeltrykk = -15 min
-            </div>
+            </div></div>
         </div>
 
         <div class="modal-footer">
@@ -3913,7 +4295,7 @@ ${comment}
 
 <div id="adhdCommentOverlay" class="overlay">
     <div class="modal" style="max-width:700px;">
-        <button class="modal-close" id="adhdCommentCloseButton">&times;</button>
+        <button class="modal-close" id="adhdCommentCloseButton">×</button>
         <h2>Sekvensmodus – kommentar</h2>
         <p id="adhdCommentTaskLabel" style="font-weight:600; margin-bottom:0.5rem;"></p>
         <textarea id="adhdCommentTextarea" class="modal-textarea" placeholder="Erfaringer, kommentarer, observasjoner ..."></textarea>
@@ -3926,9 +4308,9 @@ ${comment}
 
 <div id="adhdBreakdownOverlay" class="overlay">
     <div class="modal" style="max-width:820px;">
-        <button class="modal-close" id="adhdBreakdownCloseButton">&times;</button>
+        <button class="modal-close" id="adhdBreakdownCloseButton">×</button>
         <h2>Sekvensmodus – Breakdown</h2>
-        <div id="adhdBreakdownSummary" class="inline-note" style="margin-bottom:0.65rem;"></div>
+        <div class="helptext-container" data-helptext-container="true"><div id="adhdBreakdownSummary" class="inline-note" style="margin-bottom:0.65rem;"></div></div>
         <div id="adhdBreakdownContent" style="max-height:55vh; overflow:auto; border:1px solid var(--border); border-radius:0.6rem; padding:0.5rem 0.65rem;"></div>
         <div class="modal-footer" style="margin-top:0.75rem;">
             <button id="adhdBreakdownOkButton" type="button" class="btn-secondary">OK</button>
@@ -3947,6 +4329,14 @@ ${comment}
     const NO_HELP_TEXT_KEY = "taskTimeTracker_noHelpText_v1";
     const MIDNIGHT_DOUBLE_COUNT_GUARD_KEY = "taskTimeTracker_midnightDoubleCountGuard_v1";
     const ONENOTE_REMINDER_KEY = "taskTimeTracker_onenoteReminder_v1";
+    const REMINDERS_TOGGLE_KEY  = "taskTimeTracker_remindersToggle_v1";
+    const REMINDERS_HEIGHT_KEY  = "taskTimeTracker_remindersHeight_v1";
+    const REMINDERS_ROWS_KEY    = 'taskTimeTracker_remindersRows_v1';
+    const REMINDERS_CAL_KEY     = 'taskTimeTracker_remindersCalGrid_v1';
+    const REMINDERS_TL_KEY      = 'taskTimeTracker_remindersTimeline_v1';
+    const REMINDERS_WEEKEND_KEY = 'taskTimeTracker_remindersWeekend_v1';
+    const REMINDERS_VIEW_KEY    = 'taskTimeTracker_remindersView_v1';
+    const REMINDERS_DATA_KEY    = 'taskTimeTracker_remindersData_v1';
     const CONTROL_PANEL_OPEN_KEY = "taskTimeTracker_controlPanelOpen_v1";
     const UNDER_DEVELOPMENT_EXPANDED_KEY = "taskTimeTracker_underDevelopmentExpanded_v1";
     const SUGGESTIONS_HEIGHT_KEY_PREFIX = "taskTimeTracker_suggestions_height_";
@@ -3960,6 +4350,7 @@ ${comment}
     let autoSaveOnEndDay = false;
     let oneNoteReminderEnabled = false;
     let oneNoteReminderCurrentTasksCopySignature = "";
+    let remindersEnabled = false;
 
     let data = {
         tasks: [],
@@ -4380,6 +4771,8 @@ const startButtonEl = document.getElementById("startButton");
     const cpNoHelpTextEl = document.getElementById("cpToggle1");
     const cpProjectDivisionToggleEl = document.getElementById("cpProjectDivisionToggle");
     const cpOneNoteReminderToggleEl = document.getElementById("cpOneNoteReminderToggle");
+    const cpRemindersToggleEl = document.getElementById("cpRemindersToggle");
+    const remindersWeekGridEl = document.getElementById("remindersWeekGrid");
     const PROJECT_DIVISION_TOGGLE_KEY = "taskTimeTracker_projectDivisionToggle";
     const PERSONAL_CUSTOMIZATION_TOGGLE_KEY = "taskTimeTracker_personalCustomizationToggle";
     const PERSONAL_CUSTOMIZATION_VALUES_KEY = "taskTimeTracker_personalCustomizationValues_v1";
@@ -4724,13 +5117,27 @@ function collectProfileSettingsForExport(profileName = currentProfile) {
         controlPanelOpen: getProfileScopedSettingForProfile(CONTROL_PANEL_OPEN_KEY, pid, { fallbackToGlobal: false }),
         underDevelopmentExpanded: getProfileScopedSettingForProfile(UNDER_DEVELOPMENT_EXPANDED_KEY, pid, { fallbackToGlobal: false }),
         personalCustomizationToggle: getProfileScopedSettingForProfile(PERSONAL_CUSTOMIZATION_TOGGLE_KEY, pid),
-        personalCustomizationValues: null
+        personalCustomizationValues: null,
+        // Påminnelser
+        remindersToggle:  getProfileScopedSettingForProfile(REMINDERS_TOGGLE_KEY, pid),
+        remindersRows:    getProfileScopedSettingForProfile(REMINDERS_ROWS_KEY, pid),
+        remindersCal:     getProfileScopedSettingForProfile(REMINDERS_CAL_KEY, pid),
+        remindersTl:      getProfileScopedSettingForProfile(REMINDERS_TL_KEY, pid),
+        remindersWeekend: getProfileScopedSettingForProfile(REMINDERS_WEEKEND_KEY, pid),
+        remindersView:    getProfileScopedSettingForProfile(REMINDERS_VIEW_KEY, pid),
+        remindersData:    null
     };
 
     try {
         settings.personalCustomizationValues = localStorage.getItem(getProfileScopedSettingKeyForProfile(PERSONAL_CUSTOMIZATION_VALUES_KEY, pid));
     } catch(e) {
         settings.personalCustomizationValues = null;
+    }
+
+    try {
+        settings.remindersData = localStorage.getItem(getProfileScopedSettingKeyForProfile(REMINDERS_DATA_KEY, pid));
+    } catch(e) {
+        settings.remindersData = null;
     }
 
     return settings;
@@ -4747,7 +5154,14 @@ function applyImportedProfileSettings(profileName, settings) {
         ['oneNoteReminder', ONENOTE_REMINDER_KEY],
         ['controlPanelOpen', CONTROL_PANEL_OPEN_KEY],
         ['underDevelopmentExpanded', UNDER_DEVELOPMENT_EXPANDED_KEY],
-        ['personalCustomizationToggle', PERSONAL_CUSTOMIZATION_TOGGLE_KEY]
+        ['personalCustomizationToggle', PERSONAL_CUSTOMIZATION_TOGGLE_KEY],
+        // Påminnelser
+        ['remindersToggle',  REMINDERS_TOGGLE_KEY],
+        ['remindersRows',    REMINDERS_ROWS_KEY],
+        ['remindersCal',     REMINDERS_CAL_KEY],
+        ['remindersTl',      REMINDERS_TL_KEY],
+        ['remindersWeekend', REMINDERS_WEEKEND_KEY],
+        ['remindersView',    REMINDERS_VIEW_KEY]
     ];
 
     pairs.forEach(([prop, key]) => {
@@ -4760,6 +5174,10 @@ function applyImportedProfileSettings(profileName, settings) {
         try { localStorage.setItem(getProfileScopedSettingKeyForProfile(PERSONAL_CUSTOMIZATION_VALUES_KEY, pid), settings.personalCustomizationValues); } catch(e){}
     } else if (settings.personalCustomizationValues && typeof settings.personalCustomizationValues === 'object') {
         try { localStorage.setItem(getProfileScopedSettingKeyForProfile(PERSONAL_CUSTOMIZATION_VALUES_KEY, pid), JSON.stringify(settings.personalCustomizationValues)); } catch(e){}
+    }
+
+    if (typeof settings.remindersData === 'string') {
+        try { localStorage.setItem(getProfileScopedSettingKeyForProfile(REMINDERS_DATA_KEY, pid), settings.remindersData); } catch(e){}
     }
 }
 
@@ -5131,6 +5549,874 @@ function initSuggestionsResizePersistence() {
         const val = getProfileScopedSetting(ONENOTE_REMINDER_KEY);
         oneNoteReminderEnabled = (val === null) ? false : (val === "true");
         if (cpOneNoteReminderToggleEl) cpOneNoteReminderToggleEl.checked = oneNoteReminderEnabled;
+    }
+
+    function loadRemindersSetting() {
+        const val = getProfileScopedSetting(REMINDERS_TOGGLE_KEY);
+        remindersEnabled = (val === null) ? false : (val === "true");
+        if (cpRemindersToggleEl) cpRemindersToggleEl.checked = remindersEnabled;
+        applyRemindersMode(remindersEnabled);
+    }
+
+    // ── Påminnelser state ──────────────────────────────────────────────
+    let remindersRowCount  = 5;
+    let remindersCalInGrid = true;
+    let remindersTimeline  = false;
+    let remindersShowWeekend = true;
+    let remindersViewMode  = 'week';
+
+    // Vedvarende datastruktur per celle:
+    // { "Man:0": { text, keepWeekly, color, blink, timeFrom, timeTo }, ... }
+    let remindersData = {};
+
+    function remindersDataKey() { return getProfileScopedSettingKey(REMINDERS_DATA_KEY); }
+    function remindersSettingKey(base) { return getProfileScopedSettingKey(base); }
+
+    function saveRemindersData() {
+        try { localStorage.setItem(remindersDataKey(), JSON.stringify(remindersData)); } catch(e){}
+    }
+    function loadRemindersData() {
+        try {
+            const raw = localStorage.getItem(remindersDataKey());
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                for (const k in parsed) {
+                    if (typeof parsed[k] === 'string') {
+                        parsed[k] = { text: parsed[k], keepWeekly: true, color: null, blink: false, timeFrom: '', timeTo: '' };
+                    }
+                }
+                remindersData = parsed;
+            } else {
+                remindersData = {};
+            }
+        } catch(e){ remindersData = {}; }
+    }
+
+    function loadRemindersCalendarSettings() {
+        const rows = localStorage.getItem(remindersSettingKey(REMINDERS_ROWS_KEY));
+        const cal  = localStorage.getItem(remindersSettingKey(REMINDERS_CAL_KEY));
+        const tl   = localStorage.getItem(remindersSettingKey(REMINDERS_TL_KEY));
+        const wk   = localStorage.getItem(remindersSettingKey(REMINDERS_WEEKEND_KEY));
+        const vm   = localStorage.getItem(remindersSettingKey(REMINDERS_VIEW_KEY));
+        if (rows !== null) remindersRowCount    = parseInt(rows, 10) || 5;
+        if (cal  !== null) remindersCalInGrid   = cal !== 'false';
+        if (tl   !== null) remindersTimeline    = tl === 'true';
+        if (wk   !== null) remindersShowWeekend = wk !== 'false';
+        if (vm   !== null) remindersViewMode    = vm;
+    }
+
+    function saveRemindersCalendarSettings() {
+        try {
+            localStorage.setItem(remindersSettingKey(REMINDERS_ROWS_KEY),    String(remindersRowCount));
+            localStorage.setItem(remindersSettingKey(REMINDERS_CAL_KEY),     String(remindersCalInGrid));
+            localStorage.setItem(remindersSettingKey(REMINDERS_TL_KEY),      String(remindersTimeline));
+            localStorage.setItem(remindersSettingKey(REMINDERS_WEEKEND_KEY), String(remindersShowWeekend));
+            localStorage.setItem(remindersSettingKey(REMINDERS_VIEW_KEY),    remindersViewMode);
+        } catch(e){}
+    }
+
+    // Full reload av alle påminnelsesdata (kalles ved profilbytte)
+    function reloadAllRemindersForProfile() {
+        loadRemindersData();
+        loadRemindersCalendarSettings();
+        loadRemindersSetting();
+        buildRemindersCalendar();
+        updateRemindersActiveList();
+    }
+
+    loadRemindersData();
+    loadRemindersCalendarSettings();
+
+    function getCellData(key) {
+        return remindersData[key] || { text: '', keepWeekly: true, color: null, blink: false, timeFrom: '', timeTo: '' };
+    }
+    function setCellData(key, data) {
+        if (!data.text && !data.color && !data.timeFrom && !data.timeTo) {
+            delete remindersData[key];
+        } else {
+            remindersData[key] = data;
+        }
+        saveRemindersData();
+    }
+
+    // ── Hjelp: tidsrom-sjekk ──────────────────────────────────────────
+    function isWithinTimeRange(from, to) {
+        if (!from) return false;
+        const now = new Date();
+        const cur = now.getHours() * 60 + now.getMinutes();
+        const [fh, fm] = from.split(':').map(Number);
+        const fromMin = fh * 60 + fm;
+        if (!to) return cur >= fromMin;
+        const [th, tm] = to.split(':').map(Number);
+        const toMin = th * 60 + tm;
+        return cur >= fromMin && cur <= toMin;
+    }
+
+    // ── Aktiv påminnelses-liste under kalender ────────────────────────
+    function updateRemindersActiveList() {
+        const container = document.getElementById('remindersActiveText');
+        if (!container) return;
+
+        const allDays  = ['Man','Tir','Ons','Tor','Fre','Lør','Søn'];
+        const jsDow    = new Date().getDay();
+        const todayIdx = (jsDow + 6) % 7;
+        const todayName = allDays[todayIdx];
+
+        const now = new Date();
+        const curMin = now.getHours() * 60 + now.getMinutes();
+
+        // ── Oppdater header-farge: KUN dagens header rød hvis den har tidsatte celler
+        const headersEl = document.getElementById('remindersWeekHeaders');
+        if (headersEl) {
+            headersEl.querySelectorAll('.reminders-day-header').forEach(hdr => {
+                const day = hdr.dataset.day || hdr.textContent.trim().substring(0, 3);
+                const isToday = (day === todayName);
+                const hasTimed = isToday && Object.entries(remindersData).some(([k, d]) =>
+                    k.startsWith(day + ':') && d && d.timeFrom
+                );
+                hdr.classList.toggle('has-timed-tasks', hasTimed);
+            });
+        }
+
+        // ── Samle celler for dagens dag med timeFrom eller tekst
+        const items = [];
+        for (const key in remindersData) {
+            const d = remindersData[key];
+            if (!d) continue;
+            const [day] = key.split(':');
+            if (day !== todayName) continue;
+            if (!d.text && !d.timeFrom) continue;
+            items.push({ key, d });
+        }
+
+        items.sort((a, b) => (a.d.timeFrom || '99:99').localeCompare(b.d.timeFrom || '99:99'));
+
+        // Kategoriser
+        const active  = items.filter(({d}) => d.timeFrom && isWithinTimeRange(d.timeFrom, d.timeTo));
+        const soon    = items.filter(({d}) => {
+            if (!d.timeFrom || isWithinTimeRange(d.timeFrom, d.timeTo)) return false;
+            const [h, m] = d.timeFrom.split(':').map(Number);
+            const diff = (h * 60 + m) - curMin;
+            return diff > 0 && diff <= 30;
+        });
+        const pending = items.filter(({d}) => {
+            if (!d.timeFrom || isWithinTimeRange(d.timeFrom, d.timeTo)) return false;
+            const [h, m] = d.timeFrom.split(':').map(Number);
+            const diff = (h * 60 + m) - curMin;
+            return diff > 30;
+        });
+        const noTime  = items.filter(({d}) => !d.timeFrom && d.text);
+        const toShow  = [...active, ...soon, ...pending, ...noTime];
+
+        container.innerHTML = '';
+        if (toShow.length === 0) return;
+
+        const list = document.createElement('div');
+        list.className = 'reminders-active-list';
+
+        toShow.forEach(({key, d}, idx) => {
+            const item = document.createElement('div');
+            item.className = 'reminders-active-item';
+            item.dataset.cellKey = key; // for dblclick
+
+            const inActive = active.some(x => x.key === key);
+            const inSoon   = soon.some(x => x.key === key);
+
+            if (idx === 0 && inActive && d.blink) {
+                item.classList.add('is-first-blink');
+            }
+
+            if (idx === 0 && inActive) {
+                item.style.color = '#e74c3c';
+            } else if (inSoon) {
+                item.style.color = '#7ec8e3';
+            }
+
+            if (toShow.length > 1) {
+                const num = document.createElement('span');
+                num.className = 'reminders-active-num';
+                num.textContent = (idx + 1) + '.';
+                item.appendChild(num);
+            }
+            if (d.timeFrom) {
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'reminders-active-time';
+                timeSpan.textContent = d.timeFrom + (d.timeTo ? '–' + d.timeTo : '');
+                item.appendChild(timeSpan);
+            }
+            const txt = document.createElement('span');
+            txt.className = 'reminders-active-text';
+            txt.textContent = (d.text || '').split('\n')[0].trim() || key;
+            item.appendChild(txt);
+
+            // Dobbeltklikk: åpne popup for denne cellen
+            item.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                // Finn celle-elementet i gridden
+                const grid = document.getElementById('remindersWeekGrid');
+                if (!grid) return;
+                const [dayName, rowStr] = key.split(':');
+                const cellEl = grid.querySelector(`[data-day="${dayName}"][data-row="${rowStr}"]`);
+                if (cellEl) {
+                    closeCommentPopup(); closeDaySettingsPopup();
+                    // Finn refreshCell for denne cellen via dblclick-triggering
+                    cellEl.dispatchEvent(new MouseEvent('dblclick', { bubbles: false }));
+                }
+            });
+
+            list.appendChild(item);
+        });
+        container.appendChild(list);
+    }
+
+    setInterval(updateRemindersActiveList, 30000);
+
+    // ── Tidvelger-hjelp ───────────────────────────────────────────────
+    function makeTimeSelect(selectedVal) {
+        const sel = document.createElement('select');
+        const emptyOpt = document.createElement('option');
+        emptyOpt.value = ''; emptyOpt.textContent = '–';
+        sel.appendChild(emptyOpt);
+        for (let h = 0; h < 24; h++) {
+            for (let m = 0; m < 60; m += 15) {
+                const hh = String(h).padStart(2,'0');
+                const mm = String(m).padStart(2,'0');
+                const val = `${hh}:${mm}`;
+                const opt = document.createElement('option');
+                opt.value = val; opt.textContent = val;
+                if (val === selectedVal) opt.selected = true;
+                sel.appendChild(opt);
+            }
+        }
+        return sel;
+    }
+
+    // ── Rikt kommentarvindu ───────────────────────────────────────────
+    const SWATCH_COLORS = ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c',
+                           '#3498db','#9b59b6','#e91e63','__rainbow__','#795548'];
+
+    function openCellCommentPopup(cell, cellKey, day, rowIdx, refreshCell) {
+        const popup = document.createElement('div');
+        popup.className = 'reminders-comment-popup';
+
+        let d = { ...getCellData(cellKey) };
+
+        // ── Tittel
+        const lbl = document.createElement('div');
+        lbl.className = 'reminders-comment-label';
+        lbl.textContent = `${day} – rad ${rowIdx + 1}`;
+        popup.appendChild(lbl);
+
+        // ── 1. Bevar fra uke til uke
+        const keepRow = document.createElement('div');
+        keepRow.className = 'rcp-feature-row';
+        const keepLbl = document.createElement('span');
+        keepLbl.className = 'rcp-feature-label';
+        keepLbl.textContent = 'Bevar fra uke til uke';
+        const keepSwitch = makeSettingsSwitch(d.keepWeekly !== false);
+        keepSwitch.label.querySelector('input').addEventListener('change', () => {
+            d.keepWeekly = keepSwitch.getValue();
+            setCellData(cellKey, d); refreshCell(); updateRemindersActiveList();
+        });
+        keepRow.appendChild(keepLbl); keepRow.appendChild(keepSwitch.label);
+        popup.appendChild(keepRow);
+
+        // ── 2. Farge
+        const colorRow = document.createElement('div');
+        colorRow.className = 'rcp-feature-row';
+        const colorLbl = document.createElement('span');
+        colorLbl.className = 'rcp-feature-label';
+        colorLbl.textContent = 'Fargelegg celle';
+        const colorSwitch = makeSettingsSwitch(!!d.color);
+        colorRow.appendChild(colorLbl); colorRow.appendChild(colorSwitch.label);
+        popup.appendChild(colorRow);
+
+        const swatchRow = document.createElement('div');
+        swatchRow.className = 'rcp-color-swatches';
+        swatchRow.style.display = d.color ? 'flex' : 'none';
+        SWATCH_COLORS.forEach(hex => {
+            const sw = document.createElement('div');
+            const isRainbow = hex === '__rainbow__';
+            sw.className = 'rcp-swatch' + (isRainbow ? ' rainbow' : '') + (d.color === hex ? ' selected' : '');
+            if (!isRainbow) sw.style.background = hex;
+            sw.addEventListener('click', () => {
+                d.color = hex;
+                swatchRow.querySelectorAll('.rcp-swatch').forEach(s => s.classList.toggle('selected', s === sw));
+                setCellData(cellKey, d); refreshCell();
+            });
+            swatchRow.appendChild(sw);
+        });
+        popup.appendChild(swatchRow);
+
+        colorSwitch.label.querySelector('input').addEventListener('change', () => {
+            const on = colorSwitch.getValue();
+            swatchRow.style.display = on ? 'flex' : 'none';
+            if (!on) { d.color = null; setCellData(cellKey, d); refreshCell(); }
+        });
+
+        // ── 3. Blinking i tidsrom
+        const blinkRow = document.createElement('div');
+        blinkRow.className = 'rcp-feature-row';
+        const blinkLbl = document.createElement('span');
+        blinkLbl.className = 'rcp-feature-label';
+        blinkLbl.textContent = 'Blink i tidsrom';
+        const blinkSwitch = makeSettingsSwitch(!!d.blink);
+        blinkRow.appendChild(blinkLbl); blinkRow.appendChild(blinkSwitch.label);
+        popup.appendChild(blinkRow);
+
+        // ── Blink: oppdater umiddelbart
+        blinkSwitch.label.querySelector('input').addEventListener('change', () => {
+            d.blink = blinkSwitch.getValue();
+            setCellData(cellKey, d); refreshCell(); updateRemindersActiveList();
+        });
+
+        // ── Tid fra / til
+        popup.appendChild(document.createElement('hr')).className = 'rcp-divider';
+        const timeRow = document.createElement('div');
+        timeRow.className = 'rcp-time-row';
+        const timeLbl = document.createElement('span');
+        timeLbl.textContent = 'Tid:';
+        const fromSel = makeTimeSelect(d.timeFrom || '');
+        const dashSpan = document.createElement('span');
+        dashSpan.textContent = '–';
+        const toSel = makeTimeSelect(d.timeTo || '');
+        fromSel.addEventListener('change', () => {
+            d.timeFrom = fromSel.value;
+            if (!d.timeFrom) { d.timeTo = ''; toSel.value = ''; }
+            toSel.disabled = !d.timeFrom;
+            setCellData(cellKey, d); refreshCell(); updateRemindersActiveList();
+        });
+        toSel.addEventListener('change', () => {
+            d.timeTo = toSel.value;
+            setCellData(cellKey, d); refreshCell(); updateRemindersActiveList();
+        });
+        toSel.disabled = !d.timeFrom;
+        timeRow.appendChild(timeLbl); timeRow.appendChild(fromSel);
+        timeRow.appendChild(dashSpan); timeRow.appendChild(toSel);
+        popup.appendChild(timeRow);
+
+        // ── Kommentarfelt – ett felt med fast skillelinje under linje 1
+        popup.appendChild(document.createElement('hr')).className = 'rcp-divider';
+
+        const taWrap = document.createElement('div');
+        taWrap.style.cssText = 'position:relative;';
+
+        const ta = document.createElement('textarea');
+        ta.placeholder = 'Overskrift\nTilleggstekst…';
+        ta.value = d.text || '';
+        ta.style.cssText = 'resize:vertical;overflow:auto;min-height:80px;width:100%;box-sizing:border-box;padding-bottom:4px;';
+
+        // Skillelinje: absolutt posisjonert <div> som vises under linje 1
+        const divLine = document.createElement('div');
+        divLine.style.cssText = [
+            'position:absolute',
+            'left:6px',
+            'right:6px',
+            'height:1px',
+            'background:rgba(255,255,255,0.4)',
+            'pointer-events:none',
+        ].join(';');
+
+        const positionDivLine = () => {
+            const cs = window.getComputedStyle(ta);
+            const lineH  = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.5;
+            const padTop = parseFloat(cs.paddingTop)  || 0;
+            const borderTop = parseFloat(cs.borderTopWidth) || 0;
+            divLine.style.top = Math.round(borderTop + padTop + lineH) + 'px';
+        };
+
+        const autoResize = () => {
+            ta.style.height = 'auto';
+            ta.style.height = ta.scrollHeight + 'px';
+            positionDivLine();
+        };
+
+        ta.addEventListener('input', () => { autoResize(); syncText(); });
+
+        const syncText = () => {
+            d.text = ta.value.trim();
+            setCellData(cellKey, d);
+            refreshCell(); updateRemindersActiveList();
+        };
+
+        taWrap.appendChild(ta);
+        taWrap.appendChild(divLine);
+        popup.appendChild(taWrap);
+        requestAnimationFrame(() => { autoResize(); positionDivLine(); });
+
+        const btnRow = document.createElement('div');
+        btnRow.className = 'reminders-comment-popup-row';
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'btn-secondary';
+        saveBtn.textContent = 'Lagre';
+
+        let ctrlHeld = false;
+        const onKeyDown = (e) => { if (e.key === 'Control') { ctrlHeld = true;  if (saveBtn.matches(':hover')) saveBtn.textContent = 'Slett'; } };
+        const onKeyUp   = (e) => { if (e.key === 'Control') { ctrlHeld = false; saveBtn.textContent = 'Lagre'; } };
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('keyup',   onKeyUp);
+
+        saveBtn.addEventListener('mouseenter', () => { if (ctrlHeld) saveBtn.textContent = 'Slett'; });
+        saveBtn.addEventListener('mouseleave', () => { saveBtn.textContent = 'Lagre'; });
+
+        saveBtn.addEventListener('click', () => {
+            if (ctrlHeld) {
+                d.text = ''; d.color = null; d.blink = false;
+                d.timeFrom = ''; d.timeTo = '';
+                setCellData(cellKey, d);
+                refreshCell(); updateRemindersActiveList();
+            } else {
+                syncText();
+            }
+            closeCommentPopup();
+        });
+
+        btnRow.appendChild(saveBtn);
+        popup.appendChild(btnRow);
+
+        document.body.appendChild(popup);
+        activeCommentPopup = popup;
+        popup._cleanup = () => {
+            document.removeEventListener('keydown', onKeyDown);
+            document.removeEventListener('keyup',   onKeyUp);
+        };
+
+        const cr = cell.getBoundingClientRect();
+        let top = cr.bottom + 6, left = cr.left;
+        popup.style.visibility = 'hidden';
+        requestAnimationFrame(() => {
+            const pw = popup.offsetWidth, ph = popup.offsetHeight;
+            if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+            if (top + ph  > window.innerHeight - 8) top = cr.top - ph - 6;
+            popup.style.top = top + 'px'; popup.style.left = left + 'px';
+            popup.style.visibility = '';
+            ta.focus();
+            ta.setSelectionRange(0, 0);
+        });
+    }
+
+    // ── Popup-håndtering ───────────────────────────────────────────────
+    let activeCommentPopup     = null;
+    let activeDaySettingsPopup = null;
+
+    function closeCommentPopup()     { if (activeCommentPopup)     { if (activeCommentPopup._cleanup) activeCommentPopup._cleanup(); activeCommentPopup.remove();     activeCommentPopup = null;     } }
+    function closeDaySettingsPopup() { if (activeDaySettingsPopup) { activeDaySettingsPopup.remove(); activeDaySettingsPopup = null; } }
+    function closeAllRemindersPopups() { closeCommentPopup(); closeDaySettingsPopup(); }
+
+    document.addEventListener('mousedown', (e) => {
+        if (activeCommentPopup     && !activeCommentPopup.contains(e.target))     closeCommentPopup();
+        if (activeDaySettingsPopup && !activeDaySettingsPopup.contains(e.target)) closeDaySettingsPopup();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllRemindersPopups(); });
+
+    // ── Hjelp: hvilke dager som skal vises ────────────────────────────
+    function getVisibleDayIndices() {
+        const allDays      = ['Man','Tir','Ons','Tor','Fre','Lør','Søn'];
+        const fullDayNames = ['Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag','Søndag'];
+        const jsDow    = new Date().getDay();
+        const todayIdx = (jsDow + 6) % 7;
+
+        let indices;
+        if (remindersViewMode === 'today') {
+            indices = [todayIdx];
+        } else if (remindersViewMode === '3day') {
+            indices = [
+                (todayIdx - 1 + 7) % 7,
+                todayIdx,
+                (todayIdx + 1) % 7
+            ].sort((a, b) => a - b);
+            if (!remindersShowWeekend) indices = indices.filter(i => i < 5);
+        } else {
+            indices = [0,1,2,3,4,5,6];
+            if (!remindersShowWeekend) indices = indices.filter(i => i < 5);
+        }
+        if (indices.length === 0) indices = [todayIdx];
+        const useFullNames = remindersViewMode === 'today' || remindersViewMode === '3day';
+        return { indices, todayIdx, allDays, fullDayNames, useFullNames };
+    }
+
+    // ── Dag-innstillinger popup ────────────────────────────────────────
+    function openDaySettingsPopup(anchorEl) {
+        closeDaySettingsPopup();
+        closeCommentPopup();
+
+        const popup = document.createElement('div');
+        popup.className = 'reminders-day-settings-popup';
+
+        const h4 = document.createElement('h4');
+        h4.textContent = 'Kalenderinnstillinger';
+        popup.appendChild(h4);
+
+        // Antall celler per dag
+        const rowRow = document.createElement('div');
+        rowRow.className = 'reminders-day-settings-row';
+        const rowLabel = document.createElement('label');
+        rowLabel.textContent = 'Celler per dag';
+        const rowInput = document.createElement('input');
+        rowInput.type = 'number'; rowInput.min = 1; rowInput.max = 20;
+        rowInput.value = remindersRowCount;
+        rowRow.appendChild(rowLabel); rowRow.appendChild(rowInput);
+        popup.appendChild(rowRow);
+
+        // Vis i kalender
+        const calRow = document.createElement('div');
+        calRow.className = 'reminders-day-settings-row';
+        const calLabel = document.createElement('label'); calLabel.textContent = 'Vis i kalender';
+        const calSwitch = makeSettingsSwitch(remindersCalInGrid);
+        calRow.appendChild(calLabel); calRow.appendChild(calSwitch.label);
+        popup.appendChild(calRow);
+
+        // Vis i tidslinje
+        const tlRow = document.createElement('div');
+        tlRow.className = 'reminders-day-settings-row';
+        const tlLabel = document.createElement('label'); tlLabel.textContent = 'Vis i tidslinje';
+        const tlSwitch = makeSettingsSwitch(remindersTimeline);
+        tlRow.appendChild(tlLabel); tlRow.appendChild(tlSwitch.label);
+        popup.appendChild(tlRow);
+
+        // Vis helg
+        const wkRow = document.createElement('div');
+        wkRow.className = 'reminders-day-settings-row';
+        const wkLabel = document.createElement('label'); wkLabel.textContent = 'Vis helg';
+        const wkSwitch = makeSettingsSwitch(remindersShowWeekend);
+        wkRow.appendChild(wkLabel); wkRow.appendChild(wkSwitch.label);
+        popup.appendChild(wkRow);
+
+        // Vis-modus: Uke / 3 dager / Aktiv dag
+        const vmRow = document.createElement('div');
+        vmRow.className = 'reminders-day-settings-row';
+        vmRow.style.flexDirection = 'column';
+        vmRow.style.alignItems = 'flex-start';
+        vmRow.style.gap = '0.35rem';
+        const vmLabel = document.createElement('div');
+        vmLabel.textContent = 'Visning';
+        vmLabel.style.fontWeight = '600';
+        const vmBtns = document.createElement('div');
+        vmBtns.style.cssText = 'display:flex;gap:4px;width:100%;';
+        const viewModes = [['week','Uke'],['3day','3 dager'],['today','Aktiv dag']];
+        let selectedView = remindersViewMode;
+        const vmBtnEls = viewModes.map(([val, lbl]) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-secondary';
+            btn.textContent = lbl;
+            btn.style.cssText = 'flex:1;font-size:0.75rem;padding:3px 4px;';
+            if (val === selectedView) btn.style.outline = '2px solid var(--dot-blue)';
+            btn.addEventListener('click', () => {
+                selectedView = val;
+                vmBtnEls.forEach((b, i) => {
+                    b.style.outline = (viewModes[i][0] === val) ? '2px solid var(--dot-blue)' : '';
+                });
+            });
+            return btn;
+        });
+        vmBtnEls.forEach(b => vmBtns.appendChild(b));
+        vmRow.appendChild(vmLabel); vmRow.appendChild(vmBtns);
+        popup.appendChild(vmRow);
+
+        // Lagre / Lukk
+        const btns = document.createElement('div');
+        btns.className = 'reminders-day-settings-btns';
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'btn-secondary'; closeBtn.textContent = 'Lukk';
+        closeBtn.addEventListener('click', closeDaySettingsPopup);
+        btns.appendChild(closeBtn);
+        popup.appendChild(btns);
+
+        // Live-oppdatering: alle endringer trer i kraft umiddelbart
+        const applyLive = () => {
+            const newRows = parseInt(rowInput.value, 10);
+            if (!isNaN(newRows) && newRows >= 1 && newRows <= 20) {
+                remindersRowCount = newRows;
+            }
+            remindersCalInGrid   = calSwitch.getValue();
+            remindersTimeline    = tlSwitch.getValue();
+            remindersShowWeekend = wkSwitch.getValue();
+            saveRemindersCalendarSettings();
+            buildRemindersCalendar();
+        };
+
+        rowInput.addEventListener('change', applyLive);
+        rowInput.addEventListener('input', () => {
+            // Bare oppdater ved gyldig verdi under typing
+            const v = parseInt(rowInput.value, 10);
+            if (!isNaN(v) && v >= 1 && v <= 20) applyLive();
+        });
+        calSwitch.label.querySelector('input').addEventListener('change', applyLive);
+        tlSwitch.label.querySelector('input').addEventListener('change', applyLive);
+        wkSwitch.label.querySelector('input').addEventListener('change', applyLive);
+
+        // Visnings-modus: live ved klikk (vmBtnEls kobler seg selv via selectedView)
+        // Overskrive save-logikk for visning til også å kalle applyLive
+        vmBtnEls.forEach((btn, i) => {
+            btn.addEventListener('click', () => {
+                remindersViewMode = viewModes[i][0];
+                saveRemindersCalendarSettings();
+                buildRemindersCalendar();
+            });
+        });
+
+        document.body.appendChild(popup);
+        activeDaySettingsPopup = popup;
+
+        // Ekspander kalenderen mens innstillinger er åpne
+        const widget = document.getElementById('remindersCalendarWidget');
+        if (widget) widget.classList.add('is-expanded');
+
+        const cr = anchorEl.getBoundingClientRect();
+        let top = cr.bottom + 6, left = cr.left;
+        popup.style.visibility = 'hidden'; popup.style.display = 'flex';
+        const pw = popup.offsetWidth || 290, ph = popup.offsetHeight || 300;
+        popup.style.visibility = ''; popup.style.display = '';
+        if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+        if (top + ph  > window.innerHeight - 8) top  = cr.top - ph - 6;
+        popup.style.top = top + 'px'; popup.style.left = left + 'px';
+    }
+
+    function makeSettingsSwitch(initialValue) {
+        const lbl = document.createElement('label');
+        lbl.className = 'switch';
+        lbl.style.cssText = 'display:inline-flex;align-items:center;cursor:pointer;';
+        const inp = document.createElement('input');
+        inp.type = 'checkbox'; inp.checked = !!initialValue;
+        const span = document.createElement('span'); span.className = 'slider';
+        lbl.appendChild(inp); lbl.appendChild(span);
+        return { label: lbl, getValue: () => inp.checked };
+    }
+
+    // ── Kalender-bygging ───────────────────────────────────────────────
+    function buildRemindersCalendar() {
+        if (!remindersWeekGridEl) return;
+        const headersEl = document.getElementById('remindersWeekHeaders');
+        const widget = document.getElementById('remindersCalendarWidget');
+
+        const { indices, todayIdx, allDays, fullDayNames, useFullNames } = getVisibleDayIndices();
+        const cols = indices.length;
+
+        if (widget) widget.style.setProperty('--reminders-cols', cols);
+
+        // ── Bygg header-rad ──
+        if (headersEl) {
+            headersEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            headersEl.innerHTML = '';
+            indices.forEach(colIdx => {
+                const shortName = allDays[colIdx];
+                const displayName = useFullNames ? fullDayNames[colIdx] : shortName;
+                const hdr = document.createElement('div');
+                hdr.className = 'reminders-day-header' + (colIdx === todayIdx ? ' is-today' : '');
+                hdr.textContent = displayName;
+                hdr.dataset.day = shortName; // alltid kort for oppslag
+                hdr.title = 'Dobbeltklikk for innstillinger';
+                hdr.addEventListener('dblclick', (e) => { e.stopPropagation(); openDaySettingsPopup(hdr); });
+                headersEl.appendChild(hdr);
+            });
+        }
+
+        // ── Bygg celler-grid (inne i inner, skjult ved kollaps) ──
+        remindersWeekGridEl.innerHTML = '';
+        remindersWeekGridEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+        indices.forEach(colIdx => {
+            const day = allDays[colIdx];
+            const col = document.createElement('div');
+            col.className = 'reminders-day-col';
+
+            for (let r = 0; r < remindersRowCount; r++) {
+                const cell = document.createElement('div');
+                cell.className = 'reminders-day-cell';
+                cell.dataset.day = day;
+                cell.dataset.row = r;
+                const cellKey = `${day}:${r}`;
+
+                const cellText = document.createElement('span');
+                cellText.className = 'reminders-cell-text';
+                cell.appendChild(cellText);
+
+                const refreshCell = () => {
+                    const d = getCellData(cellKey);
+                    const firstLine = (d.text || '').split('\n')[0].trim();
+                    cellText.textContent = firstLine;
+                    cell.classList.toggle('has-reminder', !!(d.text || d.color || d.timeFrom));
+                    // Farge
+                    const isRainbow = d.color === '__rainbow__';
+                    cell.classList.toggle('color-rainbow', isRainbow);
+                    cell.style.background = (!isRainbow && d.color) ? d.color + '55' : '';
+                    cell.style.borderColor = (!isRainbow && d.color) ? d.color : '';
+                    // Ingen celle-blinking lenger
+                };
+
+                cell.addEventListener('mouseenter', () => {
+                    updateRemindersActiveList();
+                });
+                cell.addEventListener('mouseleave', () => {});
+
+                // Dobbeltklikk: åpne rikt kommentarvindu
+                cell.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    closeCommentPopup(); closeDaySettingsPopup();
+                    openCellCommentPopup(cell, cellKey, day, r, refreshCell);
+                });
+
+                refreshCell();
+                col.appendChild(cell);
+            }
+            remindersWeekGridEl.appendChild(col);
+        });
+
+        // Oppdater dødsone og aktive påminnelser etter bygging
+        requestAnimationFrame(() => {
+            updateRemindersDeadZone();
+            updateRemindersActiveList();
+        });
+    }
+
+    function applyRemindersMode(enabled) {
+        document.body.classList.toggle('reminders-enabled', !!enabled);
+        if (enabled) {
+            buildRemindersCalendar();
+            initRemindersResizeHandle();
+            applyRemindersStoredHeight();
+            requestAnimationFrame(updateRemindersDeadZone);
+        }
+    }
+
+    function applyRemindersStoredHeight() {
+        const widget = document.getElementById('remindersCalendarWidget');
+        if (!widget) return;
+        const stored = localStorage.getItem(REMINDERS_HEIGHT_KEY);
+        const h = stored ? stored + 'px' : '200px';
+        widget.style.setProperty('--reminders-expanded-h', h);
+    }
+
+    function getRemindersFullHeight() {
+        const inner = document.getElementById('remindersCalendarInner');
+        if (!inner) return 200;
+        const prev = inner.style.height;
+        inner.style.height = 'auto';
+        inner.style.overflow = 'visible';
+        const full = inner.scrollHeight;
+        inner.style.height = prev;
+        inner.style.overflow = 'hidden';
+        return full;
+    }
+
+    function updateRemindersDeadZone() {
+        const widget    = document.getElementById('remindersCalendarWidget');
+        const headersEl = document.getElementById('remindersWeekHeaders');
+        if (!widget || !headersEl) return;
+        const headers = headersEl.children;
+        if (headers.length <= 1) {
+            widget.style.setProperty('--reminders-deadzone-w', '0px');
+            return;
+        }
+        const lastHeader = headers[headers.length - 1];
+        const lhr = lastHeader.getBoundingClientRect();
+        // Fra venstre kant av siste kolonne til høyre kant av SKJERM
+        const deadW = Math.max(0, window.innerWidth - lhr.left);
+        widget.style.setProperty('--reminders-deadzone-w', deadW + 'px');
+    }
+
+    function initRemindersResizeHandle() {
+        const handle   = document.getElementById('remindersResizeHandle');
+        const inner    = document.getElementById('remindersCalendarInner');
+        const widget   = document.getElementById('remindersCalendarWidget');
+        const deadZone = document.getElementById('remindersDeadZone');
+        if (!handle || !inner || !widget || handle._rInit) return;
+        handle._rInit = true;
+
+        let isResizing   = false;
+        let startY       = 0;
+        let startH       = 0;
+        let collapseTimer = null;
+        let manuallyResized = false;
+
+        // Hover-ekspansjon – IKKE fra siste kolonne og alt til høyre (dødsone)
+        const isInDeadZone = (clientX) => {
+            const headersEl = document.getElementById('remindersWeekHeaders');
+            if (!headersEl) return false;
+            const headers = headersEl.children;
+            // Bare én kolonne → ingen dødsone (håndtaket tar seg av det)
+            if (headers.length <= 1) return false;
+            const lastHeader = headers[headers.length - 1];
+            return clientX >= lastHeader.getBoundingClientRect().left;
+        };
+
+        const expandWidget = () => {
+            if (collapseTimer) { clearTimeout(collapseTimer); collapseTimer = null; }
+            widget.classList.add('is-expanded');
+        };
+        const scheduleCollapse = () => {
+            collapseTimer = setTimeout(() => {
+                widget.classList.remove('is-expanded');
+                collapseTimer = null;
+            }, 2000);
+        };
+
+        const headersEl = document.getElementById('remindersWeekHeaders');
+
+        // Kun hover over ukedags-headerne skal ekspandere
+        if (headersEl) {
+            headersEl.addEventListener('mouseenter', (e) => {
+                if (isInDeadZone(e.clientX)) return;
+                if (collapseTimer) { clearTimeout(collapseTimer); collapseTimer = null; }
+                expandWidget();
+            });
+            headersEl.addEventListener('mousemove', (e) => {
+                if (isResizing) return;
+                if (isInDeadZone(e.clientX)) return;
+                if (collapseTimer) { clearTimeout(collapseTimer); collapseTimer = null; }
+                if (!widget.classList.contains('is-expanded')) expandWidget();
+            });
+        }
+
+        widget.addEventListener('mouseleave', () => {
+            if (isResizing) return;
+            if (manuallyResized) return;
+            if (activeCommentPopup) return;
+            if (activeDaySettingsPopup) return;
+            scheduleCollapse();
+        });
+
+        // Resize
+        const startResize = (clientY) => {
+            isResizing = true; manuallyResized = true;
+            startY = clientY;
+            startH = parseInt(widget.style.getPropertyValue('--reminders-expanded-h'), 10) || inner.offsetHeight;
+            handle.classList.add('resizing');
+            document.body.style.cursor = 'ns-resize';
+        };
+        const doResize = (clientY) => {
+            if (!isResizing) return;
+            const newH = Math.max(0, startH + (clientY - startY));
+            widget.style.setProperty('--reminders-expanded-h', newH + 'px');
+        };
+        const stopResize = () => {
+            if (!isResizing) return;
+            isResizing = false;
+            handle.classList.remove('resizing');
+            document.body.style.cursor = '';
+            const finalH = parseInt(widget.style.getPropertyValue('--reminders-expanded-h'), 10) || inner.offsetHeight;
+            try { localStorage.setItem(REMINDERS_HEIGHT_KEY, finalH); } catch(e){}
+            // Sørg for at listen forblir åpen etter resize
+            widget.classList.add('is-expanded');
+            if (collapseTimer) { clearTimeout(collapseTimer); collapseTimer = null; }
+        };
+
+        // Dobbeltklikk på håndtak: reset til full høyde
+        handle.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            manuallyResized = false;
+            const fullH = getRemindersFullHeight();
+            widget.style.setProperty('--reminders-expanded-h', fullH + 'px');
+            try { localStorage.setItem(REMINDERS_HEIGHT_KEY, fullH); } catch(e){}
+        });
+
+        handle.addEventListener('mousedown', (e) => { startResize(e.clientY); e.preventDefault(); });
+        handle.addEventListener('touchstart', (e) => { startResize(e.touches[0].clientY); e.preventDefault(); }, { passive: false });
+        document.addEventListener('mousemove', (e) => doResize(e.clientY));
+        document.addEventListener('touchmove', (e) => { if (isResizing) { doResize(e.touches[0].clientY); e.preventDefault(); } }, { passive: false });
+        document.addEventListener('mouseup', stopResize);
+        document.addEventListener('touchend', stopResize);
     }
 
 
@@ -12138,6 +13424,7 @@ if (taskInputEl) {
         loadProjectDivisionToggleSetting();
     updateProjectTaskDivisionVisibility();
         loadOneNoteReminderSetting();
+        reloadAllRemindersForProfile();
         loadPersonalCustomizationValues();
         loadPersonalCustomizationToggle();
         loadControlPanelOpenSetting();
@@ -12189,6 +13476,7 @@ if (taskInputEl) {
         loadMidnightDoubleCountGuardSetting();
         loadNoHelpTextSetting();
         loadOneNoteReminderSetting();
+        reloadAllRemindersForProfile();
         loadPersonalCustomizationValues();
         loadPersonalCustomizationToggle();
         loadControlPanelOpenSetting();
@@ -12681,6 +13969,7 @@ if (taskInputEl) {
                     loadNoHelpTextSetting();
                     loadProjectDivisionToggleSetting();
                     loadOneNoteReminderSetting();
+                    reloadAllRemindersForProfile();
                     loadPersonalCustomizationValues();
                     loadPersonalCustomizationToggle();
                     loadControlPanelOpenSetting();
@@ -14109,23 +15398,45 @@ suggestionIndex = -1;
         });
     }
     if (openPersonalCustomizeButtonEl) {
-        openPersonalCustomizeButtonEl.addEventListener('click', () => {
+        const updateTilpassGlow = (shift) => {
+            openPersonalCustomizeButtonEl.style.boxShadow = shift ? '0 0 8px 2px #ff69b4, 0 0 2px #ff69b4' : '';
+            openPersonalCustomizeButtonEl.style.borderColor = shift ? '#ff69b4' : '';
+        };
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Shift') updateTilpassGlow(true); });
+        document.addEventListener('keyup',   (e) => { if (e.key === 'Shift') updateTilpassGlow(false); });
+
+        openPersonalCustomizeButtonEl.addEventListener('mousedown', (e) => {
+            if (!e.shiftKey) return;
+            updateTilpassGlow(false);
+            e.preventDefault();
+            setTimeout(async () => {
+                const nextVisible = !frutigerMusicPlayerVisible;
+                setFrutigerMusicPlayerVisible(nextVisible);
+                if (nextVisible) {
+                    try {
+                        await loadFrutigerMusicPlaylist(!Array.isArray(frutigerMusicPlaylist) || frutigerMusicPlaylist.length <= 1);
+                    } catch(err) {}
+                }
+                updateFrutigerMusicPlayerUi();
+            }, 500);
+        });
+
+        openPersonalCustomizeButtonEl.addEventListener('click', (e) => {
+            if (e.shiftKey) return;
             reopenSettingsAfterPersonalCustomizeClose = true;
             if (typeof closeSettingsModal === 'function') closeSettingsModal();
             requestAnimationFrame(() => openPersonalCustomizeModal());
         });
     }
     if (toggleFrutigerMusicPlayerButtonEl) {
+        toggleFrutigerMusicPlayerButtonEl.style.display = 'none';
         toggleFrutigerMusicPlayerButtonEl.addEventListener('click', async () => {
             const nextVisible = !frutigerMusicPlayerVisible;
             setFrutigerMusicPlayerVisible(nextVisible);
             if (nextVisible) {
                 try {
-                    if (!Array.isArray(frutigerMusicPlaylist) || frutigerMusicPlaylist.length <= 1) {
-                        await loadFrutigerMusicPlaylist(true);
-                    } else {
-                        await loadFrutigerMusicPlaylist(false);
-                    }
+                    await loadFrutigerMusicPlaylist(!Array.isArray(frutigerMusicPlaylist) || frutigerMusicPlaylist.length <= 1);
                 } catch(e) {}
             }
             updateFrutigerMusicPlayerUi();
@@ -14695,7 +16006,7 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
         }
     });
 
-    window.addEventListener("resize", () => scheduleCrossBrowserTimelineRefresh());
+    window.addEventListener("resize", () => { scheduleCrossBrowserTimelineRefresh(); updateRemindersDeadZone(); });
     window.addEventListener("load", () => scheduleCrossBrowserTimelineRefresh(), { once: true });
 
     loadTheme();
@@ -14713,7 +16024,7 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
     loadProjectDivisionToggleSetting();
     updateProjectTaskDivisionVisibility();
     loadOneNoteReminderSetting();
-    loadPersonalCustomizationValues();
+    loadRemindersSetting();
     loadPersonalCustomizationToggle();
     syncAdhdToActiveProject();
     applyAdhdTimelineReplacement();
@@ -14772,7 +16083,21 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
         });
     }
 
-    drawTaskChart();
+    if (cpRemindersToggleEl) {
+        cpRemindersToggleEl.addEventListener("change", (e) => {
+            remindersEnabled = !!e.target.checked;
+            setProfileScopedSetting(REMINDERS_TOGGLE_KEY, !!remindersEnabled);
+            applyRemindersMode(remindersEnabled);
+        });
+    }
+
+    requestAnimationFrame(() => {
+        drawTaskChart();
+        if (chartWrapperEl && typeof ResizeObserver !== 'undefined') {
+            const chartRO = new ResizeObserver(() => { try { drawTaskChart(); } catch(e){} });
+            chartRO.observe(chartWrapperEl);
+        }
+    });
 
     function refreshWorkListLiveTimes() {
         const projectRows = Array.from(taskListEl.querySelectorAll('.task-list-item'));
@@ -15006,7 +16331,7 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
 
       <label class="group-edit-label" for="groupEditColor">Tekstfarge</label>
       <div class="group-edit-colorrow">
-        <input id="groupEditColor" type="color" class="group-edit-color">
+        <input id="groupEditColor" type="color" class="group-edit-color" value="#000000">
         <button type="button" id="groupEditColorClear" class="btn-secondary" style="padding:0.35rem 0.6rem;">Nullstill</button>
       </div>
 
@@ -15021,7 +16346,7 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
 
 <div id="appNotesOverlay" class="overlay">
     <div class="modal">
-        <button class="modal-close" id="appNotesCloseButton">&times;</button>
+        <button class="modal-close" id="appNotesCloseButton">×</button>
         <h2 id="appNotesModalTitle">Notater</h2>
         <div class="modal-row" style="width:100%;">
             <textarea id="appNotesTextarea" class="modal-textarea" placeholder="Skriv inn notater her ..."></textarea>
@@ -15029,7 +16354,7 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
         <div class="modal-footer">
             <button id="appNotesSaveButton" class="modal-button-primary" type="button">Lagre</button>
         </div>
-        <div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC eller klikk utenfor = lagre</div>
+        <div class="helptext-container" data-helptext-container="true"><div class="helper-text" style="text-align:center; margin-top: 0.75rem;">ESC eller klikk utenfor = lagre</div></div>
     </div>
 </div>
 
@@ -15169,8 +16494,9 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
 })();
 </script>
 
-</body>
-
-</html>
 
 
+
+
+
+</body></html>
