@@ -2829,6 +2829,11 @@ body.theme-dark #profileButton.profile-temp-guard-indicator {
         #remindersCalendarWidget.is-expanded .reminders-calendar-inner {
             height: var(--reminders-expanded-h, 200px);
         }
+        /* Fjern transition når man drar håndtaket */
+        .reminders-resize-handle.resizing ~ .reminders-calendar-inner,
+        #remindersCalendarWidget.is-resizing .reminders-calendar-inner {
+            transition: none;
+        }
 
         /* Ukedag-tekst vises alltid (utenfor inner) */
         .reminders-week-headers {
@@ -6378,15 +6383,24 @@ function initSuggestionsResizePersistence() {
         });
 
         // Resize
+        let lastUpdateTime = 0;
+        const throttleMs = 16; // ~60fps
+        
         const startResize = (clientY) => {
             isResizing = true; manuallyResized = true;
             startY = clientY;
             startH = parseInt(widget.style.getPropertyValue('--reminders-expanded-h'), 10) || inner.offsetHeight;
             handle.classList.add('resizing');
+            widget.classList.add('is-resizing');
             document.body.style.cursor = 'ns-resize';
+            lastUpdateTime = Date.now();
         };
         const doResize = (clientY) => {
             if (!isResizing) return;
+            const now = Date.now();
+            if (now - lastUpdateTime < throttleMs) return;
+            lastUpdateTime = now;
+            
             const newH = Math.max(0, startH + (clientY - startY));
             widget.style.setProperty('--reminders-expanded-h', newH + 'px');
         };
@@ -6394,6 +6408,7 @@ function initSuggestionsResizePersistence() {
             if (!isResizing) return;
             isResizing = false;
             handle.classList.remove('resizing');
+            widget.classList.remove('is-resizing');
             document.body.style.cursor = '';
             const finalH = parseInt(widget.style.getPropertyValue('--reminders-expanded-h'), 10) || inner.offsetHeight;
             try { localStorage.setItem(REMINDERS_HEIGHT_KEY, finalH); } catch(e){}
@@ -6413,10 +6428,12 @@ function initSuggestionsResizePersistence() {
 
         handle.addEventListener('mousedown', (e) => { startResize(e.clientY); e.preventDefault(); });
         handle.addEventListener('touchstart', (e) => { startResize(e.touches[0].clientY); e.preventDefault(); }, { passive: false });
-        document.addEventListener('mousemove', (e) => doResize(e.clientY));
-        document.addEventListener('touchmove', (e) => { if (isResizing) { doResize(e.touches[0].clientY); e.preventDefault(); } }, { passive: false });
-        document.addEventListener('mouseup', stopResize);
-        document.addEventListener('touchend', stopResize);
+        
+        // Global listeners (registered only once via capture phase)
+        document.addEventListener('mousemove', (e) => doResize(e.clientY), true);
+        document.addEventListener('touchmove', (e) => { if (isResizing) { doResize(e.touches[0].clientY); e.preventDefault(); } }, { passive: false, capture: true });
+        document.addEventListener('mouseup', stopResize, true);
+        document.addEventListener('touchend', stopResize, true);
     }
 
 
@@ -14340,6 +14357,32 @@ if (taskInputEl) {
     }
     if (resizeHandleEl && taskListWrapperEl) {
         let isResizing = false;
+        let lastUpdateTime = 0;
+        const throttleMs = 16; // ~60fps
+        
+        const handleMove = (clientX) => {
+            if (!isResizing) return;
+            const now = Date.now();
+            if (now - lastUpdateTime < throttleMs) return;
+            lastUpdateTime = now;
+            
+            const rect = taskListWrapperEl.getBoundingClientRect();
+            let newGap = clientX - rect.left;
+            if (newGap < 50) newGap = 50;
+            if (newGap > rect.width - 50) newGap = rect.width - 50;
+            taskListWrapperEl.style.setProperty('--dynamic-gap', newGap + "px");
+        };
+        
+        const stopResize = () => {
+            if (isResizing) {
+                isResizing = false;
+                suppressProjectDivisionOutsideCloseUntil = Date.now() + 350;
+                resizeHandleEl.classList.remove('resizing');
+                resizeHandleEl.classList.add('handle-release-anim'); 
+                document.body.style.cursor = '';
+            }
+        };
+        
         resizeHandleEl.addEventListener('mousedown', (e) => {
             isResizing = true;
             resizeHandleEl.classList.add('resizing');
@@ -14360,27 +14403,12 @@ if (taskInputEl) {
             const newGap = Math.max(50, containerWidth - 140);
             taskListWrapperEl.style.setProperty('--dynamic-gap', newGap + "px");
         });
-        const handleMove = (clientX) => {
-            if (!isResizing) return;
-            const rect = taskListWrapperEl.getBoundingClientRect();
-            let newGap = clientX - rect.left;
-            if (newGap < 50) newGap = 50;
-            if (newGap > rect.width - 50) newGap = rect.width - 50;
-            taskListWrapperEl.style.setProperty('--dynamic-gap', newGap + "px");
-        };
-        document.addEventListener('mousemove', (e) => handleMove(e.clientX));
-        document.addEventListener('touchmove', (e) => handleMove(e.touches[0].clientX));
-        const stopResize = () => {
-            if (isResizing) {
-                isResizing = false;
-                suppressProjectDivisionOutsideCloseUntil = Date.now() + 350;
-                resizeHandleEl.classList.remove('resizing');
-                resizeHandleEl.classList.add('handle-release-anim'); 
-                document.body.style.cursor = '';
-            }
-        };
-        document.addEventListener('mouseup', stopResize);
-        document.addEventListener('touchend', stopResize);
+        
+        // Global event listeners (only registered once)
+        document.addEventListener('mousemove', (e) => handleMove(e.clientX), true);
+        document.addEventListener('touchmove', (e) => handleMove(e.touches[0].clientX), true);
+        document.addEventListener('mouseup', stopResize, true);
+        document.addEventListener('touchend', stopResize, true);
     }
 
     startButtonEl.addEventListener("click", async () => {
@@ -14577,7 +14605,38 @@ if (projectOutdatedCheckboxEl) {
     commentCloseButtonEl.addEventListener("click", () => hideCommentPopup());
     commentCancelButtonEl.addEventListener("click", () => hideCommentPopup());
     commentSaveButtonEl.addEventListener("click", () => saveComment());
+    
+    // Drag detection: ignorerer click events hvis bruker dro inne i modal eller selekterte tekst
+    let commentMouseDownX = 0, commentMouseDownY = 0, commentWasDragging = false;
+    let commentMouseDownTarget = null;
+    commentOverlayEl.addEventListener("mousedown", (e) => {
+        commentMouseDownX = e.clientX;
+        commentMouseDownY = e.clientY;
+        commentMouseDownTarget = e.target;
+        commentWasDragging = false;
+    });
+    document.addEventListener("mousemove", (e) => {
+        if (!commentOverlayEl.classList.contains("show")) return;
+        const dx = e.clientX - commentMouseDownX;
+        const dy = e.clientY - commentMouseDownY;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            commentWasDragging = true;
+        }
+    }, true);
+    
+    document.addEventListener("mouseup", (e) => {
+        if (!commentOverlayEl.classList.contains("show")) return;
+        // Hvis mouseup er inni textarea eller modal, ikke lukk
+        if (commentMouseDownTarget && (commentMouseDownTarget === commentTextareaEl || commentTextareaEl?.contains(commentMouseDownTarget))) {
+            commentWasDragging = true;
+        }
+    }, true);
+    
     commentOverlayEl.addEventListener("click", (e) => {
+        if (commentWasDragging) {
+            commentWasDragging = false;
+            return;
+        }
         if (e.target === commentOverlayEl) saveComment();
     });
     commentTextareaEl.addEventListener("keydown", (e) => {
@@ -16034,7 +16093,52 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
     try { document.dispatchEvent(new Event('profileLoaded')); } catch(e){}
     scheduleCrossBrowserTimelineRefresh();
     updateCurrentTimeDisplay();
-    updateProfileButton(); 
+    updateProfileButton();
+    
+    // === AUTOSAVE SYSTEM ===
+    // Lagrer data hvert 5. sekund
+    let autoSaveTimer = null;
+    const startAutoSave = () => {
+        if (autoSaveTimer) clearInterval(autoSaveTimer);
+        autoSaveTimer = setInterval(() => {
+            try {
+                if (typeof saveToStorage === "function") {
+                    saveToStorage();
+                }
+            } catch(e) {
+                console.error("Autosave feil:", e);
+            }
+        }, 5000); // Lagrer hvert 5. sekund
+    };
+    startAutoSave();
+    
+    // Lagrer data når siden lukkes eller oppdateres
+    window.addEventListener("beforeunload", () => {
+        try {
+            if (typeof saveToStorage === "function") {
+                saveToStorage();
+            }
+        } catch(e) {
+            console.error("Lagring før avslutting feil:", e);
+        }
+    });
+    
+    // Lagrer ved inaktivitet (bruker gjør ingenting i 3 sekunder)
+    let inactivityTimer = null;
+    const resetInactivityTimer = () => {
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            try {
+                if (typeof saveToStorage === "function") {
+                    saveToStorage();
+                }
+            } catch(e) {}
+        }, 3000);
+    };
+    document.addEventListener("change", resetInactivityTimer, true);
+    document.addEventListener("input", resetInactivityTimer, true);
+    document.addEventListener("click", resetInactivityTimer, true);
+    document.addEventListener("keydown", resetInactivityTimer, true);
     
     if (autoSaveToggleEl) {
         autoSaveToggleEl.addEventListener("change", (e) => {
@@ -16428,7 +16532,37 @@ const clickedInsideArchive = !!(e.target && e.target.closest && e.target.closest
     saveBtn?.addEventListener("click", () => closeOverlay(true));
     textarea?.addEventListener("input", () => { updateIndicator(); scheduleAppNotesAutosave(); });
 
+    // Drag detection: ignorerer click events hvis bruker dro inne i modal eller selekterte tekst
+    let appNotesMouseDownX = 0, appNotesMouseDownY = 0, appNotesWasDragging = false;
+    let appNotesMouseDownTarget = null;
+    overlay?.addEventListener("mousedown", (e) => {
+        appNotesMouseDownX = e.clientX;
+        appNotesMouseDownY = e.clientY;
+        appNotesMouseDownTarget = e.target;
+        appNotesWasDragging = false;
+    });
+    document.addEventListener("mousemove", (e) => {
+        if(!overlay?.classList.contains("show")) return;
+        const dx = e.clientX - appNotesMouseDownX;
+        const dy = e.clientY - appNotesMouseDownY;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            appNotesWasDragging = true;
+        }
+    }, true);
+    
+    document.addEventListener("mouseup", (e) => {
+        if(!overlay?.classList.contains("show")) return;
+        // Hvis mouseup er inni textarea eller modal, ikke lukk
+        if (appNotesMouseDownTarget && (appNotesMouseDownTarget === textarea || textarea?.contains(appNotesMouseDownTarget))) {
+            appNotesWasDragging = true;
+        }
+    }, true);
+
     overlay?.addEventListener("click", (e) => {
+        if (appNotesWasDragging) {
+            appNotesWasDragging = false;
+            return;
+        }
         if(e.target === overlay){
             closeOverlay(true);
         }
