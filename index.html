@@ -1591,6 +1591,15 @@
             gap: 0.5rem;
         }
 
+
+        @keyframes task-new-blink {
+            0%   { color: #f97316; }
+            50%  { color: #dc2626; }
+            100% { color: #f97316; }
+        }
+        .task-name.task-new-blink {
+            animation: task-new-blink 2s ease-in-out infinite;
+        }
         .task-name {
             font-size: 0.95rem;
             white-space: nowrap;
@@ -3690,6 +3699,7 @@ ${comment}
             <button id="toggleAllCommentsButton" class="btn-secondary" type="button" disabled="disabled">Vis kommentarer</button>
             <button id="toggleListHeightButton" class="btn-secondary" type="button" disabled="disabled">Utvid liste</button>
             <button id="toggleRoundingButton" class="btn-secondary" type="button">Avrund tid</button>
+            <button id="deleteFromListButton" class="btn-secondary" type="button" style="display:none; background-color:#dc2626; border-color:#b91c1c; color:#ffffff;">Slett fra arbeidsliste</button>
         </div>
         <button id="clearButton" class="btn-secondary" disabled="disabled">Tøm og arkiver</button>
     </div>
@@ -4536,6 +4546,7 @@ const startButtonEl = document.getElementById("startButton");
     const toggleAllCommentsButtonEl = document.getElementById("toggleAllCommentsButton");
     const toggleListHeightButtonEl = document.getElementById("toggleListHeightButton");
     const toggleRoundingButtonEl = document.getElementById("toggleRoundingButton");
+    const deleteFromListButtonEl = document.getElementById("deleteFromListButton");
     
     const copyOneNoteButtonEl = document.getElementById("copyOneNoteButton");
 
@@ -12961,6 +12972,9 @@ if (taskInputEl) {
                     nameSpan.title = 'Dobbeltklikk for kommentar på prosjektet';
                 }
                 nameSpan.textContent = task.name;
+                const taskTotalMs = task.isActive ? getTaskElapsedMs(task) : (task.totalMs || 0);
+                const isActiveOrSelected = task.isActive || task.id === selectedTaskId;
+                if (taskTotalMs < 60000 && isActiveOrSelected) nameSpan.classList.add('task-new-blink');
                 nameRow.appendChild(nameSpan);
                 infoCol.appendChild(nameRow);
                 if (task.projectNumber && task.projectNumber.trim().length > 0) {
@@ -13111,6 +13125,20 @@ if (taskInputEl) {
         }
         if (data.tasks.length > 0 && !activeTask) clearButtonEl.disabled = false;
         else clearButtonEl.disabled = true;
+        // Show/hide "Slett fra arbeidsliste" button
+        if (deleteFromListButtonEl) {
+            const activeIdx = getActiveTaskIndex();
+            let showDelete = false;
+            if (activeIdx !== -1) {
+                const activeT = data.tasks[activeIdx];
+                if (getTaskElapsedMs(activeT) < 60000) showDelete = true;
+            }
+            if (!showDelete && selectedTaskId !== null) {
+                const selTask = data.tasks.find(t => t.id === selectedTaskId && !t.isActive);
+                if (selTask && (selTask.totalMs || 0) < 60000) showDelete = true;
+            }
+            deleteFromListButtonEl.style.display = showDelete ? '' : 'none';
+        }
         applyClearArchiveReminderBlinkState();
         const hasInput = taskInputEl.value.trim().length > 0;
         const hasSelectedProjectDivision = !!selectedProjectDivisionTarget;
@@ -14481,6 +14509,41 @@ if (taskInputEl) {
             downloadBackup();
         }
     });
+
+    if (deleteFromListButtonEl) {
+        deleteFromListButtonEl.addEventListener("click", () => {
+            const activeIdx = getActiveTaskIndex();
+            // Case 1: active task < 1 min
+            if (activeIdx !== -1) {
+                const activeT = data.tasks[activeIdx];
+                const elapsedMs = getTaskElapsedMs(activeT);
+                if (elapsedMs < 60000) {
+                    const prevTask = data.tasks.find(t => !t.isActive);
+                    if (prevTask) prevTask.totalMs = (prevTask.totalMs || 0) + elapsedMs;
+                    data.tasks.splice(activeIdx, 1);
+                    selectedTaskId = null;
+                    saveToStorage();
+                    updateUI();
+                    return;
+                }
+            }
+            // Case 2: selected non-active task < 1 min
+            if (selectedTaskId !== null) {
+                const selIdx = data.tasks.findIndex(t => t.id === selectedTaskId && !t.isActive);
+                if (selIdx !== -1) {
+                    const selTask = data.tasks[selIdx];
+                    if ((selTask.totalMs || 0) < 60000) {
+                        const prevTask = data.tasks.find((t, i) => i !== selIdx && !t.isActive);
+                        if (prevTask) prevTask.totalMs = (prevTask.totalMs || 0) + (selTask.totalMs || 0);
+                        data.tasks.splice(selIdx, 1);
+                        selectedTaskId = null;
+                        saveToStorage();
+                        updateUI();
+                    }
+                }
+            }
+        });
+    }
     transferTimeButtonEl.addEventListener("click", async () => { if (!transferTimeButtonEl.disabled) showTransferPopup(); });
     transferCloseButtonEl.addEventListener("click", () => hideTransferPopup());
     transferCancelButtonEl.addEventListener("click", () => hideTransferPopup());
